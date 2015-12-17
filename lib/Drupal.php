@@ -30,12 +30,13 @@ class Drupal
         require_once DRUPAL_ROOT . '/includes/common.inc';
         $ret['sf_dic'] = drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
 
-        foreach (system_list('module_enabled') as $module => $info) {
-            if (in_array('sf_dic', $info->info['dependencies'])) {
-                $filename = drupal_get_path('module', $module) . '/' . $module . '.services.yml';
-                if (file_exists($filename)) {
-                    $ret[$module] = $filename;
-                }
+        // Find all module.services.yml files, note that this will do a
+        // file_exists() per module, but this will skipped whenever the
+        // container file will be cached
+        foreach (array_keys(system_list('module_enabled')) as $module) {
+            $filename = drupal_get_path('module', $module) . '/' . $module . '.services.yml';
+            if (file_exists($filename)) {
+                $ret[$module] = $filename;
             }
         }
 

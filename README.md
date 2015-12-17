@@ -51,10 +51,6 @@ Any module relying on it should express it's dependency via the its info file:
 dependencies[] = sf_dic
 ```
 
-Please note that this is required, this information being cached by Drupal, it
-allows this module to attempt finding ```MYMODULE.services.yml``` files
-without parsing all existing modules in your Drupal instance.
-
 You may also provide a valid ```composer.json``` (not required, but it would
 be a good practice to provide one).
 
