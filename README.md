@@ -105,6 +105,14 @@ function mymodule_do_something() {
 }
 ```
 
+## Services this module provides
+
+ *  **service_container**: ```\Symfony\Component\DependencyInjection\ContainerInterface```
+    instance that points to the current container itself
+
+ *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
+    default database
+
 ## Known issues
 
 ### Not all services can go in the container

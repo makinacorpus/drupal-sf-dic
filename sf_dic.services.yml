@@ -1,7 +1,15 @@
 services:
 
-    # Empty testing service
+    # Pass-through to get the database connection via the service
+    # container, available for being a dependency of other services
+    database:
+        class: DatabaseConnection
+        factory: [Database, getConnection]
+
+    # Empty testing service, it will contain all services this module
+    # provide in order to be able to unit test it
     empty_service:
         class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
         calls:
             - [setContainer, ["@service_container"]]
+            - [setDatabaseConnection, ["@database"]]
