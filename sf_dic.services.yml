@@ -1,0 +1,7 @@
+services:
+
+    # Empty testing service
+    empty_service:
+        class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
+        calls:
+            - [setContainer, ["@service_container"]]

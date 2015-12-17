@@ -1,0 +1,5 @@
+name = "Symfony - Dependency injection"
+description = "Brings the Symfony 3 dependency injection container to Drupal 7 along with a limited Drupal 8 API compatibility layer"
+core = 7.x
+package = Symfony
+php = 5.5
