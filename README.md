@@ -18,6 +18,20 @@ This module works with composer, and should be installed using it, add:
 to your project ```composer.json``` file or to your Drupal module that
 should use it as a dependency.
 
+Please note that this module is in its early stages and never have been
+published throught packagist, so you'll need to add this repository:
+
+```json
+    "repositories": [
+        {
+            "type" : "vcs",
+            "url" : "git@github.com:makinacorpus/drupal-sf-dic.git"
+        }
+    ]
+```
+
+until the project comes to a stable version and is published.
+
 ### Hard way, if not
 
 You may use the ```Composer Manager``` module although it's untested, or you
