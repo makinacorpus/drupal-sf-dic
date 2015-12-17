@@ -8,7 +8,6 @@
  * Implements hook_boot().
  */
 function sf_dic_boot() {
-  require_once __DIR__ . '/lib/Drupal.php';
   if (!\Drupal::hasContainer()) {
     \Drupal::_init();
   }

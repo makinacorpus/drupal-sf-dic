@@ -72,10 +72,11 @@ class Drupal
 
         $oups = file_put_contents(
             $cachefile,
-            (new PhpDumper($container))->dump([
-                'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
-            ])
-        ;
+            (new PhpDumper($container))
+                ->dump([
+                    'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
+                ])
+        );
 
         if (false === $oups) {
             throw new RuntimeException("Cannot write the container file !");
