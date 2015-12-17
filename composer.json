@@ -1,0 +1,25 @@
+{
+    "name": "makinacorpus/drupal-sf-dic",
+    "type": "drupal-module",
+    "description": "Brings the vanilla Symfony 3 depency inject container component to Drupal 7 seamlessly along with a limited compatibility layer with Drupal 8 API",
+    "keywords": [],
+    "homepage": "http://github.com/makinacorpus/drupal-sf-dic",
+    "license": "GPL-2",
+    "authors": [
+        {
+            "name": "Pierre Rineau",
+            "email": "pierre.rineau@makina-corpus.com"
+        },
+        {
+            "name": "Makina Corpus",
+            "homepage": "http://makina-corpus.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "Drupal\\": "src" }
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "symfony/dependency-injection": "~3.0"
+    }
+}
