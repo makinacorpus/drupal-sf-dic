@@ -8,6 +8,13 @@
  * Implements hook_boot().
  */
 function sf_dic_boot() {
+  // There is no way to allow this module to get the enabled module list
+  // before the DRUPAL_BOOTSTRAP_CONFIGURATION phase (if you are lucky and
+  // caches are set) or before the DRUPAL_BOOTSTRAP_DATABASE phase (because
+  // Drupal will need the database to get the module list). That's why the
+  // hook_boot() implementation will keep living in here. This means that
+  // there is absolutly no way to allow cache backends services to be in
+  // the service container, sad, but true story.
   if (!\Drupal::hasContainer()) {
     \Drupal::_init();
   }

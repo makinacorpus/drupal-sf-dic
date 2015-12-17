@@ -105,6 +105,17 @@ function mymodule_do_something() {
 }
 ```
 
+## Known issues
 
+### Not all services can go in the container
 
+There is no way to allow this module to get the enabled module list before the
+```DRUPAL_BOOTSTRAP_CONFIGURATION``` phase (if you are lucky and caches are
+set) or before the ```DRUPAL_BOOTSTRAP_DATABASE``` phase (because Drupal 7
+will need the database to get the module list). That's why the ```hook_boot()```
+implementation in this module will remain. This means that there is absolutly no
+way to allow cache backends services to be in the service container, sad, but
+true story.
 
+Long story short: any service you would want to involve in any pre-hook_boot()
+running code cannot be set in the container.
