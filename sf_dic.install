@@ -1,0 +1,19 @@
+<?php
+/**
+ * @file
+ * React when modules are being installed.
+ */
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function sf_dic_modules_enabled($modules) {
+  \Drupal::_destroy();
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function sf_dic_modules_disabled($modules){
+  \Drupal::_destroy();
+}

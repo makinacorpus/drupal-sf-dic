@@ -44,7 +44,23 @@ class Drupal
     }
 
     /**
-     * This is not a compatilibity layer but the main initializer
+     * Destroy the current container definition
+     */
+    static public function _destroy()
+    {
+        $cachepath = variable_get('sf_cache_path', conf_path() . '/files');
+        $cachefile = $cachepath . '/container.php';
+
+        if (file_exists($cachefile)) {
+            unlink($cachefile);
+        }
+
+        self::unsetContainer();
+        self::_init();
+    }
+
+    /**
+     * Initialize the container
      */
     static public function _init()
     {
