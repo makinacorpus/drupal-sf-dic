@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\DependencyInjection\ServiceProviderInterface;
+
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
@@ -37,6 +39,37 @@ class Drupal
             $filename = drupal_get_path('module', $module) . '/' . $module . '.services.yml';
             if (file_exists($filename)) {
                 $ret[$module] = $filename;
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Find all container.php files and attempt to load the associated class.
+     *
+     * @return \Drupal\Core\DependencyInjection\ServiceProviderInterface[]
+     */
+    static protected function _findServiceProviders()
+    {
+        $ret = [];
+
+        require_once DRUPAL_ROOT . '/includes/common.inc';
+
+        // Find all module.services.yml files, note that this will do a
+        // file_exists() per module, but this will skipped whenever the
+        // container file will be cached
+        foreach (array_keys(system_list('module_enabled')) as $module) {
+            $filename = drupal_get_path('module', $module) . '/' . $module . '.container.php';
+            if (file_exists($filename)) {
+                include_once $filename;
+            }
+            $className = 'Drupal\\Module\\' . $module . '\\ServiceProvider';
+            if (class_exists($className)) {
+                $provider = new $className();
+                if ($provider instanceof ServiceProviderInterface) {
+                    $ret[$module] = $provider;
+                }
             }
         }
 
@@ -85,15 +118,21 @@ class Drupal
             $loader->load(basename($filename));
         }
 
+        foreach (static::_findServiceProviders() as $provider) {
+            $provider->register($container);
+        }
+
         $container->compile();
 
-        $oups = file_put_contents(
-            $cachefile,
-            (new PhpDumper($container))
-                ->dump([
-                    'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
-                ])
-        );
+        if (false) {
+            $oups = file_put_contents(
+                $cachefile,
+                (new PhpDumper($container))
+                    ->dump([
+                        'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
+                    ])
+            );
+        }
 
         if (false === $oups) {
             throw new RuntimeException("Cannot write the container file !");

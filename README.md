@@ -105,6 +105,47 @@ function mymodule_do_something() {
 }
 ```
 
+### Register compiler pass
+
+I am sorry for this one, it'd need a little bit of magic to make it easy and
+working at the same time, so here is the arbitrary choose way: In Drupal 8
+you can define classes implementing the
+```Drupal\Core\DependencyInjection\ServiceProviderInterface``` interface, which
+is also defined by this module.
+
+But, because Drupal 7 is not Drupal 8, you will need to arbitrarily write a
+class named ```Drupal\Module\MYMODULE\ServiceProvider``` which implements
+this interface, and write it into the MYMODULE.container.php file.
+
+For example, let's say your module name is ```kitten_killer```, you would write
+the ```kitten_killer.container.php``` file containing the following code:
+
+```php
+<?php
+
+// Note that the namespace here container the lowercased Drupal internal
+// module name, if you don't, the container builder won't find it.
+namespace Drupal\Module\kitten_killer;
+
+use Drupal\Core\DependencyInjection\ServiceProviderInterface;
+
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+// You MUST NOT change the class name.
+class ServiceProvider implements ServiceProviderInterface
+{
+   /**
+    * {@inheritdoc}
+    */
+   public function register(ContainerBuilder $container)
+   {
+       // From this point you can arbitrarily use the container the way you
+       // wish and register anything you need.
+       $container->addCompilerPass(new MyModule\DependencyInjection\SomeCompilerPass());
+   }
+}
+```
+
 ## Services this module provides
 
  *  **service_container**: ```\Symfony\Component\DependencyInjection\ContainerInterface```
