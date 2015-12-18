@@ -124,7 +124,8 @@ class Drupal
 
         $container->compile();
 
-        if (false) {
+        if (!variable_get('sf_dic_container_dev', false)) {
+
             $oups = file_put_contents(
                 $cachefile,
                 (new PhpDumper($container))
@@ -132,10 +133,10 @@ class Drupal
                         'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
                     ])
             );
-        }
 
-        if (false === $oups) {
-            throw new RuntimeException("Cannot write the container file !");
+            if (false === $oups) {
+                throw new RuntimeException("Cannot write the container file !");
+            }
         }
 
         self::$container = $container;
