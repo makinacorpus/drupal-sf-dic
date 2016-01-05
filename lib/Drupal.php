@@ -95,7 +95,7 @@ class Drupal
     /**
      * Initialize the container
      */
-    static public function _init()
+    static public function _loadContainer()
     {
         if (null !== self::$container) {
             return;
@@ -140,6 +140,14 @@ class Drupal
         }
 
         self::$container = $container;
+    }
+
+    /**
+     * Initialize the container
+     */
+    static public function _init()
+    {
+        self::_loadContainer();
     }
 
     /**

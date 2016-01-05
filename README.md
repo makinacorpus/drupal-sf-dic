@@ -18,28 +18,14 @@ This module works with composer, and should be installed using it, add:
 to your project ```composer.json``` file or to your Drupal module that
 should use it as a dependency.
 
-Please note that this module is in its early stages and never have been
-published throught packagist, so you'll need to add this repository:
-
-```json
-    "repositories": [
-        {
-            "type" : "vcs",
-            "url" : "git@github.com:makinacorpus/drupal-sf-dic.git"
-        }
-    ]
-```
-
-until the project comes to a stable version and is published.
+Pease refer to [Composer template for Drupal projects](https://github.com/drupal-composer/drupal-project/tree/7.x)
+to have a nice exemple for doing this.
 
 ### Hard way, if not
 
 You may use the ```Composer Manager``` module although it's untested, or you
 if it's not too late you probably should provide a global ```composer.json```
 for your Drupal site.
-
-Pease refer to [Composer template for Drupal projects](https://github.com/drupal-composer/drupal-project/tree/7.x)
-to have a nice exemple for doing this.
 
 ## Usage
 
@@ -154,6 +140,11 @@ class ServiceProvider implements ServiceProviderInterface
  *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
     default database
 
+ *  All the Drupal variables are set as a container parameters, which mean that
+    you can use all of them as services parameters. Please note that the side
+    effect of this is that if you wish to change a variable and use the new
+    value as a service parameter, you will need to rebuild the container.
+
 ## Known issues
 
 ### Not all services can go in the container
@@ -168,3 +159,10 @@ true story.
 
 Long story short: any service you would want to involve in any pre-hook_boot()
 running code cannot be set in the container.
+
+### Compiled container is a PHP file
+
+Which means that if you run Drupal with multiple web heads that don't share the
+same filesystem, you might experience container desync problems on rebuild.
+Future plans to solve this is to provide a cache based container such as Drupal
+8 does.
