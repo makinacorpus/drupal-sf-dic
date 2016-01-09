@@ -2,11 +2,14 @@
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
+
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
  * Drupal 8 compatibility
@@ -109,7 +112,10 @@ class Drupal
             return;
         }
 
-        $container = new ContainerBuilder();
+        $container = new ContainerBuilder(
+            // This allows to resolve Drupal variables as parameters
+            new DrupalParameterBag()
+        );
 
         // Build a new container, we need to find all modules having a
         // services.yml file defined
