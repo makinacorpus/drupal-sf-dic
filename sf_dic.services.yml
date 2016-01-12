@@ -23,26 +23,8 @@ services:
   # Register arbitrarily a set of entity controllers which the core provides,
   # this is not Drupal 8 compatible, since it only exposes a single
   # entity.manager service (which is incredibly stupid)
+  # @todo
+  #   expose all controllers with their own service?
   entity.manager:
     public: false
     class: Drupal\Core\Entity\EntityManager
-#  entity.manager.file:
-#    class: DrupalEntityControllerInterface
-#    factory: [entity_get_controller]
-#    arguments: [file]
-#  entity.manager.node:
-#    class: DrupalEntityControllerInterface
-#    factory: [entity_get_controller]
-#    arguments: [node]
-#  entity.manager.taxonomy_term:
-#    class: DrupalEntityControllerInterface
-#    factory: [entity_get_controller]
-#    arguments: [taxonomy_term]
-#  entity.manager.taxonomy_vocabulary:
-#    class: DrupalEntityControllerInterface
-#    factory: [entity_get_controller]
-#    arguments: [taxonomy_vocabulary]
-#  entity.manager.user:
-#    class: DrupalEntityControllerInterface
-#    factory: [entity_get_controller]
-#    arguments: [user]
