@@ -1,15 +1,48 @@
 services:
 
-    # Pass-through to get the database connection via the service
-    # container, available for being a dependency of other services
-    database:
-        class: DatabaseConnection
-        factory: [Database, getConnection]
+  # Register the container itself as a synthetic service for the modules to be
+  # able to use it as a dependency
+  service_container:
+    class: Symfony\Component\DependencyInjection\ContainerInterface
+    synthetic: true
 
-    # Empty testing service, it will contain all services this module
-    # provide in order to be able to unit test it
-    empty_service:
-        class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
-        calls:
-            - [setContainer, ["@service_container"]]
-            - [setDatabaseConnection, ["@database"]]
+  # Pass-through to get the database connection via the service container,
+  # available for being a dependency of other services
+  database:
+    class: DatabaseConnection
+    factory: [Database, getConnection]
+
+  # Empty testing service, it will contain all services this module provides
+  # in order to be able to unit test it
+  empty_service:
+    class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
+    calls:
+      - [setContainer, ["@service_container"]]
+      - [setDatabaseConnection, ["@database"]]
+
+  # Register arbitrarily a set of entity controllers which the core provides,
+  # this is not Drupal 8 compatible, since it only exposes a single
+  # entity.manager service (which is incredibly stupid)
+  entity.manager:
+    public: false
+    class: Drupal\Core\Entity\EntityManager
+#  entity.manager.file:
+#    class: DrupalEntityControllerInterface
+#    factory: [entity_get_controller]
+#    arguments: [file]
+#  entity.manager.node:
+#    class: DrupalEntityControllerInterface
+#    factory: [entity_get_controller]
+#    arguments: [node]
+#  entity.manager.taxonomy_term:
+#    class: DrupalEntityControllerInterface
+#    factory: [entity_get_controller]
+#    arguments: [taxonomy_term]
+#  entity.manager.taxonomy_vocabulary:
+#    class: DrupalEntityControllerInterface
+#    factory: [entity_get_controller]
+#    arguments: [taxonomy_vocabulary]
+#  entity.manager.user:
+#    class: DrupalEntityControllerInterface
+#    factory: [entity_get_controller]
+#    arguments: [user]
