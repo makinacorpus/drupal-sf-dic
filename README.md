@@ -140,6 +140,10 @@ class ServiceProvider implements ServiceProviderInterface
  *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
     default database
 
+ *  **entity.manager**: ```\Drupal\Core\Entity\EntityManager``` passthrough that
+    only defines the ```getStorage($entity_type)``` method that will return
+    ```\DrupalEntityControllerInterface``` instance
+
  *  All the Drupal variables are set as a container parameters, which mean that
     you can use all of them as services parameters. Please note that the side
     effect of this is that if you wish to change a variable and use the new
