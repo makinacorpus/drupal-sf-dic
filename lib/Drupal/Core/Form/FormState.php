@@ -37,6 +37,9 @@ class FormState implements FormStateInterface
         if (!isset($this->data['storage'])) {
             $this->data['storage'] = [];
         }
+        if (!isset($this->data['values'])) {
+            $this->data['values'] = [];
+        }
     }
 
     /**

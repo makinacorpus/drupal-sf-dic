@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * PSR-0/PEAR class naming, in order to ensure Simpletests sees it
+ */
+abstract class MakinaCorpus_Drupal_Sf_Container_Tests_AbstractUnitTestCase
+    extends DrupalUnitTestCase
+{
+    public function setUp()
+    {
+        parent::setUp();
+
+        $modules = array('system', 'locale', 'sf_dic', 'sf_dic_test');
+        foreach ($modules as $module) {
+            // This is a very bad hack that allows us to install dependencies in
+            // a very performant way so we cant unit test database and cache
+            // operations without spawning the full site.
+            $install_file = drupal_get_path('module', $module) . '/' . $module . '.install';
+            if (file_exists($install_file)) {
+              require_once $install_file;
+            }
+            require_once drupal_get_path('module', $module) . '/' . $module . '.module';
+            drupal_install_schema($module);
+            // Force schema internal cache rebuild.
+            drupal_get_schema(NULL, TRUE);
+            module_implements(NULL, NULL, TRUE);
+        }
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+    }
+}

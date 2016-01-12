@@ -1,6 +1,6 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests;
+namespace MakinaCorpus\Drupal\Sf\Container\Tests\Mockup;
 
 use Drupal\Core\Database\DatabaseConnectionAwareTrait;
 

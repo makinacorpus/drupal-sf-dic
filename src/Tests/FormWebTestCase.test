@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * PSR-0/PEAR class naming, in order to ensure Simpletests sees it.
+ */
+class MakinaCorpus_Drupal_Sf_Container_Tests_FormWebTestCase
+    extends DrupalWebTestCase
+{
+    public static function getInfo()
+    {
+        return array(
+            'name'        => 'Drupal 8 style form',
+            'description' => 'Ensures that forms work from one end to the other',
+            'group'       => 'Symfony dependency injection',
+        );
+    }
+
+    public function setUp()
+    {
+        parent::setUp('sf_dic', 'sf_dic_test');
+    }
+
+    public function testFormBase()
+    {
+        $this->drupalGet('test/form/extends');
+
+        $this->assertField('some_param');
+    }
+}

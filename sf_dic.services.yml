@@ -70,8 +70,8 @@ services:
 
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it
-  empty_service:
-    class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
+  test_empty_service:
+    class: MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\EmptyService
     calls:
       - [setContainer, ["@service_container"]]
       - [setDatabaseConnection, ["@database"]]

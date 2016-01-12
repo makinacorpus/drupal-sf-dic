@@ -1,20 +1,24 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests;
+namespace MakinaCorpus\Drupal\Sf\Container\Tests\Mockup;
 
-use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class FormImplements implements FormInterface
+class FormExtends extends FormBase
 {
     public function getFormId()
     {
-        return 'i_am_a_form_that_implements_form_interface';
+        return 'i_am_a_form_that_extends_form_base';
     }
 
-    public function buildForm(array $form, FormStateInterface $form_state)
+    public function buildForm(array $form, FormStateInterface $form_state, $someParam = null)
     {
         return [
+            'some_param' => [
+                '#type' => 'textfield',
+                '#default_value' => $someParam,
+            ],
             'actions' => [
                 '#type' => 'actions',
                 'submit_normal' => [
@@ -32,14 +36,9 @@ class FormImplements implements FormInterface
         ];
     }
 
-    public function validateForm(array &$form, FormStateInterface $form_state)
-    {
-        drupal_set_message("I have been validated");
-    }
-
     public function submitForm(array &$form, FormStateInterface $form_state)
     {
-        drupal_set_message("Normal submit");
+        drupal_set_message("Normal submit, some param is " . $form_state->getValue('some_param'));
     }
 
     public function submitFormOther(array &$form, FormStateInterface $form_state)

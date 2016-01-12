@@ -21,6 +21,18 @@ class Drupal
      */
     static protected $container;
 
+    static protected function getContainerPhpFileTarget()
+    {
+        if (!empty($GLOBALS['drupal_test_info'])) {
+            $test_info = $GLOBALS['drupal_test_info'];
+            $filename = 'container.' . $test_info['test_run_id'] . '.php';
+        } else {
+            $filename = 'container.php';
+        }
+
+        return variable_get('sf_cache_path', conf_path() . '/files') . '/' . $filename;
+    }
+
     /**
      * Find all services.yml files
      *
@@ -84,8 +96,7 @@ class Drupal
      */
     static public function _destroy()
     {
-        $cachepath = variable_get('sf_cache_path', conf_path() . '/files');
-        $cachefile = $cachepath . '/container.php';
+        $cachefile = self::getContainerPhpFileTarget();
 
         if (file_exists($cachefile)) {
             unlink($cachefile);
@@ -104,8 +115,7 @@ class Drupal
             return;
         }
 
-        $cachepath = variable_get('sf_cache_path', conf_path() . '/files');
-        $cachefile = $cachepath . '/container.php';
+        $cachefile = self::getContainerPhpFileTarget();
 
         if (@include_once $cachefile) {
             self::$container = new ProjectServiceContainer();

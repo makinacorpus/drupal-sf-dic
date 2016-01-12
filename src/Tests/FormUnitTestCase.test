@@ -1,0 +1,49 @@
+<?php
+
+use Drupal\Core\Form\FormState;
+
+/**
+ * PSR-0/PEAR class naming, in order to ensure Simpletests sees it.
+ */
+class MakinaCorpus_Drupal_Sf_Container_Tests_FormUnitTestCase
+    extends MakinaCorpus_Drupal_Sf_Container_Tests_AbstractUnitTestCase
+{
+    public static function getInfo()
+    {
+        return array(
+            'name'        => 'Drupal 8 style form state',
+            'description' => 'Ensures form state values and other various behaviors',
+            'group'       => 'Symfony dependency injection',
+        );
+    }
+
+    public function testFormState()
+    {
+        $form_state = [];
+
+        $instance = new FormState($form_state);
+
+        // Test values manipulation
+        $instance->setValue(['foo', 'bar'], 42);
+        $this->assertIdentical($instance->getValue(['foo', 'bar']), 42);
+        $temp = &$instance->getValue(['foo']);
+        $this->assertTrue(is_array($temp));
+        $this->assertIdentical($temp['bar'], 42);
+        $temp['baz'] = 'abc';
+        $this->assertIdentical($instance->getValue(['foo', 'baz']), 'abc');
+        $object = new stdClass();
+        $instance->setValue(['a', 'b', 'c'], $object);
+        $this->assertIdentical($instance->getValue(['a', 'b', 'c']), $object);
+        $temp = $instance->getValue(['a']);
+        $this->assertIdentical($temp['b']['c'], $object);
+        $values = &$instance->getValues();
+        $values['d'] = 12;
+        $this->assertIdentical($values, $instance->getValues());
+
+        // Let's do it with storage too
+        $instance->setStorage(['foo' => 42]);
+        $storage = &$instance->getStorage();
+        $storage['a']['b'] = 112;
+        $this->assertIdentical($storage, $instance->getStorage());
+    }
+}

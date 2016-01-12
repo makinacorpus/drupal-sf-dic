@@ -28,14 +28,14 @@ function sf_dic_boot() {
  * Menu callback for doing forms.
  */
 function sf_dic_page_form($formClass, ...$args) {
-  return \Drupal::service('form_builder')->getForm($formClass, ...$args);
+  return \Drupal::formBuilder()->getForm($formClass, ...$args);
 }
 
 /**
  * Implements hook_form().
  */
 function sf_dic_forms($form_id, $args) {
-  $formBuilder = \Drupal::service('form_builder');
+  $formBuilder = \Drupal::formBuilder();
 
   $form = $formBuilder->getFormInstance($form_id);
 
@@ -84,7 +84,7 @@ function _sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateI
  */
 function sf_dic_forms_proxy($form, &$form_state, ...$args) {
 
-  $form_obj = \Drupal::service('form_builder')->getFormInstance($form_state['build_info']['form_id']);
+  $form_obj = \Drupal::formBuilder()->getFormInstance($form_state['build_info']['form_id']);
   if (!$form_obj) { // Just to be sure it won't WSOD.
     return $form;
   }
