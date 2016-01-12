@@ -144,10 +144,94 @@ class ServiceProvider implements ServiceProviderInterface
     only defines the ```getStorage($entity_type)``` method that will return
     ```\DrupalEntityControllerInterface``` instance
 
+ *  **logger.factory**: ```Drupal\Core\Logger\LoggerChannelFactory``` compatible
+    service that will allow you to inject loggers into your services instead of
+    using the ```watchdog``` function
+
+ *  **logger.channel.NAME** (where *NAME* in *default*, *php*, *image*, *cron*,
+    *file*, *form*): ```Psr\Log\LoggerInterface``` instances, also happen
+    to be ```Drupal\Core\Logger\LoggerChannelInterface``` implementations
+
+ *  **form_builder**: ```Drupal\Core\Form\FormBuilder``` instance, with a single
+    method implemented: ```getForm``` which allows you to spawn Drupal 8 style
+    forms in your Drupal 7 site, the implementation is transparent
+
  *  All the Drupal variables are set as a container parameters, which mean that
     you can use all of them as services parameters. Please note that the side
     effect of this is that if you wish to change a variable and use the new
     value as a service parameter, you will need to rebuild the container.
+
+## Working with forms
+
+### Defining your form
+
+In order to be able to use Drupal 8 style forms, you may spawn them with 2
+different methods. First you should define a form implementing
+```FormInterface``` or extending ```FormBase```:
+
+```php
+
+namespace MyVendor\MyModule;
+
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
+
+class MyForm extends FormBase
+{
+    public function buildForm($form, FormStateInterface $form_state)
+    {
+        // build a form API array, classical then
+        return $form;
+    }
+
+    public function submitForm(&$form, FormStateInterface $form_state)
+    {
+        // do something...
+    }
+}
+
+```
+
+### Using the form builder
+
+In any kind of code returning a render array, directly call:
+
+```php
+function my_module_some_page() {
+  $build = [];
+
+  $build['form'] = \Drupal::formBuilder()->getForm('\\MyVendor\\MyModule');
+
+  return $build;
+}
+```
+
+### Using your forms in menu
+
+Because we had to hack a bit the way Drupal spawn this forms (don't worry they
+still are 100% Drupal working forms) if you use the hook menu you must replace
+the ```drupal_get_form``` page callback with ```sf_dic_page_form``` in
+order for it to work, and that's pretty much it:
+
+```php
+/**
+ * Implements hook_menu().
+ */
+function sf_dic_test_menu() {
+  $items = [];
+
+  $items['test/form/implements'] = [
+    'page callback'     => 'sf_dic_page_form',
+    'page arguments'    => ['MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\FormImplements', "42"],
+    'access callback'   => true,
+    'type'              => MENU_CALLBACK,
+  ];
+
+  // ...
+
+  return $items;
+}
+```
 
 ## Known issues
 
