@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Yes, it is a Drupal module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sf_dic_test_menu() {
+  $items = [];
+
+  $items['test/form/implements'] = [
+    'page callback'     => 'sf_dic_page_form',
+    'page arguments'    => ['MakinaCorpus\Drupal\Sf\Container\Tests\FormImplements', "42"],
+    'access arguments'  => ['access content'],
+    'type'              => MENU_CALLBACK,
+  ];
+
+  $items['test/form/extends'] = [
+    'page callback'     => 'sf_dic_page_form',
+    'page arguments'    => ['MakinaCorpus\Drupal\Sf\Container\Tests\FormExtends', 'foo'],
+    'access arguments'  => ['access content'],
+    'type'              => MENU_CALLBACK,
+  ];
+
+  return $items;
+}

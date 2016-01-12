@@ -12,13 +12,52 @@ services:
     class: DatabaseConnection
     factory: [Database, getConnection]
 
-  # Empty testing service, it will contain all services this module provides
-  # in order to be able to unit test it
-  empty_service:
-    class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
-    calls:
-      - [setContainer, ["@service_container"]]
-      - [setDatabaseConnection, ["@database"]]
+  # Form builder
+  form_builder:
+    class: Drupal\Core\Form\FormBuilder
+    arguments: ["@logger.channel.form"]
+
+  # Logger that sends everything into the watchdog
+  logger.watchdog:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Container\Log\DrupalLogger
+
+  # Logger factory from Drupal 8
+  logger.factory:
+    class: Drupal\Core\Logger\LoggerChannelFactory
+    calls: 
+      - [addLogger, ["@logger.watchdog"]]
+
+  # Expose Drupal 8 default logger channels
+  logger.channel_base:
+    abstract: true
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: ["@logger.factory", get]
+  logger.channel.default:
+    # Sorry this one is public, because we are going to use it in our unit
+    # tests, it should be set privte ideally
+    parent: logger.channel_base
+    arguments: ['system']
+  logger.channel.php:
+    public: false
+    parent: logger.channel_base
+    arguments: ['php']
+  logger.channel.image:
+    public: false
+    parent: logger.channel_base
+    arguments: ['image']
+  logger.channel.cron:
+    public: false
+    parent: logger.channel_base
+    arguments: ['cron']
+  logger.channel.file:
+    public: false
+    parent: logger.channel_base
+    arguments: ['file']
+  logger.channel.form:
+    public: false
+    parent: logger.channel_base
+    arguments: ['form']
 
   # Register arbitrarily a set of entity controllers which the core provides,
   # this is not Drupal 8 compatible, since it only exposes a single
@@ -28,3 +67,11 @@ services:
   entity.manager:
     public: false
     class: Drupal\Core\Entity\EntityManager
+
+  # Empty testing service, it will contain all services this module provides
+  # in order to be able to unit test it
+  empty_service:
+    class: MakinaCorpus\Drupal\Sf\Container\Tests\EmptyService
+    calls:
+      - [setContainer, ["@service_container"]]
+      - [setDatabaseConnection, ["@database"]]

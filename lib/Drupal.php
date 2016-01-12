@@ -242,16 +242,25 @@ class Drupal
         return DRUPAL_ROOT;
     }
 
-      /**
-       * Returns the current primary database
-       *
-       * @return \DatabaseConnection
-       *   The current active database's master connection.
-       */
-      static public function database()
-      {
-          return Database::getConnection();
-      }
+    /**
+     * Returns the current primary database
+     *
+     * @return \DatabaseConnection
+     */
+    static public function database()
+    {
+        return Database::getConnection();
+    }
+
+    /**
+     * Returns the form builder service
+     *
+     * @return \Drupal\Core\Form\FormBuilderInterface
+     */
+    public static function formBuilder()
+    {
+        return static::getContainer()->get('form_builder');
+    }
 
     /**
      * Returns the requested cache bin.

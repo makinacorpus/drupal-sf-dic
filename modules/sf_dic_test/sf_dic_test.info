@@ -1,0 +1,7 @@
+name = "Symfony - Dependency injection - Testing"
+description = "Test the module with the same name"
+core = 7.x
+package = Symfony
+php = 5.5
+;exclude[] = true
+dependencies[] = sf_dic
