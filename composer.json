@@ -19,7 +19,7 @@
             "MakinaCorpus\\Drupal\\Sf\\Container\\" : "src/"
         },
         "psr-0" : {
-            "Drupal\\ : "lib/"
+            "Drupal\\" : "lib/"
         },
         "files" : [
             "lib/Drupal.php"
