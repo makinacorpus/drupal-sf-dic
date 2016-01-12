@@ -33,7 +33,7 @@ abstract class FormBase implements FormInterface
      */
     protected function currentUser()
     {
-        return user_load($GLOBALS['user'])->uid;
+        return user_load($GLOBALS['user']->uid);
     }
 
     /**

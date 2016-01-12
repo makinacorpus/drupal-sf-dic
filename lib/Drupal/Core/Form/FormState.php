@@ -569,18 +569,21 @@ class FormState implements FormStateInterface
     /**
      * {@inheritdoc}
      */
-    public function setRebuild($rebuild = TRUE) {
-      $this->rebuild = $rebuild;
-      return $this;
+    public function setRebuild($rebuild = true)
+    {
+        $this->data['rebuild'] = $rebuild;
+
+        return $this;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function isRebuilding() {
-      return $this->rebuild;
+    public function isRebuilding()
+    {
+        return !empty($this->data['rebuild']);
     }
-  
+
     /**
      * {@inheritdoc}
      */

@@ -17,7 +17,7 @@ use Psr\Log\LogLevel;
 final class FormBuilder implements FormBuilderInterface
 {
     /**
-     * @var \FormInterface[]
+     * @var FormInterface[]
      */
     private $formMap = [];
 
@@ -43,8 +43,10 @@ final class FormBuilder implements FormBuilderInterface
      *
      * @param string $formId
      *
-     * @return FormInterface
-     *   Or null if not found
+     * @return mixed[]
+     *   A tuple where first value is a FormInterface instance and second value
+     *   is the associated FormStateInterface instance, of course it'll return
+     *   null if nothing is set at this key
      */
     public function getFormInstance($formId)
     {
@@ -70,9 +72,15 @@ final class FormBuilder implements FormBuilderInterface
         }
 
         $formId = $form->getFormId();
-        $this->formMap[$formId] = $form;
-        array_unshift($args, $formId);
 
-        return call_user_func_array('drupal_get_form', $args);
+        $data = [];
+        $data['build_info']['args'] = $args;
+
+        $formState = new FormState($data);
+        $formState->setFormObject($form);
+
+        $this->formMap[$formId] = [$form, $formState];
+
+        return drupal_build_form($formId, $data);
     }
 }

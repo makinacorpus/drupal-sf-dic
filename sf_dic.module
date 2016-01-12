@@ -35,15 +35,11 @@ function sf_dic_page_form($formClass, ...$args) {
  * Implements hook_form().
  */
 function sf_dic_forms($form_id, $args) {
-  $formBuilder = \Drupal::formBuilder();
-
-  $form = $formBuilder->getFormInstance($form_id);
-
-  if ($form) {
+  if (\Drupal::formBuilder()->getFormInstance($form_id)) {
     return [$form_id => ['callback' => 'sf_dic_forms_proxy']];
+  } else {
+    return [];
   }
-
-  return [];
 }
 
 /**
@@ -53,7 +49,7 @@ function sf_dic_forms($form_id, $args) {
  * @param FormStateInterface $form_state
  * @param mixed[] $form
  */
-function _sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateInterface $form_state_obj, array &$form) {
+function sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateInterface $form_state_obj, array &$form) {
 
   foreach (['#process', '#after_build', '#submit', '#validate', '#element_validate'] as $name) {
     // @todo Handle ['#ajax' => callback].
@@ -75,8 +71,28 @@ function _sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateI
   }
 
   foreach (element_children($form) as $key) {
-    _sf_dic_forms_proxy_unpack_callback($form_obj, $form_state_obj, $form[$key]);
+    sf_dic_forms_proxy_unpack_callback($form_obj, $form_state_obj, $form[$key]);
   }
+}
+
+/**
+ * Form processor.
+ */
+function sf_dic_forms_proxy_process($form, &$form_state, &$complete_form) {
+
+  $objects = \Drupal::formBuilder()->getFormInstance($form_state['build_info']['form_id']);
+
+  if (!$objects) { // Just to be sure it won't WSOD.
+    return $form;
+  }
+
+  list($form_obj, $form_state_obj) = $objects;
+
+  // Because we want it to be really close to real Drupal forms, we need to
+  // proceed to a few callback names unpacking.
+  sf_dic_forms_proxy_unpack_callback($form_obj, $form_state_obj, $form);
+
+  return $form;
 }
 
 /**
@@ -84,35 +100,29 @@ function _sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateI
  */
 function sf_dic_forms_proxy($form, &$form_state, ...$args) {
 
-  $form_obj = \Drupal::formBuilder()->getFormInstance($form_state['build_info']['form_id']);
-  if (!$form_obj) { // Just to be sure it won't WSOD.
+  $objects = \Drupal::formBuilder()->getFormInstance($form_state['build_info']['form_id']);
+
+  if (!$objects) { // Just to be sure it won't WSOD.
     return $form;
   }
 
-  $form_state_obj = new FormState($form_state);
-  $form_state_obj->setFormObject($form_obj);
+  /** @var $form_obj FormInterface */
+  /** @var $form_state_obj FormStateInterface */
+  list($form_obj, $form_state_obj) = $objects;
 
   $form = $form_obj->buildForm($form, $form_state_obj, ...$args);
 
+  // We attach process so that it will happen after the form has been set
+  // or retrieved from the cache, avoiding Closure serialization attempt.
+  $form['#process'][] = 'sf_dic_forms_proxy_process';
+
   // Setup the submit and validate global handlers.
   if (empty($form['#submit'])) {
-    $form['#submit'] = [
-      function (&$form) use ($form_obj, $form_state_obj) {
-        $form_obj->submitForm($form, $form_state_obj);
-      }
-    ];
+    $form['#submit'] = ['::submitForm'];
   }
   if (empty($form['#validate'])) {
-    $form['#validate'] = [
-      function (&$form) use ($form_obj, $form_state_obj) {
-        $form_obj->validateForm($form, $form_state_obj);
-      }
-    ];
+    $form['#validate'] = ['::validateForm'];
   }
-
-  // Because we want it to be really close to real Drupal forms, we need to
-  // proceed to a few callback names unpacking.
-  _sf_dic_forms_proxy_unpack_callback($form_obj, $form_state_obj, $form);
 
   return $form;
 }
