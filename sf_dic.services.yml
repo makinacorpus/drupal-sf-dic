@@ -15,7 +15,7 @@ services:
   # Form builder
   form_builder:
     class: Drupal\Core\Form\FormBuilder
-    arguments: ["@logger.channel.form"]
+    arguments: ["@service_container", "@logger.channel.form"]
 
   # Logger that sends everything into the watchdog
   logger.watchdog:

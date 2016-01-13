@@ -2,11 +2,22 @@
 
 namespace Drupal\Core\Form;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 /**
  * Provides an interface for a Form.
  */
 interface FormInterface
 {
+    /**
+     * Create a new instance
+     *
+     * Fuck, I hate Drupal 8. This is so so stupid...
+     *
+     * @param ContainerInterface $container
+     */
+    public static function create(ContainerInterface $container);
+
     /**
      * Returns a unique string identifying the form.
      *

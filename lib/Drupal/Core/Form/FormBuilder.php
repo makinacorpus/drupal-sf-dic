@@ -8,8 +8,9 @@
 namespace Drupal\Core\Form;
 
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
 use Psr\Log\LogLevel;
+
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * API compatible yet incomplete implementation of the Drupal 8 equivalent.
@@ -27,12 +28,18 @@ final class FormBuilder implements FormBuilderInterface
     private $logger;
 
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * Default constructor
      *
      * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger)
     {
+        $this->container = $container;
         $this->logger = $logger;
     }
 
@@ -64,8 +71,14 @@ final class FormBuilder implements FormBuilderInterface
             $this->logger->log(LogLevel::CRITICAL, "Form class '@class' does not exists", ['@class' => $formClass]);
             return [];
         }
+        if (!method_exists($formClass, 'create')) {
+            $this->logger->log(LogLevel::CRITICAL, "Form class '@class' does not implements ::create()", ['@class' => $formClass]);
+            return [];
+        }
 
-        $form = new $formClass();
+        // God, I do hate Drupal 8...
+        $form = call_user_func([$formClass, 'create'], $this->container);
+
         if (!$form instanceof FormInterface) {
             $this->logger->log(LogLevel::CRITICAL, "Form class '@class' does not implement \Drupal\Core\Form\FormInterface", ['@class' => $formClass]);
             return [];

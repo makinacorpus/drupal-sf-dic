@@ -4,6 +4,8 @@ namespace Drupal\Core\Form;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 /**
  * Provides a base class for forms.
  */
@@ -19,10 +21,17 @@ abstract class FormBase implements FormInterface
     /**
      * {@inheritdoc}
      */
+    public static function create(ContainerInterface $container)
+    {
+        return new static();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function validateForm(array &$form, FormStateInterface $form_state)
     {
         // Validation is optional.
-        time();
     }
 
     /**
