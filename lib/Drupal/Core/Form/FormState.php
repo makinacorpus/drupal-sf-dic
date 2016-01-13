@@ -25,6 +25,14 @@ class FormState implements FormStateInterface
     protected $data = [];
 
     /**
+     * This property is being kept out of the $form_state array since it won't
+     * be ever cached or stored, it meant to be kept out of global data
+     *
+     * @var mixed[]
+     */
+    protected $temporary = [];
+
+    /**
      * Default constructor
      *
      * @param mixed[] $data
@@ -218,58 +226,53 @@ class FormState implements FormStateInterface
     /**
      * {@inheritdoc}
      */
-    public function setSubmitted() {
-      $this->submitted = TRUE;
-      return $this;
+    public function setTemporary(array $temporary)
+    {
+        $this->temporary = $temporary;
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function isSubmitted() {
-      return $this->submitted;
+    public function getTemporary()
+    {
+        return $this->temporary;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function setTemporary(array $temporary) {
-      $this->temporary = $temporary;
-      return $this;
+    public function &getTemporaryValue($key)
+    {
+        $value = &NestedArray::getValue($this->temporary, (array)$key);
+
+        return $value;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function getTemporary() {
-      return $this->temporary;
+    public function setTemporaryValue($key, $value)
+    {
+        NestedArray::setValue($this->temporary, (array) $key, $value, true);
+
+        return $this;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function &getTemporaryValue($key) {
-      $value = &NestedArray::getValue($this->temporary, (array) $key);
-      return $value;
+    public function hasTemporaryValue($key)
+    {
+        $exists = null;
+
+        NestedArray::getValue($this->temporary, (array) $key, $exists);
+
+        return $exists;
     }
-  
-    /**
-     * {@inheritdoc}
-     */
-    public function setTemporaryValue($key, $value) {
-      NestedArray::setValue($this->temporary, (array) $key, $value, TRUE);
-      return $this;
-    }
-  
-    /**
-     * {@inheritdoc}
-     */
-    public function hasTemporaryValue($key) {
-      $exists = NULL;
-      NestedArray::getValue($this->temporary, (array) $key, $exists);
-      return $exists;
-    }
-  
+
     /**
      * {@inheritdoc}
      */
@@ -459,17 +462,11 @@ class FormState implements FormStateInterface
     /**
      * {@inheritdoc}
      */
-    public function setRedirect($route_name, array $route_parameters = array(), array $options = array()) {
-      $url = new Url($route_name, $route_parameters, $options);
-      return $this->setRedirectUrl($url);
-    }
-  
-    /**
-     * {@inheritdoc}
-     */
-    public function setRedirectUrl(Url $url) {
-      $this->redirect = $url;
-      return $this;
+    public function setRedirect($path, array $options = [])
+    {
+        $this->data['redirect'] = [$path, $options];
+
+        return $this;
     }
 
     /**

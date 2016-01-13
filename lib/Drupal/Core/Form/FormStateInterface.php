@@ -14,7 +14,7 @@ interface FormStateInterface
      *   The complete form array.
      */
     public function &getCompleteForm();
-  
+
     /**
      * Stores the complete form array.
      *
@@ -24,7 +24,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setCompleteForm(array &$complete_form);
-  
+
     /**
      * Ensures an include file is loaded whenever the form is processed.
      *
@@ -49,13 +49,13 @@ interface FormStateInterface
      *   $module is used; i.e., resulting in "$module.$type" by default.
      *
      * @return string|false
-     *   The filepath of the loaded include file, or FALSE if the include file was
+     *   The filepath of the loaded include file, or false if the include file was
      *   not found or has been loaded already.
      *
      * @see module_load_include()
      */
-    public function loadInclude($module, $type, $name = NULL);
-  
+    public function loadInclude($module, $type, $name = null);
+
     /**
      * Sets the value of the form state.
      *
@@ -65,36 +65,22 @@ interface FormStateInterface
      * @return $this
      */
     public function setFormState(array $form_state_additions);
-  
+
     /**
      * Sets the redirect for the form.
      *
-     * @param string $route_name
-     *   The name of the route
-     * @param array $route_parameters
-     *   (optional) An associative array of parameter names and values.
+     * WARNING: This method differs from Drupal 8 since Drupal 7 does not have
+     * the same routing API
+     *
+     * @param string $path
+     *   Path where to redirect
      * @param array $options
-     *   (optional) An associative array of additional options. See
-     *   \Drupal\Core\Url for the available keys.
+     *   An associative array of additional options. See url() for more info.
      *
      * @return $this
-     *
-     * @see \Drupal\Core\Form\FormSubmitterInterface::redirectForm()
      */
-    public function setRedirect($route_name, array $route_parameters = array(), array $options = array());
-  
-    /**
-     * Sets the redirect URL for the form.
-     *
-     * @param \Drupal\Core\Url $url
-     *   The URL to redirect to.
-     *
-     * @return $this
-     *
-     * @see \Drupal\Core\Form\FormSubmitterInterface::redirectForm()
-     */
-    public function setRedirectUrl(Url $url);
-  
+    public function setRedirect($path, array $options = []);
+
     /**
      * Sets the entire set of arbitrary data.
      *
@@ -104,7 +90,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setStorage(array $storage);
-  
+
     /**
      * Returns the entire set of arbitrary data.
      *
@@ -112,7 +98,7 @@ interface FormStateInterface
      *   The entire set of arbitrary data to store for this form.
      */
     public function &getStorage();
-  
+
     /**
      * Gets any arbitrary property.
      *
@@ -123,11 +109,11 @@ interface FormStateInterface
      *   $property = ['foo', 'bar'] it will return $storage['foo']['bar'].
      *
      * @return mixed
-     *   A reference to the value for that property, or NULL if the property does
+     *   A reference to the value for that property, or null if the property does
      *   not exist.
      */
     public function &get($property);
-  
+
     /**
      * Sets a value to an arbitrary property.
      *
@@ -143,7 +129,7 @@ interface FormStateInterface
      * @return $this
      */
     public function set($property, $value);
-  
+
     /**
      * Determines if an arbitrary property is present.
      *
@@ -155,7 +141,7 @@ interface FormStateInterface
      *   isset($storage['foo']['bar']).
      */
     public function has($property);
-  
+
     /**
      * Returns the submitted and sanitized form values.
      *
@@ -163,7 +149,7 @@ interface FormStateInterface
      *   An associative array of values submitted to the form.
      */
     public function &getValues();
-  
+
     /**
      * Returns the submitted form value for a specific key.
      *
@@ -176,10 +162,10 @@ interface FormStateInterface
      *   (optional) The default value if the specified key does not exist.
      *
      * @return mixed
-     *   The value for the given key, or NULL.
+     *   The value for the given key, or null.
      */
-    public function &getValue($key, $default = NULL);
-  
+    public function &getValue($key, $default = null);
+
     /**
      * Sets the submitted form values.
      *
@@ -192,7 +178,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setValues(array $values);
-  
+
     /**
      * Sets the submitted form value for a specific key.
      *
@@ -207,7 +193,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setValue($key, $value);
-  
+
     /**
      * Removes a specific key from the submitted form values.
      *
@@ -220,7 +206,7 @@ interface FormStateInterface
      * @return $this
      */
     public function unsetValue($key);
-  
+
     /**
      * Determines if a specific key is present in the submitted form values.
      *
@@ -231,10 +217,10 @@ interface FormStateInterface
      *   $key = array('foo', 'bar') it will return isset($values['foo']['bar']).
      *
      * @return bool
-     *   TRUE if the $key is set, FALSE otherwise.
+     *   true if the $key is set, false otherwise.
      */
     public function hasValue($key);
-  
+
     /**
      * Determines if a specific key has a value in the submitted form values.
      *
@@ -245,10 +231,10 @@ interface FormStateInterface
      *   $key = array('foo', 'bar') it will return empty($values['foo']['bar']).
      *
      * @return bool
-     *   TRUE if the $key has no value, FALSE otherwise.
+     *   true if the $key has no value, false otherwise.
      */
     public function isValueEmpty($key);
-  
+
     /**
      * Changes submitted form values during form validation.
      *
@@ -277,15 +263,15 @@ interface FormStateInterface
      * @return $this
      */
     public function setValueForElement(array $element, $value);
-  
+
     /**
      * Determines if any forms have any errors.
      *
      * @return bool
-     *   TRUE if any form has any errors, FALSE otherwise.
+     *   true if any form has any errors, false otherwise.
      */
     public static function hasAnyErrors();
-  
+
     /**
      * Files an error against a form element.
      *
@@ -322,7 +308,7 @@ interface FormStateInterface
      *   $form['actions']['previous'] = array(
      *     '#type' => 'submit',
      *     '#value' => t('Previous'),
-     *     '#limit_validation_errors' => array(),       // No validation.
+     *     '#limit_validation_errors' => [],       // No validation.
      *     '#submit' => array('some_submit_function'),  // #submit required.
      *   );
      * @endcode
@@ -378,7 +364,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setErrorByName($name, $message = '');
-  
+
     /**
      * Flags an element as having an error.
      *
@@ -390,12 +376,12 @@ interface FormStateInterface
      * @return $this
      */
     public function setError(array &$element, $message = '');
-  
+
     /**
      * Clears all errors against all form elements made by self::setErrorByName().
      */
     public function clearErrors();
-  
+
     /**
      * Returns an associative array of all errors.
      *
@@ -403,7 +389,7 @@ interface FormStateInterface
      *   An array of all errors, keyed by the name of the form element.
      */
     public function getErrors();
-  
+
     /**
      * Returns the error message filed against the given form element.
      *
@@ -414,28 +400,28 @@ interface FormStateInterface
      *   The form element to check for errors.
      *
      * @return string|null
-     *   Either the error message for this element or NULL if there are no errors.
+     *   Either the error message for this element or null if there are no errors.
      */
     public function getError(array $element);
-  
+
     /**
      * Sets the form to be rebuilt after processing.
      *
      * @param bool $rebuild
-     *   (optional) Whether the form should be rebuilt or not. Defaults to TRUE.
+     *   (optional) Whether the form should be rebuilt or not. Defaults to true.
      *
      * @return $this
      */
-    public function setRebuild($rebuild = TRUE);
-  
+    public function setRebuild($rebuild = true);
+
     /**
      * Determines if the form should be rebuilt after processing.
      *
      * @return bool
-     *   TRUE if the form should be rebuilt, FALSE otherwise.
+     *   true if the form should be rebuilt, false otherwise.
      */
     public function isRebuilding();
-  
+
     /**
      * Converts support notations for a form callback to a valid callable.
      *
@@ -449,7 +435,7 @@ interface FormStateInterface
      *   A valid callable.
      */
     public function prepareCallback($callback);
-  
+
     /**
      * Returns the form object that is responsible for building this form.
      *
@@ -457,7 +443,7 @@ interface FormStateInterface
      *   The form object.
      */
     public function getFormObject();
-  
+
     /**
      * Sets the form object that is responsible for building this form.
      *
@@ -472,7 +458,7 @@ interface FormStateInterface
      * Sets this form to be cached.
      *
      * @param bool $cache
-     *   TRUE if the form should be cached, FALSE otherwise.
+     *   true if the form should be cached, false otherwise.
      *
      * @return $this
      *
@@ -480,16 +466,16 @@ interface FormStateInterface
      *   If the current request is using an HTTP method that must not change
      *   state (e.g., GET).
      */
-    public function setCached($cache = TRUE);
-  
+    public function setCached($cache = true);
+
     /**
      * Determines if the form should be cached.
      *
      * @return bool
-     *   TRUE if the form should be cached, FALSE otherwise.
+     *   true if the form should be cached, false otherwise.
      */
     public function isCached();
-  
+
     /**
      * Prevents the form from being cached.
      *
@@ -508,7 +494,7 @@ interface FormStateInterface
      * @see \Drupal\Core\Form\FormState::$limit_validation_errors
      */
     public function setLimitValidationErrors($limit_validation_errors);
-  
+
     /**
      * Retrieves the limited validation error sections.
      *
@@ -518,7 +504,7 @@ interface FormStateInterface
      * @see \Drupal\Core\Form\FormState::$limit_validation_errors
      */
     public function getLimitValidationErrors();
-  
+
     /**
      * Sets the HTTP method to use for the form's submission.
      *
@@ -545,45 +531,45 @@ interface FormStateInterface
      *   The HTTP form method.
      *
      * @return bool
-     *   TRUE if the HTTP form method matches.
+     *   true if the HTTP form method matches.
      *
      * @see \Drupal\Core\Form\FormState::$method
      */
     public function isMethodType($method_type);
-  
+
     /**
      * Enforces that validation is run.
      *
      * @param bool $must_validate
-     *   If TRUE, validation will always be run.
+     *   If true, validation will always be run.
      *
      * @return $this
      */
-    public function setValidationEnforced($must_validate = TRUE);
-  
+    public function setValidationEnforced($must_validate = true);
+
     /**
      * Checks if validation is enforced.
      *
      * @return bool
-     *   If TRUE, validation will always be run.
+     *   If true, validation will always be run.
      */
     public function isValidationEnforced();
-  
+
     /**
      * Prevents the form from redirecting.
      *
      * @param bool $no_redirect
-     *   If TRUE, the form will not redirect.
+     *   If true, the form will not redirect.
      *
      * @return $this
      */
-    public function disableRedirect($no_redirect = TRUE);
-  
+    public function disableRedirect($no_redirect = true);
+
     /**
      * Determines if redirecting has been prevented.
      *
      * @return bool
-     *   If TRUE, the form will not redirect.
+     *   If true, the form will not redirect.
      */
     public function isRedirectDisabled();
 
@@ -596,7 +582,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setSubmitHandlers(array $submit_handlers);
-  
+
     /**
      * Gets the submit handlers.
      *
@@ -604,22 +590,7 @@ interface FormStateInterface
      *   An array of submit handlers.
      */
     public function getSubmitHandlers();
-  
-    /**
-     * Sets that the form has been submitted.
-     *
-     * @return $this
-     */
-    public function setSubmitted();
-  
-    /**
-     * Determines if the form has been submitted.
-     *
-     * @return bool
-     *   TRUE if the form has been submitted, FALSE otherwise.
-     */
-    public function isSubmitted();
-  
+
     /**
      * Sets temporary data.
      *
@@ -629,7 +600,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setTemporary(array $temporary);
-  
+
     /**
      * Gets temporary data.
      *
@@ -637,7 +608,7 @@ interface FormStateInterface
      *   Temporary data accessible during the current page request only.
      */
     public function getTemporary();
-  
+
     /**
      * Gets an arbitrary value from temporary storage.
      *
@@ -648,11 +619,11 @@ interface FormStateInterface
      *   $key = ['foo', 'bar'] it will return $temporary['foo']['bar'].
      *
      * @return mixed
-     *   A reference to the value for that key, or NULL if the property does
+     *   A reference to the value for that key, or null if the property does
      *   not exist.
      */
     public function &getTemporaryValue($key);
-  
+
     /**
      * Sets an arbitrary value in temporary storage.
      *
@@ -667,7 +638,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setTemporaryValue($key, $value);
-  
+
     /**
      * Determines if a temporary value is present.
      *
@@ -678,25 +649,25 @@ interface FormStateInterface
      *   $key = ['foo', 'bar'] it will return isset($temporary['foo']['bar']).
      */
     public function hasTemporaryValue($key);
-  
+
     /**
      * Sets the form element that triggered submission.
      *
      * @param array|null $triggering_element
-     *   The form element that triggered submission, of NULL if there is none.
+     *   The form element that triggered submission, of null if there is none.
      *
      * @return $this
      */
     public function setTriggeringElement($triggering_element);
-  
+
     /**
      * Gets the form element that triggered submission.
      *
      * @return array|null
-     *   The form element that triggered submission, of NULL if there is none.
+     *   The form element that triggered submission, of null if there is none.
      */
     public function &getTriggeringElement();
-  
+
     /**
      * Sets the validate handlers.
      *
@@ -706,7 +677,7 @@ interface FormStateInterface
      * @return $this
      */
     public function setValidateHandlers(array $validate_handlers);
-  
+
     /**
      * Gets the validate handlers.
      *
