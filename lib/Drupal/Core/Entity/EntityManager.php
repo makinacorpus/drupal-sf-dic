@@ -10,7 +10,7 @@ class EntityManager
     /**
      * Get entity controller
      *
-     * @return DrupalEntityControllerInterface
+     * @return \DrupalEntityControllerInterface
      */
     public function getStorage($entity_type)
     {

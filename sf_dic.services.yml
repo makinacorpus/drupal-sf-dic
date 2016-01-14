@@ -17,6 +17,41 @@ services:
     class: Drupal\Core\Form\FormBuilder
     arguments: ["@service_container", "@logger.channel.form"]
 
+  # Module handler, will only proxify what Drupal 7 can do
+  module_handler:
+    class: Drupal\Core\Extension\ModuleHandler
+
+  # Cache factory
+  cache_factory:
+    public: false
+    class: Drupal\Core\Cache\CacheFactory
+
+  # Expose a few cache backends, core ones minus the very Drupal 8 specific ones
+  cache.bootstrap:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache_bootstrap]
+  cache.default:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache]
+  cache.entity:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache_field]
+  cache.menu:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache_menu]
+  cache.render:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache]
+  cache.data:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [cache]
+
   # Logger that sends everything into the watchdog
   logger.watchdog:
     public: false
