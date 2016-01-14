@@ -5,8 +5,9 @@
  */
 
 use Drupal\Core\Form\FormInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
+
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Implements hook_boot().
@@ -29,6 +30,13 @@ function sf_dic_boot() {
  */
 function sf_dic_page_form($formClass, ...$args) {
   return \Drupal::formBuilder()->getForm($formClass, ...$args);
+}
+
+/**
+ * Implements hook_exit().
+ */
+function sf_dic_exit() {
+  \Drupal::service('event_dispatcher')->dispatch(KernelEvents::TERMINATE);
 }
 
 /**
