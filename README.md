@@ -134,15 +134,31 @@ class ServiceProvider implements ServiceProviderInterface
 
 ## Services this module provides
 
+In order to provide a solid basis for working with Drupal 7 modules in order
+to have them converted to Drupal 8 later, this modules provides a set of Drupal
+8 API-compatible services that you should use in your own in order to reduce
+the future porting time:
+
  *  **service_container**: ```\Symfony\Component\DependencyInjection\ContainerInterface```
     instance that points to the current container itself
 
  *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
     default database
 
- *  **entity.manager**: ```\Drupal\Core\Entity\EntityManager``` passthrough that
+ *  **entity.manager**: ```\Drupal\Core\Entity\EntityManager``` passthru that
     only defines the ```getStorage($entity_type)``` method that will return
     ```\DrupalEntityControllerInterface``` instance
+
+ *  **module_handler**: ```\Drupal\Core\Extension\ModuleHandler``` passthru uses
+    Drupal 7 module.inc functions
+
+ *  **cache_factory**: ```\Drupal\Core\Cache\CacheFactory``` instance, working as
+    expected
+
+ *  **cache.NAME** (where *NAME* in *bootstrap*, *default*, *entity*, *menu*,
+    *render*, *data*) ```\Drupal\Core\Cache\CacheBackendInterface``` specific
+    implementation that will proxify toward the Drupal 7 cache layer, fully
+    API compatible with Drupal 8
 
  *  **logger.factory**: ```Drupal\Core\Logger\LoggerChannelFactory``` compatible
     service that will allow you to inject loggers into your services instead of
@@ -167,7 +183,12 @@ class ServiceProvider implements ServiceProviderInterface
 
 In order to be able to use Drupal 8 style forms, you may spawn them with 2
 different methods. First you should define a form implementing
-```FormInterface``` or extending ```FormBase```:
+```FormInterface``` or extending ```FormBase```.
+
+Please note that it is API compatible with Drupal 8 so you should read the
+Drupal 8 documentation. Please notice there are a few missing methods a few
+differences when dealing with entites and URLs, since Drupal 8 does not handle
+those the same way as Drupal 7.
 
 ```php
 
