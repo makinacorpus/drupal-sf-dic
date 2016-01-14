@@ -145,6 +145,11 @@ the future porting time:
  *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
     default database
 
+ *  **event_dispatcher**: ```Symfony\Component\EventDispatcher\EventDispatcher```
+    which allows you to use it at your convenence; please be aware that only the
+    ```KernelEvents::TERMINATE``` event is run as of now (others are not
+    revelant in a Drupal 7 site)
+
  *  **entity.manager**: ```\Drupal\Core\Entity\EntityManager``` passthru that
     only defines the ```getStorage($entity_type)``` method that will return
     ```\DrupalEntityControllerInterface``` instance
@@ -254,7 +259,20 @@ function sf_dic_test_menu() {
 }
 ```
 
-## Known issues
+## Working with event dispatcher
+
+Create an event subscribe implementing ```Symfony\Component\EventDispatcher\EventSubscriberInterface```
+then register it in your **my_module.services.yml** file by adding it the
+```event_subscriber``` tag:
+
+```yaml
+services:
+  my_module_some_event:
+    class: MyVendor\MyModule\EventSubscriber\SomeEventSubscriber
+    tags: [{ name: event_subscriber }]
+```
+
+And that's pretty much it.
 
 ### Not all services can go in the container
 
