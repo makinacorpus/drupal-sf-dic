@@ -68,10 +68,26 @@ function sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateIn
           // build a PHP valid callable with it instead, that should be enough
           // to trick core From API into executing it.
           if (!is_callable($callback) && is_string($callback) && '::' === substr($callback, 0, 2)) {
+
             $method = substr($callback, 2);
-            $form[$name][$index] = function (&$form) use ($form_obj, $method, $form_state_obj) {
-              return call_user_func([$form_obj, $method], $form, $form_state_obj);
-            };
+
+            // Deal with '#element_validate' differently to mimic Drupal 8
+            // behavior.
+            switch ($name) {
+
+              case '#element_validate':
+                $form[$name][$index] = function (&$element, &$form_state, &$complete_form) use ($form_obj, $method, $form_state_obj) {
+                  return call_user_func([$form_obj, $method], $element, $form_state_obj, $complete_form);
+                };
+                break;
+
+              default:
+                $form[$name][$index] = function (&$form) use ($form_obj, $method, $form_state_obj) {
+                  return call_user_func([$form_obj, $method], $form, $form_state_obj);
+                };
+                break;
+            }
+
           }
         }
       } // Else this is an error... But I'll that to core to deal with.

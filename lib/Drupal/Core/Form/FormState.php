@@ -10,6 +10,11 @@ use Drupal\Component\Utility\NestedArray;
 class FormState implements FormStateInterface
 {
     /**
+     * @var bool
+     */
+    protected static $anyErrors = false;
+
+    /**
      * @var mixed[]
      */
     protected $form = [];
@@ -470,68 +475,43 @@ class FormState implements FormStateInterface
     }
 
     /**
-     * Sets the global status of errors.
-     *
-     * @param bool $errors
-     *   TRUE if any form has any errors, FALSE otherwise.
+     * {@inheritdoc}
      */
-    protected static function setAnyErrors($errors = TRUE) {
-      static::$anyErrors = $errors;
+    protected static function setAnyErrors($errors = TRUE)
+    {
+        static::$anyErrors = $errors;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public static function hasAnyErrors() {
-      return static::$anyErrors;
+    public static function hasAnyErrors()
+    {
+        return static::$anyErrors;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function setErrorByName($name, $message = '') {
-      if ($this->isValidationComplete()) {
-        throw new \LogicException('Form errors cannot be set after form validation has finished.');
-      }
-  
-      $errors = $this->getErrors();
-      if (!isset($errors[$name])) {
-        $record = TRUE;
-        $limit_validation_errors = $this->getLimitValidationErrors();
-        if ($limit_validation_errors !== NULL) {
-          $record = FALSE;
-          foreach ($limit_validation_errors as $section) {
-            // Exploding by '][' reconstructs the element's #parents. If the
-            // reconstructed #parents begin with the same keys as the specified
-            // section, then the element's values are within the part of
-            // $form_state->getValues() that the clicked button requires to be
-            // valid, so errors for this element must be recorded. As the exploded
-            // array will all be strings, we need to cast every value of the
-            // section array to string.
-            if (array_slice(explode('][', $name), 0, count($section)) === array_map('strval', $section)) {
-              $record = TRUE;
-              break;
-            }
-          }
-        }
-        if ($record) {
-          $errors[$name] = $message;
-          $this->errors = $errors;
-          static::setAnyErrors();
-        }
-      }
-  
-      return $this;
+    public function setErrorByName($name, $message = '')
+    {
+        form_set_error($name, $message);
+        static::setAnyErrors(true);
+
+        return $this;
     }
-  
+
     /**
      * {@inheritdoc}
      */
-    public function setError(array &$element, $message = '') {
-      $this->setErrorByName(implode('][', $element['#parents']), $message);
-      return $this;
+    public function setError(array &$element, $message = '')
+    {
+        form_error($element, $message);
+        static::setAnyErrors(true);
+
+        return $this;
     }
-  
+
     /**
      * {@inheritdoc}
      */
