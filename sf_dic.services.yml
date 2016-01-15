@@ -64,7 +64,8 @@ services:
   # We are not going to use Drupal 8 event dispatcher, but hopefully the
   # symfony vanilla one is API compatible
   event_dispatcher:
-    class: Symfony\Component\EventDispatcher\EventDispatcher
+    class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
+    arguments: ["@service_container"]
 
   # Logger that sends everything into the watchdog
   logger.watchdog:
