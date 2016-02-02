@@ -5,8 +5,15 @@ namespace MakinaCorpus\Drupal\Sf\Container\Tests\Mockup;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 class FormImplements implements FormInterface
 {
+    static public function create(ContainerInterface $container)
+    {
+        return new self();
+    }
+
     public function getFormId()
     {
         return 'i_am_a_form_that_implements_form_interface';
