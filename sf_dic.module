@@ -26,6 +26,14 @@ function sf_dic_boot() {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function sf_dic_flush_caches() {
+  \Drupal::_destroy();
+  return [];
+}
+
+/**
  * Menu callback for doing forms.
  */
 function sf_dic_page_form($formClass, ...$args) {
