@@ -57,7 +57,7 @@ abstract class FormBase implements FormInterface
     protected function logger($channel)
     {
         if (!$this->loggerFactory) {
-            \Drupal::service('logger.factory');
+            $this->loggerFactory = \Drupal::service('logger.factory');
         }
 
         return $this->loggerFactory->get($channel);
