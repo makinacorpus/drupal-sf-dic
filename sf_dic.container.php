@@ -20,6 +20,6 @@ class ServiceProvider implements ServiceProviderInterface
 
         // @todo This will make all variables read-only for the container
         //   which I'm not against but could cause some problems...
-        // $container->addCompilerPass(new VariablesCompilerPass());
+        $container->addCompilerPass(new VariablesCompilerPass());
     }
 }
