@@ -2,6 +2,9 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\Tests;
 
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -30,11 +33,17 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     static private function bootstrapConfiguration()
     {
+        if (!isset($_SERVER['HTTP_HOST'])) {
+            $_SERVER['HTTP_HOST'] = '127.0.0.1';
+        }
         if (!isset($_SERVER['HTTP_REFERER'])) {
             $_SERVER['HTTP_REFERER'] = '';
         }
         if (!isset($_SERVER['SERVER_PROTOCOL']) || ($_SERVER['SERVER_PROTOCOL'] != 'HTTP/1.0' && $_SERVER['SERVER_PROTOCOL'] != 'HTTP/1.1')) {
             $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.0';
+        }
+        if (!isset($_SERVER['REMOTE_ADDR'])) {
+            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         }
 
         drupal_settings_initialize();
@@ -59,10 +68,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         if (isset($GLOBALS[$variableName])) {
             $directory = $GLOBALS[$variableName];
         } else {
-            $directory = getenv($variableName);
-            if (!$directory) {
-                throw new \RuntimeException(sprintf("You must configure the %s environment or phpunit variable", $variableName));
-            }
+            throw new \RuntimeException(sprintf("You must configure the %s environment or phpunit variable", $variableName));
         }
 
         if (!is_dir($directory)) {
@@ -97,12 +103,30 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         define('DRUPAL_ROOT', $directory);
         require_once $bootstrapInc;
 
+        self::bootstrapConfiguration();
         self::$bootstrapped = true;
+
+        \Drupal::_toggleTestMode(true);
 
         drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
 
         return self::$databaseConnection = \Database::getConnection();
     }
+
+    /**
+     * @var \ModuleHandlerInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $nullModuleHandler;
+
+    /**
+     * @var \DrupalCacheInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $nullLegacyCache;
+
+    /**
+     * @var CacheBackendInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $nullCacheBackend;
 
     /**
      * @var \DatabaseConnection
@@ -113,6 +137,42 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      * @var ContainerInterface
      */
     private $container;
+
+    /**
+     * @return ModuleHandlerInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getNullModuleHandler()
+    {
+        if (!$this->nullModuleHandler) {
+            $this->nullModuleHandler = $this->getMock('\Drupal\Core\Extension\ModuleHandlerInterface');
+        }
+
+        return $this->nullModuleHandler;
+    }
+
+    /**
+     * @return CacheBackendInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getNullCacheBackend()
+    {
+        if (!$this->nullCacheBackend) {
+            $this->nullCacheBackend = $this->getMock('\Drupal\Core\Cache\CacheBackendInterface');
+        }
+
+        return $this->nullCacheBackend;
+    }
+
+    /**
+     * @return \DrupalCacheInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getNullLegacyCache()
+    {
+        if (!$this->nullLegacyCache) {
+            $this->nullLegacyCache = $this->getMock('\DrupalCacheInterface');
+        }
+
+        return $this->nullLegacyCache;
+    }
 
     /**
      * Get current Drupal site database connection
@@ -131,6 +191,8 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function getDrupalContainer()
     {
+        drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
         return \Drupal::getContainer();
     }
 
@@ -152,6 +214,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        // @todo later destroy temporary container
+        \Drupal::unsetContainer();
+        unset($this->nullCacheBackend, $this->nullLegacyCache, $this->nullModuleHandler);
     }
 }

@@ -9,7 +9,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
  * Drupal 8 compatibility
@@ -17,9 +16,22 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 class Drupal
 {
     /**
+     * @var boolean
+     */
+    static protected $isRunningTests = false;
+
+    /**
      * @var \Symfony\Component\DependencyInjection\ContainerInterface
      */
     static protected $container;
+
+    /**
+     * Set or unset the test mode
+     */
+    static public function _toggleTestMode($toggle = true)
+    {
+        self::$isRunningTests = $toggle;
+    }
 
     static protected function getContainerPhpFileTarget()
     {
@@ -45,13 +57,13 @@ class Drupal
 
         // Add self
         require_once DRUPAL_ROOT . '/includes/common.inc';
-        $ret['sf_dic'] = drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
+        $ret['sf_dic'] = DRUPAL_ROOT . '/' . drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
 
         // Find all module.services.yml files, note that this will do a
         // file_exists() per module, but this will skipped whenever the
         // container file will be cached
         foreach (array_keys(system_list('module_enabled')) as $module) {
-            $filename = drupal_get_path('module', $module) . '/' . $module . '.services.yml';
+            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.services.yml';
             if (file_exists($filename)) {
                 $ret[$module] = $filename;
             }
@@ -96,6 +108,11 @@ class Drupal
      */
     static public function _destroy()
     {
+        if (self::$isRunningTests) {
+            self::unsetContainer();
+            return;
+        }
+
         $cachefile = self::getContainerPhpFileTarget();
 
         if (file_exists($cachefile)) {
@@ -115,11 +132,13 @@ class Drupal
             return;
         }
 
-        $cachefile = self::getContainerPhpFileTarget();
+        if (!self::$isRunningTests) {
+            $cachefile = self::getContainerPhpFileTarget();
 
-        if (@include_once $cachefile) {
-            self::$container = new ProjectServiceContainer();
-            return;
+            if (@include_once $cachefile) {
+                self::$container = new ProjectServiceContainer();
+                return;
+            }
         }
 
         $container = new ContainerBuilder(
@@ -140,7 +159,7 @@ class Drupal
 
         $container->compile();
 
-        if (!variable_get('sf_dic_container_dev', false)) {
+        if (!self::$isRunningTests) {
 
             $oups = file_put_contents(
                 $cachefile,
