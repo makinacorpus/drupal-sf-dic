@@ -87,7 +87,7 @@ class Drupal
         // file_exists() per module, but this will skipped whenever the
         // container file will be cached
         foreach (array_keys(system_list('module_enabled')) as $module) {
-            $filename = drupal_get_path('module', $module) . '/' . $module . '.container.php';
+            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.container.php';
             if (file_exists($filename)) {
                 include_once $filename;
             }
