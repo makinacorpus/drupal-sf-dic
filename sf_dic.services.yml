@@ -6,6 +6,10 @@ services:
     class: Symfony\Component\DependencyInjection\ContainerInterface
     synthetic: true
 
+  # Request stack, because we can
+  request_stack:
+    class: Symfony\Component\HttpFoundation\RequestStack
+
   # Pass-through to get the database connection via the service container,
   # available for being a dependency of other services
   database:

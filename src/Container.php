@@ -4,6 +4,7 @@ namespace MakinaCorpus\Drupal\Sf\Container;
 
 use Symfony\Component\DependencyInjection\Container as SymfonyContainer;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalFrozenParameterBag;
 
 class Container extends SymfonyContainer

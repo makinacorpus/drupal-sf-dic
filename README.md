@@ -142,6 +142,9 @@ the future porting time:
  *  **service_container**: ```\Symfony\Component\DependencyInjection\ContainerInterface```
     instance that points to the current container itself
 
+ *  **request_stack**: ```\Symfony\Component\HttpFoundation\RequestStack```
+    instance, yes, a real one in your Drupal 7
+
  *  **database**: ```\DatabaseConnection``` instance that points to the Drupal
     default database
 

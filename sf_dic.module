@@ -7,6 +7,7 @@
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -23,6 +24,7 @@ function sf_dic_boot() {
   if (!\Drupal::hasContainer()) {
     \Drupal::_init();
   }
+  \Drupal::service('request_stack')->push(Request::createFromGlobals());
 }
 
 /**

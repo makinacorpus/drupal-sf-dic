@@ -292,6 +292,60 @@ class Drupal
     }
 
     /**
+     * Indicates if there is a currently active request object.
+     *
+     * @return bool
+     *   TRUE if there is a currently active request object, FALSE otherwise.
+     */
+    public static function hasRequest()
+    {
+        // Check hasContainer() first in order to always return a Boolean.
+        return
+            static::hasContainer() &&
+            static::getContainer()->has('request_stack') /* &&
+            static::getContainer()->get('request_stack')->getCurrentRequest() !== null */
+        ;
+    }
+
+    /**
+     * Retrieves the currently active request object.
+     *
+     * Note: The use of this wrapper in particular is especially discouraged. Most
+     * code should not need to access the request directly.  Doing so means it
+     * will only function when handling an HTTP request, and will require special
+     * modification or wrapping when run from a command line tool, from certain
+     * queue processors, or from automated tests.
+     *
+     * If code must access the request, it is considerably better to register
+     * an object with the Service Container and give it a setRequest() method
+     * that is configured to run when the service is created.  That way, the
+     * correct request object can always be provided by the container and the
+     * service can still be unit tested.
+     *
+     * If this method must be used, never save the request object that is
+     * returned.  Doing so may lead to inconsistencies as the request object is
+     * volatile and may change at various times, such as during a subrequest.
+     *
+     * @return \Symfony\Component\HttpFoundation\Request
+     *   The currently active request object.
+     */
+    public static function request()
+    {
+        return static::getContainer()->get('request_stack')->getCurrentRequest();
+    }
+
+    /**
+     * Retrives the request stack.
+     *
+     * @return \Symfony\Component\HttpFoundation\RequestStack
+     *   The request stack
+     */
+    public static function requestStack()
+    {
+        return static::getContainer()->get('request_stack');
+    }
+
+    /**
      * Returns the requested cache bin.
      *
      * @param string $bin

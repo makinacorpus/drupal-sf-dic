@@ -36,6 +36,7 @@
         "symfony/dependency-injection" : "~3.0",
         "symfony/event-dispatcher": "~2.8|~3.0",
         "symfony/expression-language" : "~2.8|~3.0",
+        "symfony/http-foundation" : "~2.8|~3.0",
         "symfony/http-kernel" : "~2.8|~3.0",
         "symfony/yaml" : "~2.8|~3.0"
     },
