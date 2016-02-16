@@ -193,6 +193,8 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     {
         drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
+        \Drupal::_init();
+
         return \Drupal::getContainer();
     }
 
@@ -215,6 +217,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         \Drupal::unsetContainer();
+
         unset($this->nullCacheBackend, $this->nullLegacyCache, $this->nullModuleHandler);
     }
 }
