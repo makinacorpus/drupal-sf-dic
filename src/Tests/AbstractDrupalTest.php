@@ -139,9 +139,49 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     private $container;
 
     /**
+     * @var \stdClass[]
+     */
+    private $accounts = [];
+
+    /**
+     * Create a Drupal user
+     *
+     * @param string[] $permissionList
+     *   Permission string list
+     *
+     * @return \stdClass
+     */
+    protected function createDrupalUser($permissionList = [])
+    {
+        $account = new \stdClass();
+        $this->accounts[] = $account;
+        $stupidHash = uniqid() . mt_rand();
+        $account->name = $stupidHash;
+        $account->mail = $stupidHash . '@example.com';
+        $account->roles = [];
+        user_save($account);
+
+        // Fake user access cache for testing
+        $data = &drupal_static('user_access');
+        $data[$account->uid] = array_combine($permissionList, $permissionList);
+
+        return $account;
+    }
+
+    /**
+     * Get Drupal anonymous user
+     *
+     * @return \stdClass
+     */
+    final protected function getAnonymousUser()
+    {
+        return drupal_anonymous_user();
+    }
+
+    /**
      * @return ModuleHandlerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getNullModuleHandler()
+    final protected function getNullModuleHandler()
     {
         if (!$this->nullModuleHandler) {
             $this->nullModuleHandler = $this->getMock('\Drupal\Core\Extension\ModuleHandlerInterface');
@@ -153,7 +193,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     /**
      * @return CacheBackendInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getNullCacheBackend()
+    final protected function getNullCacheBackend()
     {
         if (!$this->nullCacheBackend) {
             $this->nullCacheBackend = $this->getMock('\Drupal\Core\Cache\CacheBackendInterface');
@@ -165,7 +205,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \DrupalCacheInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getNullLegacyCache()
+    final protected function getNullLegacyCache()
     {
         if (!$this->nullLegacyCache) {
             $this->nullLegacyCache = $this->getMock('\DrupalCacheInterface');
@@ -203,6 +243,8 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
+        parent::setUp();
+
         $this->db = self::findDrupalDatabaseConnection();
 
         // @todo
@@ -216,8 +258,14 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        foreach ($this->accounts as $account) {
+            user_delete($account->uid);
+        }
+
         \Drupal::unsetContainer();
 
         unset($this->nullCacheBackend, $this->nullLegacyCache, $this->nullModuleHandler);
+
+        parent::tearDown();
     }
 }
