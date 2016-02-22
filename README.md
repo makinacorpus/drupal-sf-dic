@@ -180,6 +180,17 @@ the future porting time:
     method implemented: ```getForm``` which allows you to spawn Drupal 8 style
     forms in your Drupal 7 site, the implementation is transparent
 
+ *  You can fetch ```\Drupal\Core\Entity\EntityStorageInterface``` instances
+    via the entity manager service, which are compatible with Drupal 8 interface
+
+ *  Both ```\Drupal\node\NodeInterface``` and ```\Drupal\user\UserInterface```
+    are implemented and automatically in use via the Drupal 7 entity controllers
+    but you may also load them using entity storage services
+
+ *  You should use ```\Drupal\Core\Session\AccountInterface``` whenever you
+    need a user account which is not meant to be manipulated as an entity, for
+    example for various access checks
+
  *  All the Drupal variables are set as a container parameters, which mean that
     you can use all of them as services parameters. Please note that the side
     effect of this is that if you wish to change a variable and use the new

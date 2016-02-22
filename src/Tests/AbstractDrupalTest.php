@@ -46,7 +46,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         }
 
-        drupal_settings_initialize();
+        //drupal_settings_initialize();
     }
 
     /**

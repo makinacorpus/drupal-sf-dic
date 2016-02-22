@@ -61,6 +61,18 @@ function sf_dic_forms($form_id, $args) {
 }
 
 /**
+ * Implements hook_entity_info_alter().
+ */
+function sf_dic_entity_info_alter(&$entity_info) {
+  if (isset($entity_info['node'])) {
+    $entity_info['node']['controller class'] = '\Drupal\node\CompatNodeController';
+  }
+  if (isset($entity_info['user'])) {
+    $entity_info['user']['controller class'] = '\Drupal\user\CompatUserController';
+  }
+}
+
+/**
  * Recursively unpack callbacks for the given form
  *
  * @param FormInterface $instance

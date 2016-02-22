@@ -1,4 +1,6 @@
 <?php
+use Drupal\Core\Session\AccountInterface;
+
 /**
  * @file
  * React when modules are being installed.
@@ -16,4 +18,52 @@ function sf_dic_modules_enabled($modules) {
  */
 function sf_dic_modules_disabled($modules){
   \Drupal::_destroy();
+}
+
+/**
+ * Implements hook_schema_alter().
+ */
+function sf_dic_schema_alter(&$schema) {
+  if (isset($schema['role'])) {
+    $schema['role']['fields']['machine_name'] = [
+      'description' => "Role unique string identifier",
+      'type'        => 'varchar',
+      'length'      => 64,
+      'not null'    => false,
+      'default'     => null,
+    ];
+    $schema['role']['unique keys']['machine_name'] = ['machine_name'];
+  }
+}
+
+/**
+ * Ensure schema changes.
+ */
+function sf_dic_schema_ensure() {
+  if (db_table_exists('role') && !db_field_exists('role', 'machine_name')) {
+    db_add_field('role', 'machine_name', [
+      'description' => "Role unique string identifier",
+      'type'        => 'varchar',
+      'length'      => 64,
+      'not null'    => false,
+      'default'     => null,
+    ]);
+    // @todo Find a way to universally set the unique key constraint.
+  }
+  db_update('role')->fields(['machine_name' => AccountInterface::ANONYMOUS_ROLE])->condition('rid', DRUPAL_ANONYMOUS_RID)->execute();
+  db_update('role')->fields(['machine_name' => AccountInterface::AUTHENTICATED_ROLE])->condition('rid', DRUPAL_AUTHENTICATED_RID)->execute();
+}
+
+/**
+ * Implements hook_install().
+ */
+function sf_dic_install() {
+  sf_dic_schema_ensure();
+}
+
+/**
+ * Ensures schema alterations.
+ */
+function sf_dic_update_7001 () {
+  sf_dic_schema_ensure();
 }
