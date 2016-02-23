@@ -32,9 +32,14 @@ function sf_dic_boot() {
   // for anonymous user.
   variable_set('drupal_anonymous_user_object', new User());
 
+  // SUPER FIXME!:
   // And fixes the current user account;
   if (!$GLOBALS['user'] instanceof AccountInterface) {
-    $GLOBALS['user'] = user_load($GLOBALS['user']->uid);
+    $old = $GLOBALS['user'];
+    $GLOBALS['user'] = $user = new User();
+    foreach ($old as $property => $value) {
+      $user->{$property} = $value;
+    }
   }
 }
 
