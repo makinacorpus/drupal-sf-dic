@@ -38,7 +38,16 @@ class Account implements AccountInterface
      */
     public function getRoles($exclude_locked_roles = FALSE)
     {
-        return array_keys($this->roles);
+        $roles = $this->roles;
+
+        if ($exclude_locked_roles) {
+            unset(
+                $roles[AccountInterface::ANONYMOUS_ROLE],
+                $roles[AccountInterface::AUTHENTICATED_ROLE]
+            );
+        }
+
+        return array_keys($roles);
     }
 
     /**
@@ -99,7 +108,7 @@ class Account implements AccountInterface
      */
     public function getDisplayName()
     {
-        return format_username($this);
+        return filter_xss(format_username($this));
     }
 
     /**

@@ -289,7 +289,7 @@ class Drupal
      */
     static public function currentUser()
     {
-        return Database::getConnection();
+        return self::getContainer()->get('current_user');
     }
 
     /**
