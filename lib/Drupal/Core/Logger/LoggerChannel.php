@@ -59,7 +59,7 @@ final class LoggerChannel extends AbstractLogger implements LoggerChannelInterfa
             'channel'     => $this->channel,
             'link'        => '',
             'user'        => null,
-            'uid'         => $GLOBALS['user']->uid,
+            'uid'         => \Drupal::currentUser()->id(),
             'request_uri' => $_SERVER['REQUEST_URI'],
             'referer'     => '',
             'ip'          => '',

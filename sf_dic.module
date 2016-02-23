@@ -6,7 +6,6 @@
 
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\user\User;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -29,18 +28,12 @@ function sf_dic_boot() {
   \Drupal::service('request_stack')->push(Request::createFromGlobals());
 
   // This is needed to allow modules to manipulate a UserInterface instance
-  // for anonymous user.
-  variable_set('drupal_anonymous_user_object', new User());
-
-  // SUPER FIXME!:
-  // And fixes the current user account;
-  if (!$GLOBALS['user'] instanceof AccountInterface) {
-    $old = $GLOBALS['user'];
-    $GLOBALS['user'] = $user = new User();
-    foreach ($old as $property => $value) {
-      $user->{$property} = $value;
-    }
-  }
+  // for anonymous user. Note that we don't need to put anything in the user
+  // structure since that drupal_anonymous_user() will do it for us.
+  $GLOBALS['conf']['drupal_anonymous_user_object'] = new User();
+  $accountProxy = \Drupal::service('current_user');
+  $accountProxy->setOriginalAccount($GLOBALS['user']);
+  $GLOBALS['user'] = $accountProxy;
 }
 
 /**

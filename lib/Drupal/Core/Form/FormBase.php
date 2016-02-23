@@ -39,11 +39,10 @@ abstract class FormBase implements FormInterface
      * Gets the current user
      *
      * @return AccountInterface
-     *   User account
      */
     protected function currentUser()
     {
-        return user_load($GLOBALS['user']->uid);
+        return \Drupal::currentUser();
     }
 
     /**

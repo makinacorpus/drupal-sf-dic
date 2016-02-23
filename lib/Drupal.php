@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
+use Drupal\Core\Session\AccountInterface;
 
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
 
@@ -277,6 +278,16 @@ class Drupal
      * @return \DatabaseConnection
      */
     static public function database()
+    {
+        return Database::getConnection();
+    }
+
+    /**
+     * Returns the current user
+     *
+     * @return AccountInterface
+     */
+    static public function currentUser()
     {
         return Database::getConnection();
     }

@@ -180,6 +180,10 @@ the future porting time:
     method implemented: ```getForm``` which allows you to spawn Drupal 8 style
     forms in your Drupal 7 site, the implementation is transparent
 
+ *  **current_user**: ```Drupal\Core\Session\AccountProxy``` compatible with
+    ```Drupal\Core\Session\AccountInterface``` which proxifies the current
+    user, note that it also replaces the ```$GLOBALS['user']``` object
+
  *  You can fetch ```\Drupal\Core\Entity\EntityStorageInterface``` instances
     via the entity manager service, which are compatible with Drupal 8 interface
 
