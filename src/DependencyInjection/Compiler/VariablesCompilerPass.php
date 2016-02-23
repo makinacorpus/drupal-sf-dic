@@ -9,6 +9,10 @@ class VariablesCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $container->getParameterBag()->add($GLOBALS['conf']);
+        $conf = $GLOBALS['conf'];
+
+        unset($conf['drupal_anonymous_user_object']);
+
+        $container->getParameterBag()->add($conf);
     }
 }
