@@ -37,6 +37,40 @@ function sf_dic_boot() {
 }
 
 /**
+ * Implements hook_menu_alter().
+ */
+function sf_dic_menu_alter(&$items) {
+  foreach (node_type_get_types() as $type) {
+    $path = 'node/add/' . str_replace('_', '-', $type->type);
+    if (isset($items[$path])) {
+      $items[$path]['page callback'] = 'sf_dic_node_add_page';
+    }
+  }
+}
+
+/**
+ * Overwrite of node_add().
+ */
+function sf_dic_node_add_page($type) {
+  $account = \Drupal::currentUser();
+
+  $types = node_type_get_types();
+  $node = \Drupal::service('entity.manager')
+    ->getStorage('node')
+    ->create()
+    ->setOwnerId($account->id())
+  ;
+  $node->type = $type;
+  $node->language = LANGUAGE_NONE;
+
+  drupal_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
+  $output = drupal_get_form($type . '_node_form', $node);
+
+  return $output;
+}
+
+
+/**
  * Implements hook_flush_caches().
  */
 function sf_dic_flush_caches() {
