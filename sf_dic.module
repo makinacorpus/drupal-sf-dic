@@ -62,6 +62,7 @@ function sf_dic_node_add_page($type) {
   ;
   $node->type = $type;
   $node->language = LANGUAGE_NONE;
+  $node->name = $account->getAccountName();
 
   drupal_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
   $output = drupal_get_form($type . '_node_form', $node);
