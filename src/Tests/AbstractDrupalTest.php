@@ -3,7 +3,9 @@
 namespace MakinaCorpus\Drupal\Sf\Container\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -149,17 +151,20 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      * @param string[] $permissionList
      *   Permission string list
      *
-     * @return \stdClass
+     * @return AccountInterface
      */
     protected function createDrupalUser($permissionList = [])
     {
-        $account = new \stdClass();
+        /* @var $storage EntityStorageInterface */
+        $storage = $this->getDrupalContainer()->get('entity.manager')->getStorage('user');
+
+        $account = $storage->create();
         $this->accounts[] = $account;
         $stupidHash = uniqid() . mt_rand();
         $account->name = $stupidHash;
         $account->mail = $stupidHash . '@example.com';
         $account->roles = [];
-        user_save($account);
+        $storage->save($account);
 
         // Fake user access cache for testing
         $data = &drupal_static('user_access');
@@ -171,7 +176,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     /**
      * Get Drupal anonymous user
      *
-     * @return \stdClass
+     * @return AccountInterface
      */
     final protected function getAnonymousUser()
     {

@@ -6,6 +6,7 @@
 
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\User;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -25,6 +26,10 @@ function sf_dic_boot() {
     \Drupal::_init();
   }
   \Drupal::service('request_stack')->push(Request::createFromGlobals());
+
+  // This is needed to allow modules to manipulate a UserInterface instance
+  // for anonymous user.
+  variable_set('drupal_anonymous_user_object', new User());
 }
 
 /**

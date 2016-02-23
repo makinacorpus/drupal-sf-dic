@@ -2,6 +2,7 @@
 
 namespace Drupal\Core\Form;
 
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -37,7 +38,7 @@ abstract class FormBase implements FormInterface
     /**
      * Gets the current user
      *
-     * @return stdClass
+     * @return AccountInterface
      *   User account
      */
     protected function currentUser()
