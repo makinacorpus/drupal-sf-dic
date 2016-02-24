@@ -19,22 +19,16 @@ class EntityManager
      */
     public function getStorage($entityType)
     {
-        $controller = entity_get_controller($entityType);
-
-        if (!$controller) {
-            throw new \InvalidArgumentException(sprintf("%s: entity type does not exist", $entityType));
-        }
-
         switch ($entityType) {
 
             case 'node':
-                return new NodeStorage($controller, $entityType);
+                return new NodeStorage($entityType);
 
             case 'user':
-                return new UserStorage($controller, $entityType);
+                return new UserStorage($entityType);
 
             default:
-                return new DefaultEntityStorageProxy($controller, $entityType);
+                return new DefaultEntityStorageProxy($entityType);
         }
     }
 }

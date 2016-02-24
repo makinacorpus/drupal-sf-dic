@@ -20,11 +20,10 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
     /**
      * Default constructor
      *
-     * @param \DrupalEntityControllerInterface $controller
+     * @param string $entityType
      */
-    public function __construct(\DrupalEntityControllerInterface $controller, $entityType)
+    public function __construct($entityType)
     {
-        $this->controller = $controller;
         $this->entityType = $entityType;
     }
 
@@ -33,8 +32,16 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
      *
      * @return \DrupalEntityControllerInterface
      */
-    protected function getController()
+    final protected function getController()
     {
+        if (!$this->controller) {
+            $this->controller = entity_get_controller($this->entityType);
+
+            if (!$this->controller) {
+                throw new \InvalidArgumentException(sprintf("%s: entity type does not exist", $this->entityType));
+            }
+        }
+
         return $this->controller;
     }
 
