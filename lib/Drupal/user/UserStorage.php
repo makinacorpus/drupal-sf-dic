@@ -23,10 +23,10 @@ class UserStorage extends DefaultEntityStorageProxy
     {
         return user_delete_multiple(
             array_map(
-                $entities,
                 function (UserInterface $entity) {
                     return $entity->id();
-                }
+                },
+                $entities
             )
         );
     }
