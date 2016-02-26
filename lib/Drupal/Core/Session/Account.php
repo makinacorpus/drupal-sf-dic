@@ -7,7 +7,7 @@ namespace Drupal\Core\Session;
  */
 class Account implements AccountInterface
 {
-    public $uid = 0;
+    public $uid = null;
     public $name = "Anonymous";
     public $pass = '';
     public $mail = '';
