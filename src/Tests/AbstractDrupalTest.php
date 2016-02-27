@@ -97,8 +97,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             list($parsedMajor) = explode('.', $matches[1]);
         }
         if (!isset($parsedMajor) || empty($parsedMajor)) {
-            throw(sprintf("%s: could not parse core version", $bootstrapInc));
-            return null;
+            throw new \RuntimeException(sprintf("%s: could not parse core version", $bootstrapInc));
         }
 
         // We are OK to go
@@ -250,7 +249,11 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->db = self::findDrupalDatabaseConnection();
+        try {
+            $this->db = self::findDrupalDatabaseConnection();
+        } catch (\Exception $e) {
+            $this->markTestSkipped("Could not find suitable Drupal instance to bootstrap, please set the DRUPAL_PATH variable within your phpunit.xml file");
+        }
 
         // @todo
         //   - create temporary container

@@ -6,6 +6,7 @@
 
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\Language;
 use Drupal\user\User;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,11 @@ function sf_dic_boot() {
   }
   \Drupal::service('request_stack')->push(Request::createFromGlobals());
 
+  // Forces Drupal to switch to multilingual
+  if (empty($GLOBALS['conf']['language_count']) || $GLOBALS['conf']['language_count'] < 2) {
+    $GLOBALS['conf']['language_count'] = 2;
+  }
+
   // This is needed to allow modules to manipulate a UserInterface instance
   // for anonymous user. Note that we don't need to put anything in the user
   // structure since that drupal_anonymous_user() will do it for us.
@@ -34,6 +40,21 @@ function sf_dic_boot() {
   $accountProxy = \Drupal::service('current_user');
   $accountProxy->setOriginalAccount($GLOBALS['user']);
   $GLOBALS['user'] = $accountProxy;
+}
+
+/**
+ * Implements hook_language_init().
+ */
+function sf_dic_language_init() {
+  // Replaces the global language by an instance of LanguageInterface.
+  $legacy = $GLOBALS['language'];
+  if ($legacy instanceof \stdClass) {
+    $language = new Language();
+    foreach ($legacy as $property => $value) {
+      $language->{$property} = $value;
+    }
+    $GLOBALS['language'] = $language;
+  }
 }
 
 /**

@@ -195,6 +195,9 @@ the future porting time:
     need a user account which is not meant to be manipulated as an entity, for
     example for various access checks
 
+ *  global ```$language``` variable is replaced by a
+    ```\Drupal\Core\Language\LanguageInterface``` instance
+
  *  All the Drupal variables are set as a container parameters, which mean that
     you can use all of them as services parameters. Please note that the side
     effect of this is that if you wish to change a variable and use the new
