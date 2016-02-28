@@ -52,6 +52,9 @@ class AliasManager implements AliasManagerInterface
         if (null === $this->whitelist) {
             $this->whitelistRebuild();
         }
+
+        $this->data[self::ALIAS] = [];
+        $this->data[self::SOURCE] = [];
     }
 
     /**
@@ -164,7 +167,7 @@ class AliasManager implements AliasManagerInterface
                 }
             }
         } else {
-            $this->data = [];
+            $this->data = [self::ALIAS => [], self::SOURCE => []];
         }
 
         $this->dataIsUpdated = true;

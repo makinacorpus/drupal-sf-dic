@@ -87,6 +87,9 @@ class DefaultAliasStorage implements AliasStorageInterface
                 // Use LIKE for case-insensitive matching (stupid).
                 $select->condition('u.' . $field, $this->db->escapeLike($value), 'LIKE');
             } else {
+                if ('langcode' === $field) { // Drupal 7 compat
+                    $field = 'language';
+                }
                 $select->condition('u.' . $field, $value);
             }
         }
@@ -110,10 +113,13 @@ class DefaultAliasStorage implements AliasStorageInterface
 
         foreach ($conditions as $field => $value) {
             if ($field == 'source' || $field == 'alias') {
-              // Use LIKE for case-insensitive matching (still stupid).
-              $query->condition($field, $this->db->escapeLike($value), 'LIKE');
+                // Use LIKE for case-insensitive matching (still stupid).
+                $query->condition($field, $this->db->escapeLike($value), 'LIKE');
             } else {
-              $query->condition($field, $value);
+                if ('langcode' === $field) { // Drupal 7 compat
+                    $field = 'language';
+                }
+                $query->condition($field, $value);
             }
         }
 
@@ -202,7 +208,7 @@ class DefaultAliasStorage implements AliasStorageInterface
             ->db
             ->select('url_alias')
             ->condition('alias', $this->db->escapeLike($alias), 'LIKE')
-            ->condition('langcode', $langcode)
+            ->condition('language', $langcode)
         ;
 
         if (!empty($source)) {

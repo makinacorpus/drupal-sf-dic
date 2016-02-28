@@ -2,6 +2,8 @@
 
 namespace Drupal\node;
 
+use Drupal\Core\Language\Language;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\UserInterface;
 
@@ -13,7 +15,7 @@ class Node implements NodeInterface
     public $nid;
     public $vid;
     public $type;
-    public $language = LANGUAGE_NONE;
+    public $language = LanguageInterface::LANGCODE_NOT_SPECIFIED;
     public $title = '';
     public $uid = 0;
     public $status = 0;
@@ -45,8 +47,11 @@ class Node implements NodeInterface
      */
     public function language()
     {
-        // @todo this is a string...
-        return $this->language;
+        // @todo ugly as hell, but does the job...
+        $language = new Language();
+        $language->language = $this->language ? $this->language : LanguageInterface::LANGCODE_NOT_SPECIFIED;
+
+        return $language;
     }
 
     /**

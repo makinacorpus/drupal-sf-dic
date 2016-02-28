@@ -3,6 +3,7 @@
 namespace MakinaCorpus\Drupal\Sf\Container\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\EntityManager;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -46,6 +47,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         }
         if (!isset($_SERVER['REMOTE_ADDR'])) {
             $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        }
+        if (!isset($_SERVER['REQUEST_METHOD'])) {
+            $_SERVER['REQUEST_METHOD'] = 'GET';
         }
 
         //drupal_settings_initialize();
@@ -237,11 +241,27 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function getDrupalContainer()
     {
+        // Avoid Drupal attempt to return a cached page while we are actually
+        // unit testing it
+        drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+        $GLOBALS['conf']['cache'] = 0;
+        drupal_page_is_cacheable(false);
+
         drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
         \Drupal::_init();
 
         return \Drupal::getContainer();
+    }
+
+    /**
+     * Get the entity manager
+     *
+     * @return EntityManager
+     */
+    protected function getEntityManager()
+    {
+        return $this->getDrupalContainer()->get('entity.manager');
     }
 
     /**
