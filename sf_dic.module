@@ -28,6 +28,9 @@ function sf_dic_boot() {
   }
   \Drupal::service('request_stack')->push(Request::createFromGlobals());
 
+  // Change path.inc to proxify toward Drupal 8 compatible API.
+  $GLOBALS['conf']['path_inc'] = substr(__DIR__, strlen(DRUPAL_ROOT)) . '/sf_dic.path.inc';
+
   // Forces Drupal to switch to multilingual
   if (empty($GLOBALS['conf']['language_count']) || $GLOBALS['conf']['language_count'] < 2) {
     $GLOBALS['conf']['language_count'] = 2;

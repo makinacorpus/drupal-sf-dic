@@ -157,6 +157,9 @@ the future porting time:
     only defines the ```getStorage($entity_type)``` method that will return
     ```\DrupalEntityControllerInterface``` instance
 
+ *  You can fetch ```\Drupal\Core\Entity\EntityStorageInterface``` instances
+    via the entity manager service, which are compatible with Drupal 8 interface
+
  *  **module_handler**: ```\Drupal\Core\Extension\ModuleHandler``` passthru uses
     Drupal 7 module.inc functions
 
@@ -184,16 +187,34 @@ the future porting time:
     ```Drupal\Core\Session\AccountInterface``` which proxifies the current
     user, note that it also replaces the ```$GLOBALS['user']``` object
 
- *  You can fetch ```\Drupal\Core\Entity\EntityStorageInterface``` instances
-    via the entity manager service, which are compatible with Drupal 8 interface
+ *  **path.alias_manager**: ```Drupal\Core\Path\AliasManagerInterface``` that
+    does pretty much the same thing as Drupal 7 does but keeping compatibility
+
+ *  **path.alias_storage**: ```Drupal\Core\Path\AliasStorageInterface``` that
+    does pretty much the same thing as Drupal 7 does but keeping compatibility
+
+ *  **path.current**: ```Drupal\Core\Path\CurrentPathStack``` that you should
+    always use as your object dependencies whenever you need the current path,
+    instead of using ```current_path()``` or ```$_GET['q']```
+
+ *  You should use ```\Drupal\Core\Session\AccountInterface``` whenever you
+    need a user account which is not meant to be manipulated as an entity, for
+    example for various access checks
+
+## A few weird things this modules does you should be aware of
 
  *  Both ```\Drupal\node\NodeInterface``` and ```\Drupal\user\UserInterface```
     are implemented and automatically in use via the Drupal 7 entity controllers
     but you may also load them using entity storage services
 
- *  You should use ```\Drupal\Core\Session\AccountInterface``` whenever you
-    need a user account which is not meant to be manipulated as an entity, for
-    example for various access checks
+ *  ```path_inc``` variable is enforced and you cannot change it using your
+    ```settings.php``` file, instead your module should override the
+    **path.alias_storage** or **path.alias_manager** services
+
+ *  The path alias whitelist performance hack for both Drupal 7 and 8 has been
+    hardened and excludes per default every path that is an admin path, if you
+    don't like it, you probably then should override the **path.alias_manager**
+    service
 
  *  global ```$language``` variable is replaced by a
     ```\Drupal\Core\Language\LanguageInterface``` instance

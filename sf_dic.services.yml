@@ -71,6 +71,18 @@ services:
     public: false
     class: Drupal\Core\Entity\EntityManager
 
+  # Also register the bare minimum anyone would need to work with path
+  # aliases the Drupal 8 way
+  path.alias_manager:
+    class: Drupal\Core\Path\AliasManager
+    arguments: ['@path.alias_storage', '@cache.data']
+  path.alias_storage:
+    class: Drupal\Core\Path\DefaultAliasStorage
+    arguments: ['@database', '@module_handler']
+  path.current:
+    class: Drupal\Core\Path\CurrentPathStack
+    arguments: ['@request_stack']
+
   # We are not going to use Drupal 8 event dispatcher, but hopefully the
   # symfony vanilla one is API compatible
   event_dispatcher:

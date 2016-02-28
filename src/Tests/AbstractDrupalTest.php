@@ -100,8 +100,10 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             throw new \RuntimeException(sprintf("%s: could not parse core version", $bootstrapInc));
         }
 
-        // We are OK to go
-        define('DRUPAL_ROOT', $directory);
+        // realpath() is necessary in order to avoid symlinks messing up with
+        // Drupal path when testing in a console which hadn't hardened the env
+        // using a chroot() unlink PHP-FPM
+        define('DRUPAL_ROOT', realpath($directory));
         require_once $bootstrapInc;
 
         self::bootstrapConfiguration();
