@@ -9,6 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Please be aware that when working with this base class, everything you do
@@ -244,7 +245,10 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
 
         drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
+        // Forces the container init via the module in order to reset a few
+        // environnemental stuff, such as the current request etc...
         \Drupal::_init();
+        \Drupal::service('request_stack')->push(Request::createFromGlobals());
 
         return \Drupal::getContainer();
     }

@@ -10,6 +10,7 @@ use Drupal\Core\Language\Language;
 use Drupal\user\User;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -101,6 +102,69 @@ function sf_dic_node_add_page($type) {
 function sf_dic_flush_caches() {
   \Drupal::_destroy();
   return [];
+}
+
+/**
+ * Menu callback for doing forms.
+ */
+function sf_dic_page($controller, ...$args) {
+
+  $method = null;
+
+  // CLASS::STATIC_METHOD is not supported here.
+  if (false !== strpos($controller, '::')) {
+    list($controller, $method) = explode('::', $controller, 2);
+  }
+
+  if (class_exists($controller)) {
+    $controller = new $controller();
+  } else if (\Drupal::hasService($controller)) {
+    $controller = \Drupal::service($controller);
+  } else {
+    throw new InvalidArgumentException(sprintf("%s: is not callable or class does not exist", $controller));
+  }
+
+  if (null === $method) {
+    $method = 'render';
+  }
+
+  if (!method_exists($controller, $method)) {
+    $method = $method . 'Action';
+    if (!method_exists($controller, $method)) {
+      throw new InvalidArgumentException(sprintf("%s::%s(), %s::%sAction(), %s::render(): method does not exists", $controller, $method, $controller, $method, $controller));
+    }
+  }
+
+  // Little bit of magic.
+  $r = new ReflectionClass(get_class($controller));
+  $rm = $r->getMethod($method);
+  $request = \Drupal::request();
+  foreach (array_values($rm->getParameters()) as $index => $rp) {
+    /* @var $rp \ReflectionParameter */
+    if ($rc = $rp->getClass()) {
+      if ('Symfony\Component\HttpFoundation\Request' === $rc->getName()) {
+        array_splice($args, $index, 0, [$request]);
+      }
+    }
+  }
+
+  // We cannot use the ContainerAwareInterface since in SF3 the recommended way
+  // is to use the ContainerAwareTrait which won't give any meta information on
+  // the object about weither or not we should inject the container.
+  if (method_exists($controller, 'setContainer')) {
+    $controller->setContainer(\Drupal::getContainer());
+  }
+
+  $ret = call_user_func([$controller, $method], ...$args);
+
+  // @todo Partial support only of symfony http response, headers and others
+  //   are ignored, we should probably have a custom delivery callback in order
+  //   to fully support this.
+  if ($ret instanceof Response) {
+    $ret = (string)$ret->getContent();
+  }
+
+  return $ret;
 }
 
 /**
