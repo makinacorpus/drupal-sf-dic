@@ -127,6 +127,8 @@ class DefaultAliasStorage implements AliasStorageInterface
         // @todo Switch to using an event for this instead of a hook.
         $this->moduleHandler->invokeAll('path_delete', [$path]);
 
+        \Drupal::service('path.alias_manager')->cacheClear();
+
         return $deleted;
     }
 
