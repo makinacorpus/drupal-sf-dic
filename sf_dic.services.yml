@@ -135,6 +135,7 @@ services:
   # in order to be able to unit test it
   test_empty_service:
     class: MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\EmptyService
+    arguments: ["%some_variable%"]
     calls:
       - [setContainer, ["@service_container"]]
       - [setDatabaseConnection, ["@database"]]

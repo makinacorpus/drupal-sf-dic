@@ -14,8 +14,13 @@ class DrupalParameterBag extends ParameterBag
         if (array_key_exists($name, $GLOBALS['conf'])) {
             return $GLOBALS['conf'][$name];
         }
+        if (parent::has($name)) {
+            return parent::get($name);
+        }
 
-        return parent::get($name);
+        trigger_error(sprintf("%s: container parameter or drupal variable is undefined", $name), E_USER_DEPRECATED);
+
+        return null;
     }
 
     /**
