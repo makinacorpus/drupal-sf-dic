@@ -65,8 +65,11 @@ final class FormBuilder implements FormBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getForm($formClass, ...$args)
+    public function getForm($formClass)
     {
+        $args = func_get_args();
+        array_shift($args);
+
         if (!class_exists($formClass)) {
             $this->logger->log(LogLevel::CRITICAL, "Form class '@class' does not exists", ['@class' => $formClass]);
             return [];

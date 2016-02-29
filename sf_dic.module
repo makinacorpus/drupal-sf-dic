@@ -107,7 +107,9 @@ function sf_dic_flush_caches() {
 /**
  * Menu callback for doing forms.
  */
-function sf_dic_page($controller, ...$args) {
+function sf_dic_page($controller) {
+  $args = func_get_args();
+  array_shift($args);
 
   $method = null;
 
@@ -155,7 +157,7 @@ function sf_dic_page($controller, ...$args) {
     $controller->setContainer(\Drupal::getContainer());
   }
 
-  $ret = call_user_func([$controller, $method], ...$args);
+  $ret = call_user_func_array([$controller, $method], $args);
 
   // @todo Partial support only of symfony http response, headers and others
   //   are ignored, we should probably have a custom delivery callback in order
@@ -170,8 +172,8 @@ function sf_dic_page($controller, ...$args) {
 /**
  * Menu callback for doing forms.
  */
-function sf_dic_page_form($formClass, ...$args) {
-  return \Drupal::formBuilder()->getForm($formClass, ...$args);
+function sf_dic_page_form($formClass) {
+  return call_user_func_array([\Drupal::formBuilder(), 'getForm'], func_get_args());
 }
 
 /**
@@ -276,7 +278,7 @@ function sf_dic_forms_proxy_process($form, &$form_state, &$complete_form) {
 /**
  * Build form from a FormInterface object
  */
-function sf_dic_forms_proxy($form, &$form_state, ...$args) {
+function sf_dic_forms_proxy($form, &$form_state) {
 
   $objects = \Drupal::formBuilder()->getFormInstance($form_state['build_info']['form_id']);
 
@@ -288,7 +290,13 @@ function sf_dic_forms_proxy($form, &$form_state, ...$args) {
   /** @var $form_state_obj FormStateInterface */
   list($form_obj, $form_state_obj) = $objects;
 
-  $form = $form_obj->buildForm($form, $form_state_obj, ...$args);
+  $args = func_get_args();
+  array_shift($args);
+  array_shift($args);
+  array_unshift($args, $form_state_obj);
+  array_unshift($args, $form);
+
+  $form = call_user_func_array([$form_obj, 'buildForm'], $args);
 
   // We attach process so that it will happen after the form has been set
   // or retrieved from the cache, avoiding Closure serialization attempt.

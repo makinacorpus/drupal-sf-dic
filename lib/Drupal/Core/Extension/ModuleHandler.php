@@ -76,7 +76,9 @@ class ModuleHandler implements ModuleHandlerInterface
      */
     public function invoke($module, $hook, array $args = [])
     {
-        return module_invoke($module, $hook, ...$args);
+        array_unshift($args, $hook);
+        array_unshift($args, $module);
+        return call_user_func_array('module_invoke', $args);
     }
 
     /**
@@ -84,7 +86,8 @@ class ModuleHandler implements ModuleHandlerInterface
      */
     public function invokeAll($hook, array $args = [])
     {
-        return module_invoke_all($hook, ...$args);
+        array_unshift($args, $hook);
+        return call_user_func_array('module_invoke_all', $args);
     }
 
     /**

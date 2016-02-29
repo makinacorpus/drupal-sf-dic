@@ -16,5 +16,5 @@ interface FormBuilderInterface
      * @return mixed[]
      *   drupal_render() friendly structure
      */
-    public function getForm($formClass, ...$args);
+    public function getForm($formClass);
 }
