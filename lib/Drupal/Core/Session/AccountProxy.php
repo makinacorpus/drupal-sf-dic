@@ -45,7 +45,8 @@ class AccountProxy implements AccountInterface
      */
     public function __set($name, $value)
     {
-        throw new \LogicException("You should never attempt to update the global \$user");
+        // throw new \LogicException("You should never attempt to update the global \$user");
+        $this->originalAccount->{$name} = $value;
     }
 
     /**
