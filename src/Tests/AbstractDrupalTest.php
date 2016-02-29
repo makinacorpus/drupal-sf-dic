@@ -70,12 +70,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         $variableName = 'DRUPAL_PATH';
 
         // Try to find out the right site root.
-        $directory = null;
-        if (isset($GLOBALS[$variableName])) {
-            $directory = $GLOBALS[$variableName];
-        } else {
-            throw new \RuntimeException(sprintf("You must configure the %s environment or phpunit variable", $variableName));
-        }
+        $directory = getenv($variableName);
 
         if (!is_dir($directory)) {
             throw new \RuntimeException(sprintf("%s: directory does not exists", $directory));

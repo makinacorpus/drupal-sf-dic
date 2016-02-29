@@ -26,6 +26,6 @@
     </filter>
 
     <php>
-        <var name="DRUPAL_PATH" value="/var/www/monsite/public" />
+        <env name="DRUPAL_PATH" value="/var/www/monsite/public" />
     </php>
 </phpunit>
