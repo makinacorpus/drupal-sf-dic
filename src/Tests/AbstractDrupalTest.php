@@ -3,6 +3,7 @@
 namespace MakinaCorpus\Drupal\Sf\Container\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\DrupalKernel;
 use Drupal\Core\DrupalKernelInterface;
 use Drupal\Core\Entity\EntityManager;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -11,7 +12,6 @@ use Drupal\Core\Session\AccountInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\Core\DrupalKernel;
 
 /**
  * Please be aware that when working with this base class, everything you do
@@ -295,7 +295,6 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         }
 
         // @todo
-        //   - create temporary container
         //   - create connection on temporary database
         //   - pseudo a minimal site
     }

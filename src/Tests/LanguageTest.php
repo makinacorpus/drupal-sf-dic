@@ -9,6 +9,8 @@ class LanguageTest extends AbstractDrupalTest
 {
     protected function setUp()
     {
+        parent::setUp();
+
         $GLOBALS['conf']['language_default'] = (object)[
             'language'    => 'en',
             'name'        => 'English',
@@ -28,9 +30,9 @@ class LanguageTest extends AbstractDrupalTest
     {
         // Ensures that copy/pasted then modified code points toward Drupal
         // 7 constants and not Drupal 8 values
-      $this->assertSame(0, LanguageInterface::DIRECTION_LTR);
-      $this->assertSame(1, LanguageInterface::DIRECTION_RTL);
-      $this->assertSame(LANGUAGE_NONE, LanguageInterface::LANGCODE_NOT_SPECIFIED);
+        $this->assertSame(0, LanguageInterface::DIRECTION_LTR);
+        $this->assertSame(1, LanguageInterface::DIRECTION_RTL);
+        $this->assertSame(LANGUAGE_NONE, LanguageInterface::LANGCODE_NOT_SPECIFIED);
     }
 
     public function testOtherIsNotDefault()

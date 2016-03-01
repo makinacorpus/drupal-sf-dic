@@ -189,7 +189,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface
      */
     protected function loadContainer()
     {
-        $filename = true;
+        $filename = null;
 
         if (!$this->isRunningTests) {
             $filename = $this->getContainerPhpFilename();

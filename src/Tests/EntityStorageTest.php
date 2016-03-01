@@ -6,6 +6,17 @@ use Drupal\Core\Entity\EntityManager;
 
 class EntityStorageTest extends AbstractDrupalTest
 {
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->getDrupalContainer(); // Force full bootstrap
+
+        if (module_exists('pathauto')) {
+            $this->markTestSkipped("Some modules are stupid, we cannot test under those conditions");
+        }
+    }
+
     public function testEntityManager()
     {
         $container = $this->getDrupalContainer();
