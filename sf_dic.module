@@ -101,7 +101,7 @@ function sf_dic_node_add_page($type) {
  * Implements hook_flush_caches().
  */
 function sf_dic_flush_caches() {
-  \Drupal::_getKernel()->invalidateContainer();
+  \Drupal::unsetContainer();
   return [];
 }
 

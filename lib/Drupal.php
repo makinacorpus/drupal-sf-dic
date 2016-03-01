@@ -57,6 +57,16 @@ class Drupal
     }
 
     /**
+     * Unset and invalidate the container
+     */
+    static public function unsetContainer()
+    {
+        if (self::$kernel) {
+            self::$kernel->invalidateContainer();
+        }
+    }
+
+    /**
      * Retrieves a service from the container
      *
      * Use this method if the desired service is not one of those with a dedicated
