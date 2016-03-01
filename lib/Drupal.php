@@ -1,10 +1,11 @@
 <?php
 
+use Drupal\Core\DrupalKernel;
+use Drupal\Core\DrupalKernelInterface;
 use Drupal\Core\Session\AccountInterface;
 
-use Drupal\Core\DrupalKernelInterface;
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Drupal 8 compatibility
@@ -33,6 +34,10 @@ class Drupal
      */
     static public function _getKernel()
     {
+        if (!self::$kernel) {
+            self::$kernel = new DrupalKernel();
+            self::$kernel->preHandle(Request::createFromGlobals());
+        }
         return self::$kernel;
     }
 
@@ -43,7 +48,7 @@ class Drupal
      */
     static public function getContainer()
     {
-        return self::$kernel->getContainer();
+        return self::_getKernel()->getContainer();
     }
 
     /**
@@ -53,7 +58,7 @@ class Drupal
      */
     static public function hasContainer()
     {
-        return null !== self::$kernel;
+        return true;
     }
 
     /**
@@ -61,9 +66,7 @@ class Drupal
      */
     static public function unsetContainer()
     {
-        if (self::$kernel) {
-            self::$kernel->invalidateContainer();
-        }
+        self::_getKernel()->invalidateContainer();
     }
 
     /**

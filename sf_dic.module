@@ -4,7 +4,6 @@
  * Various proxy functions to make it work.
  */
 
-use Drupal\Core\DrupalKernel;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
@@ -25,10 +24,7 @@ function sf_dic_boot() {
   // hook_boot() implementation will keep living in here. This means that
   // there is absolutly no way to allow cache backends services to be in
   // the service container, sad, but true story.
-  $kernel = new DrupalKernel();
-  $kernel->preHandle(Request::createFromGlobals());
-
-  \Drupal::_setKernel($kernel);
+  \Drupal::_getKernel();
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   $GLOBALS['conf']['path_inc'] = substr(__DIR__, strlen(realpath(DRUPAL_ROOT))) . '/sf_dic.path.inc';
