@@ -1,23 +1,23 @@
 <?php
-use Drupal\Core\Session\AccountInterface;
-
 /**
  * @file
  * React when modules are being installed.
  */
 
+use Drupal\Core\Session\AccountInterface;
+
 /**
  * Implements hook_modules_enabled().
  */
 function sf_dic_modules_enabled($modules) {
-  \Drupal::_destroy();
+  \Drupal::_getKernel()->invalidateContainer();
 }
 
 /**
  * Implements hook_modules_disabled().
  */
 function sf_dic_modules_disabled($modules){
-  \Drupal::_destroy();
+  \Drupal::_getKernel()->invalidateContainer();
 }
 
 /**

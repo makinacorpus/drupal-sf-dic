@@ -19,7 +19,7 @@ class Drupal
     /**
      * Set kernel
      *
-     * @param DrupalKernelInterface $kernel
+     * @param \Drupal\Core\DrupalKernelInterface $kernel
      */
     static public function _setKernel(DrupalKernelInterface $kernel)
     {
@@ -29,7 +29,7 @@ class Drupal
     /**
      * Get kernel
      *
-     * @return DrupalKernelInterface
+     * @return \Drupal\Core\DrupalKernelInterface
      */
     static public function _getKernel()
     {
