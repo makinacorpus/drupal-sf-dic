@@ -68,7 +68,6 @@ services:
   # @todo
   #   expose all controllers with their own service?
   entity.manager:
-    public: false
     class: Drupal\Core\Entity\EntityManager
 
   # Also register the bare minimum anyone would need to work with path
