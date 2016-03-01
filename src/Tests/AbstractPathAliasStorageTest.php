@@ -1,6 +1,6 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests;
+namespace MakinaCorpus\Drupal\Sf\Tests;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;

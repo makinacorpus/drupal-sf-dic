@@ -133,7 +133,7 @@ services:
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it
   test_empty_service:
-    class: MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\EmptyService
+    class: MakinaCorpus\Drupal\Sf\Tests\Mockup\EmptyService
     arguments: ["%some_variable%"]
     calls:
       - [setContainer, ["@service_container"]]

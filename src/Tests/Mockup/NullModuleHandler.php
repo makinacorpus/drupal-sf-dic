@@ -1,6 +1,6 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests\Mockup;
+namespace MakinaCorpus\Drupal\Sf\Tests\Mockup;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
 

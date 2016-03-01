@@ -1,6 +1,6 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests;
+namespace MakinaCorpus\Drupal\Sf\Tests;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
@@ -8,7 +8,7 @@ use Drupal\Core\Path\AliasManager;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Path\AliasStorageInterface;
 
-use MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\ArrayAliasStorage;
+use MakinaCorpus\Drupal\Sf\Tests\Mockup\ArrayAliasStorage;
 
 class PathAliasManagerTest extends \PHPUnit_Framework_TestCase
 {

@@ -290,7 +290,7 @@ function sf_dic_test_menu() {
 
   $items['test/form/implements'] = [
     'page callback'     => 'sf_dic_page_form',
-    'page arguments'    => ['MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\FormImplements', "42"],
+    'page arguments'    => ['MakinaCorpus\Drupal\Sf\Tests\Mockup\FormImplements', "42"],
     'access callback'   => true,
     'type'              => MENU_CALLBACK,
   ];

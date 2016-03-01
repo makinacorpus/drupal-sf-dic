@@ -1,10 +1,10 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Container\Tests;
+namespace MakinaCorpus\Drupal\Sf\Tests;
 
 class ContollerTest extends AbstractDrupalTest
 {
-    const CONTROLLER_CLASS = '\MakinaCorpus\Drupal\Sf\Container\Tests\Mockup\Controller';
+    const CONTROLLER_CLASS = '\MakinaCorpus\Drupal\Sf\Tests\Mockup\Controller';
 
     protected function setUp()
     {
