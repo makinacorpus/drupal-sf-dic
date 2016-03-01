@@ -3,6 +3,7 @@
 namespace MakinaCorpus\Drupal\Sf\Container\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\DrupalKernelInterface;
 use Drupal\Core\Entity\EntityManager;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -10,6 +11,7 @@ use Drupal\Core\Session\AccountInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\DrupalKernel;
 
 /**
  * Please be aware that when working with this base class, everything you do
@@ -64,7 +66,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     static private function findDrupalDatabaseConnection()
     {
-        if (self::$bootstrapped) {
+        if (self::$databaseConnection) {
             return self::$databaseConnection;
         }
 
@@ -107,9 +109,6 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         require_once $bootstrapInc;
 
         self::bootstrapConfiguration();
-        self::$bootstrapped = true;
-
-        \Drupal::_toggleTestMode(true);
 
         drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
 
@@ -145,6 +144,11 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      * @var \stdClass[]
      */
     private $accounts = [];
+
+    /**
+     * @var DrupalKernelInterface
+     */
+    private $kernel;
 
     /**
      * Create a Drupal user
@@ -225,9 +229,36 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      *
      * @return \DatabaseConnection
      */
-    protected function getDatabaseConnection()
+    final protected function getDatabaseConnection()
     {
         return $this->db;
+    }
+
+    /**
+     * Get kernel
+     *
+     * @return DrupalKernelInterface
+     */
+    private function getKernel()
+    {
+        if (!$this->kernel) {
+
+            if (!self::$bootstrapped) {
+                // Avoid Drupal attempt to return a cached page while we are
+                // actually unit testing it
+                drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+                $GLOBALS['conf']['cache'] = 0;
+                drupal_page_is_cacheable(false);
+                drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+                self::$bootstrapped = true;
+            }
+
+            $this->kernel = new DrupalKernel(true);
+            $this->kernel->preHandle(Request::createFromGlobals());
+            \Drupal::_setKernel($this->kernel);
+        }
+
+        return $this->kernel;
     }
 
     /**
@@ -235,22 +266,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      *
      * @return ContainerInterface
      */
-    protected function getDrupalContainer()
+    final protected function getDrupalContainer()
     {
-        // Avoid Drupal attempt to return a cached page while we are actually
-        // unit testing it
-        drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
-        $GLOBALS['conf']['cache'] = 0;
-        drupal_page_is_cacheable(false);
-
-        drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-
-        // Forces the container init via the module in order to reset a few
-        // environnemental stuff, such as the current request etc...
-        \Drupal::_init();
-        \Drupal::service('request_stack')->push(Request::createFromGlobals());
-
-        return \Drupal::getContainer();
+        return $this->getKernel()->getContainer();
     }
 
     /**
@@ -291,9 +309,12 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             user_delete($account->uid);
         }
 
-        \Drupal::unsetContainer();
-
-        unset($this->nullCacheBackend, $this->nullLegacyCache, $this->nullModuleHandler);
+        unset(
+            $this->kernel,
+            $this->nullCacheBackend,
+            $this->nullLegacyCache,
+            $this->nullModuleHandler
+        );
 
         parent::tearDown();
     }

@@ -1,15 +1,10 @@
 <?php
 
-use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use Drupal\Core\Session\AccountInterface;
 
-use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
+use Drupal\Core\DrupalKernelInterface;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * Drupal 8 compatibility
@@ -17,207 +12,38 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 class Drupal
 {
     /**
-     * @var boolean
+     * @var DrupalKernelInterface
      */
-    static protected $isRunningTests = false;
+    static protected $kernel;
 
     /**
-     * @var \Symfony\Component\DependencyInjection\ContainerInterface
-     */
-    static protected $container;
-
-    /**
-     * Set or unset the test mode
-     */
-    static public function _toggleTestMode($toggle = true)
-    {
-        self::$isRunningTests = $toggle;
-    }
-
-    static protected function getContainerPhpFileTarget()
-    {
-        if (!empty($GLOBALS['drupal_test_info'])) {
-            $test_info = $GLOBALS['drupal_test_info'];
-            $filename = 'container.' . $test_info['test_run_id'] . '.php';
-        } else {
-            $filename = 'container.php';
-        }
-
-        return variable_get('sf_cache_path', conf_path() . '/files') . '/' . $filename;
-    }
-
-    /**
-     * Find all services.yml files
+     * Set kernel
      *
-     * @return string[]
-     *   Path to files
+     * @param DrupalKernelInterface $kernel
      */
-    static protected function _findFiles()
+    static public function _setKernel(DrupalKernelInterface $kernel)
     {
-        $ret = [];
-
-        // Add self
-        require_once DRUPAL_ROOT . '/includes/common.inc';
-        $ret['sf_dic'] = DRUPAL_ROOT . '/' . drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
-
-        // Find all module.services.yml files, note that this will do a
-        // file_exists() per module, but this will skipped whenever the
-        // container file will be cached
-        foreach (array_keys(system_list('module_enabled')) as $module) {
-            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.services.yml';
-            if (file_exists($filename)) {
-                $ret[$module] = $filename;
-            }
-        }
-
-        return $ret;
+        self::$kernel = $kernel;
     }
 
     /**
-     * Find all container.php files and attempt to load the associated class.
+     * Get kernel
      *
-     * @return \Drupal\Core\DependencyInjection\ServiceProviderInterface[]
+     * @return DrupalKernelInterface
      */
-    static protected function _findServiceProviders()
+    static public function _getKernel()
     {
-        $ret = [];
-
-        require_once DRUPAL_ROOT . '/includes/common.inc';
-
-        // Find all module.services.yml files, note that this will do a
-        // file_exists() per module, but this will skipped whenever the
-        // container file will be cached
-        foreach (array_keys(system_list('module_enabled')) as $module) {
-            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.container.php';
-            if (file_exists($filename)) {
-                include_once $filename;
-            }
-            $className = 'Drupal\\Module\\' . $module . '\\ServiceProvider';
-            if (class_exists($className)) {
-                $provider = new $className();
-                if ($provider instanceof ServiceProviderInterface) {
-                    $ret[$module] = $provider;
-                }
-            }
-        }
-
-        return $ret;
-    }
-
-    /**
-     * Destroy the current container definition
-     */
-    static public function _destroy()
-    {
-        if (self::$isRunningTests) {
-            self::unsetContainer();
-            return;
-        }
-
-        $cachefile = self::getContainerPhpFileTarget();
-
-        if (file_exists($cachefile)) {
-            unlink($cachefile);
-        }
-
-        self::unsetContainer();
-        self::_init();
-    }
-
-    /**
-     * Initialize the container
-     */
-    static public function _loadContainer()
-    {
-        if (null !== self::$container) {
-            return;
-        }
-
-        if (!self::$isRunningTests) {
-            $cachefile = self::getContainerPhpFileTarget();
-
-            if (@include_once $cachefile) {
-                self::$container = new ProjectServiceContainer();
-                return;
-            }
-        }
-
-        $container = new ContainerBuilder(
-            // This allows to resolve Drupal variables as parameters
-            new DrupalParameterBag()
-        );
-
-        // Build a new container, we need to find all modules having a
-        // services.yml file defined
-        foreach (static::_findFiles() as $filename) {
-            $loader = new YamlFileLoader($container, new FileLocator(dirname($filename)));
-            $loader->load(basename($filename));
-        }
-
-        foreach (static::_findServiceProviders() as $provider) {
-            $provider->register($container);
-        }
-
-        $container->compile();
-
-        if (!self::$isRunningTests) {
-
-            $oups = file_put_contents(
-                $cachefile,
-                (new PhpDumper($container))
-                    ->dump([
-                        'base_class' => '\MakinaCorpus\Drupal\Sf\Container\Container',
-                    ])
-            );
-
-            if (false === $oups) {
-                throw new RuntimeException("Cannot write the container file !");
-            }
-        }
-
-        self::$container = $container;
-    }
-
-    /**
-     * Initialize the container
-     */
-    static public function _init()
-    {
-        self::_loadContainer();
-    }
-
-    /**
-     * Sets a new global container
-     *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-     */
-    static public function setContainer(ContainerInterface $container)
-    {
-        static::$container = $container;
-    }
-
-    /**
-     * Unsets the global container
-     */
-    static public function unsetContainer()
-    {
-        static::$container = null;
+        return self::$kernel;
     }
 
     /**
      * Returns the currently active global container
      *
      * @return \Symfony\Component\DependencyInjection\ContainerInterface
-     *
-     * @throws \LogicException
      */
     static public function getContainer()
     {
-        if (null === static::$container) {
-            throw new LogicException('\Drupal::$container is not initialized yet. \Drupal::setContainer() must be called with a real container.');
-        }
-
-        return static::$container;
+        return self::$kernel->getContainer();
     }
 
     /**
@@ -227,7 +53,7 @@ class Drupal
      */
     static public function hasContainer()
     {
-        return null !== static::$container;
+        return null !== self::$kernel;
     }
 
     /**
@@ -245,7 +71,7 @@ class Drupal
      */
     static public function service($id)
     {
-        return static::getContainer()->get($id);
+        return self::getContainer()->get($id);
     }
 
     /**
@@ -269,7 +95,7 @@ class Drupal
      */
     static public function root()
     {
-        return DRUPAL_ROOT;
+        return self::$kernel->getAppRoot();
     }
 
     /**
@@ -279,7 +105,7 @@ class Drupal
      */
     static public function database()
     {
-        return Database::getConnection();
+        return \Database::getConnection();
     }
 
     /**
