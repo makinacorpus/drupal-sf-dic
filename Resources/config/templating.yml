@@ -29,6 +29,11 @@ services:
   templating.loader:
     alias: templating.loader.filesystem
 
+  twig.extension.trans:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\TranslationExtension
+    tags: [{name: twig.extension}]
+
   #
   # Following are useful only for cache warmer, not sure we will ever use this
   # --

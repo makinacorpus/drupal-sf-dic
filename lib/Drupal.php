@@ -29,6 +29,30 @@ class Drupal
     }
 
     /**
+     * Register bundles
+     *
+     * Important note: this must run before sf_dic_boot() which means that you
+     * have only two entry points for this:
+     *  - either hardcode the call into your settings.php file (recommended);
+     *  - or do it in a hook_boot() called before the sf_dic module one.
+     *
+     * @param BundleInterface[] $bundles
+     */
+    static public function registerBundles($bundles)
+    {
+        if (self::$kernel) {
+            throw new \LogicException("\Drupal::registerBundles() called too late");
+        }
+
+        $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
+        $debug  = empty($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
+
+        self::$kernel = new Kernel($env, $debug);
+        self::$kernel->addExtraBundles($bundles);
+        self::$kernel->handle(Request::createFromGlobals());
+    }
+
+    /**
      * Get kernel
      *
      * @return KernelInterface
@@ -36,8 +60,7 @@ class Drupal
     static public function _getKernel()
     {
         if (!self::$kernel) {
-            self::$kernel = new Kernel();
-            self::$kernel->handle(Request::createFromGlobals());
+            self::registerBundles([]);
         }
         return self::$kernel;
     }

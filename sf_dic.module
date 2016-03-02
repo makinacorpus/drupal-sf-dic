@@ -102,6 +102,18 @@ function sf_dic_flush_caches() {
 }
 
 /**
+ * Render with twig
+ *
+ * @param string $view
+ * @param string $parameters
+ *
+ * @return string
+ */
+function sf_dic_twig_render($view, $parameters) {
+  return \Drupal::service('twig')->render($view, $parameters);
+}
+
+/**
  * Menu callback for doing forms.
  */
 function sf_dic_page($controller) {
