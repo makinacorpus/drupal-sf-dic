@@ -18,12 +18,19 @@ class PathAliasManagerTest extends \PHPUnit_Framework_TestCase
     private $aliasStorage;
 
     /**
-     * @var AliasManagerInterface
+     * @var AliasManagerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $aliasManager;
 
     protected function setUp()
     {
+        if (!defined('LANGUAGE_NONE')) {
+            define('LANGUAGE_NONE', 'und');
+        }
+        if (!defined('LANGUAGE_NEGOTIATION_DEFAULT')) {
+            define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
+        }
+
         $this->aliasStorage = new ArrayAliasStorage();
         $this->aliasStorage->save('duplicate-langcode', 'alias-fr', 'fr');
         $this->aliasStorage->save('duplicate-langcode', 'alias-en', 'en');
@@ -32,7 +39,15 @@ class PathAliasManagerTest extends \PHPUnit_Framework_TestCase
         $this->aliasStorage->save('duplicate-alias-2', 'duplicate-alias', LanguageInterface::LANGCODE_NOT_SPECIFIED);
         $this->aliasStorage->save('normal-source', 'normal-alias', LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
-        $this->aliasManager = new AliasManager($this->aliasStorage);
+        $this->aliasManager = $this
+            ->getMockBuilder('\Drupal\Core\Path\AliasManager')
+            ->setMethods(['whitelistRebuild', 'whitelistInit'])
+            ->setConstructorArgs([$this->aliasStorage, false])
+            ->getMock();
+        ;
+        // Avoid variable_get() and variable_set() calls
+        $this->aliasManager->method('whitelistInit')->willReturn([]);
+        $this->aliasManager->method('whitelistRebuild')->willReturn([]);
 
         $GLOBALS['language'] = new Language();
     }

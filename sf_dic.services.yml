@@ -1,3 +1,7 @@
+parameters:
+  kernel.environment: prod
+  kernel.debug: false
+
 services:
 
   # Register the container itself as a synthetic service for the modules to be
@@ -5,6 +9,19 @@ services:
   service_container:
     class: Symfony\Component\DependencyInjection\ContainerInterface
     synthetic: true
+
+  kernel:
+    class: Symfony\Component\HttpKernel\KernelInterface
+    factory: [Drupal, _getKernel]
+
+  http_kernel:
+    class: Symfony\Component\HttpKernel\HttpKernelInterface
+    factory: ["@kernel", getHttpKernel]
+
+  # For symfony compatibility
+  file_locator:
+    class: MakinaCorpus\Drupal\Sf\Config\FileLocator
+    arguments: ["@kernel"]
 
   # Request stack, because we can
   request_stack:

@@ -1,7 +1,11 @@
 # Drupal 7 - Symfony - Dependency injection
 
-Brings the Symfony 3 dependency injection container to Drupal 7 along with
-a limited Drupal 8 API compatibility layer.
+This project has been maturing enough to fill those needs:
+
+ *  brings the Symfony 3 dependency injection container to Drupal 7 ;
+ *  brings a Drupal 8 forward-compatibility layer for easier module porting ;
+ *  brings the ability to use Symfony bundles into Drupal 7 as long as they
+    use a limited set of Symfony features.
 
 ## Installation
 
@@ -29,7 +33,9 @@ for your Drupal site.
 
 ## Usage
 
-### Defining this module as a dependency
+### As a forward-compatible Drupal 8 module
+
+#### Defining this module as a dependency
 
 Any module relying on it should express it's dependency via the its info file:
 
@@ -40,7 +46,7 @@ dependencies[] = sf_dic
 You may also provide a valid ```composer.json``` (not required, but it would
 be a good practice to provide one).
 
-### Defining your services
+#### Defining your services
 
 Then you just need to write a ```MYMODULE.services.yml``` file in your module
 folder:
@@ -57,7 +63,7 @@ services:
 
 Please refer to [Symfony's dependency injection container documentation](http://symfony.com/doc/3.0/components/dependency_injection/index.html).
 
-### Fetch your services via the Drupal 8 compatibility layer
+#### Fetch your services via the Drupal 8 compatibility layer
 
 The right way of doing it would be to never use the compatibility layer and
 introduce all your services via your services definition file.
@@ -91,7 +97,7 @@ function mymodule_do_something() {
 }
 ```
 
-### Register compiler pass
+#### Register compiler pass
 
 I am sorry for this one, it'd need a little bit of magic to make it easy and
 working at the same time, so here is the arbitrary choose way: In Drupal 8
@@ -132,7 +138,7 @@ class ServiceProvider implements ServiceProviderInterface
 }
 ```
 
-## Services this module provides
+#### Services this module provides
 
 In order to provide a solid basis for working with Drupal 7 modules in order
 to have them converted to Drupal 8 later, this modules provides a set of Drupal
@@ -201,7 +207,7 @@ the future porting time:
     need a user account which is not meant to be manipulated as an entity, for
     example for various access checks
 
-## A few weird things this modules does you should be aware of
+#### A few weird things this modules does you should be aware of
 
  *  Both ```\Drupal\node\NodeInterface``` and ```\Drupal\user\UserInterface```
     are implemented and automatically in use via the Drupal 7 entity controllers
@@ -224,9 +230,9 @@ the future porting time:
     effect of this is that if you wish to change a variable and use the new
     value as a service parameter, you will need to rebuild the container.
 
-## Working with forms
+#### Working with forms
 
-### Defining your form
+##### Defining your form
 
 In order to be able to use Drupal 8 style forms, you may spawn them with 2
 different methods. First you should define a form implementing
@@ -260,7 +266,7 @@ class MyForm extends FormBase
 
 ```
 
-### Using the form builder
+##### Using the form builder
 
 In any kind of code returning a render array, directly call:
 
@@ -274,7 +280,7 @@ function my_module_some_page() {
 }
 ```
 
-### Using your forms in menu
+##### Using your forms in menu
 
 Because we had to hack a bit the way Drupal spawn this forms (don't worry they
 still are 100% Drupal working forms) if you use the hook menu you must replace
@@ -300,6 +306,56 @@ function sf_dic_test_menu() {
   return $items;
 }
 ```
+
+### As a Symfony bundle user
+
+#### What can I do ?
+
+This module can natively use Symfony bundles into the Drupal application, but
+you must ackowledge the fact that you cannot use the whole Symfony API:
+
+ *  you may use ```*Bundle``` class, the ```Extension``` class, and provide
+    services via the ```Resource/config``` folder;
+
+ *  you may use Twig natively (the ```TwigBundle``` is automatically registered
+    in the kernel if the classes are found) where template naming convention
+    are the Symfony naming conventions;
+
+ *  this module provide an abstract controller class
+    ```MakinaCorpus\Drupal\Sf\Controller``` that you may extend in order to
+    provide controllers, you must then now that your controllers won't behave
+    like symfony components, but there return will only be used to fill in the
+    page ```content``` Drupal region;
+
+ *  you may use anything you want as long as you set it as composer dependencies
+    case in which you might want to see the next chapter. Please note that it
+    will only work to the packages you pulled extend.
+
+#### Bring the necessary dependencies
+
+You must require a few packages for this to work, if you want twig you must:
+```sh
+composer require symfony/templating
+composer require symfony/twig-bundle
+```
+
+You probably also want to add the ```twig/extensions``` package.
+
+Alternatively, if you are not afraid and have beard, you could just:
+
+```sh
+composer require symfony/symfony
+```
+
+Which should work gracefully, note that we are *not* using the Symfony full
+stack so most of its code won't be in use.
+
+#### Register one or more bundles
+
+@todo
+
+> I seriously need to write that part, but there is no event or hook allowing
+> you to register your bundles right now.
 
 ## Working with event dispatcher
 

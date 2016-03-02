@@ -11,7 +11,7 @@ class DrupalParameterBag extends ParameterBag
      */
     public function get($name)
     {
-        if (array_key_exists($name, $GLOBALS['conf'])) {
+        if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
             return $GLOBALS['conf'][$name];
         }
         if (parent::has($name)) {
@@ -28,6 +28,6 @@ class DrupalParameterBag extends ParameterBag
      */
     public function has($name)
     {
-        return array_key_exists($name, $GLOBALS['conf']) || parent::has($name);
+        return (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) || parent::has($name);
     }
 }

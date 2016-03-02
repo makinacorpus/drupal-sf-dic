@@ -35,19 +35,21 @@ class AliasManager implements AliasManagerInterface
     protected $whitelist;
 
     /**
+     * @var boolean
+     */
+    protected $excludeAdminPath = true;
+
+    /**
      * Default constructor
      *
      * @param AliasStorageInterface $storage
      */
-    public function __construct(AliasStorageInterface $storage)
+    public function __construct(AliasStorageInterface $storage, $excludeAdminPath = true)
     {
         $this->storage = $storage;
+        $this->excludeAdminPath = $excludeAdminPath;
 
-        // Keeping Drupal 7 way of storing the whitelist, good enough for us.
-        // Please consider that we are going to exclude all admin paths from
-        // the whitelist, and drop them no matter there are aliases or not,
-        // admin path are not supposed to have aliases.
-        $this->whitelist = variable_get('path_alias_whitelist');
+        $this->whitelist = $this->whitelistInit();
 
         if (null === $this->whitelist) {
             $this->whitelistRebuild();
@@ -55,6 +57,15 @@ class AliasManager implements AliasManagerInterface
 
         $this->data[self::ALIAS] = [];
         $this->data[self::SOURCE] = [];
+    }
+
+    public function whitelistInit()
+    {
+        // Keeping Drupal 7 way of storing the whitelist, good enough for us.
+        // Please consider that we are going to exclude all admin paths from
+        // the whitelist, and drop them no matter there are aliases or not,
+        // admin path are not supposed to have aliases.
+        return variable_get('path_alias_whitelist');
     }
 
     /**
@@ -90,7 +101,7 @@ class AliasManager implements AliasManagerInterface
         if (self::SOURCE !== $type) {
 
             // Exclude all admin paths
-            if (path_is_admin($lookup)) {
+            if ($this->excludeAdminPath && path_is_admin($lookup)) {
                 return $lookup;
             }
 

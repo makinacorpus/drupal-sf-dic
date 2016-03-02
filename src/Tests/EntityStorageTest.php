@@ -12,7 +12,7 @@ class EntityStorageTest extends AbstractDrupalTest
 
         $this->getDrupalContainer(); // Force full bootstrap
 
-        if (module_exists('pathauto')) {
+        if (!getenv('FORCE_TESTS') && module_exists('pathauto')) {
             $this->markTestSkipped("Some modules are stupid, we cannot test under those conditions");
         }
     }

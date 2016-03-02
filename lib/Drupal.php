@@ -1,11 +1,12 @@
 <?php
 
-use Drupal\Core\DrupalKernel;
-use Drupal\Core\DrupalKernelInterface;
 use Drupal\Core\Session\AccountInterface;
+
+use MakinaCorpus\Drupal\Sf\Kernel;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Drupal 8 compatibility
@@ -13,16 +14,16 @@ use Symfony\Component\HttpFoundation\Request;
 class Drupal
 {
     /**
-     * @var DrupalKernelInterface
+     * @var KernelInterface
      */
     static protected $kernel;
 
     /**
      * Set kernel
      *
-     * @param \Drupal\Core\DrupalKernelInterface $kernel
+     * @param KernelInterface $kernel
      */
-    static public function _setKernel(DrupalKernelInterface $kernel)
+    static public function _setKernel(KernelInterface $kernel)
     {
         self::$kernel = $kernel;
     }
@@ -30,13 +31,13 @@ class Drupal
     /**
      * Get kernel
      *
-     * @return \Drupal\Core\DrupalKernelInterface
+     * @return KernelInterface
      */
     static public function _getKernel()
     {
         if (!self::$kernel) {
-            self::$kernel = new DrupalKernel();
-            self::$kernel->preHandle(Request::createFromGlobals());
+            self::$kernel = new Kernel();
+            self::$kernel->handle(Request::createFromGlobals());
         }
         return self::$kernel;
     }
@@ -66,7 +67,10 @@ class Drupal
      */
     static public function unsetContainer()
     {
-        self::_getKernel()->invalidateContainer();
+        $kernel = self::_getKernel();
+        if ($kernel instanceof Kernel) {
+            $kernel->dropCache();
+        }
     }
 
     /**

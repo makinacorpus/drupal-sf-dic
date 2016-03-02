@@ -1,0 +1,6 @@
+parameters:
+  fake_bundle_foo: 42
+
+services:
+  fake_bundle_service:
+    class: stdClass

@@ -1,0 +1,52 @@
+services:
+
+  templating:
+    class: Symfony\Bundle\TwigBundle\TwigEngine
+    arguments: ['@twig', '@templating.name_parser', '@templating.locator']
+
+  templating.loader.chain:
+    public: false
+    class: Symfony\Component\Templating\Loader\ChainLoader
+    arguments: ['@templating.locator']
+
+  templating.locator:
+    class: MakinaCorpus\Drupal\Sf\Templating\Loader\TemplateLocator
+    arguments: ['@file_locator', '%kernel.cache_dir%']
+
+  templating.loader.filesystem:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Templating\Loader\FilesystemLoader
+
+#  templating.engine.delegating:
+#    public: false
+#    class: Symfony\Bundle\FrameworkBundle\Templating\DelegatingEngine
+#    arguments: ['@service_container', []]
+
+  templating.name_parser:
+    class: MakinaCorpus\Drupal\Sf\Templating\TemplateNameParser
+    arguments: ['@kernel']
+
+  templating.loader:
+    alias: templating.loader.filesystem
+
+  #
+  # Following are useful only for cache warmer, not sure we will ever use this
+  # --
+  #
+  # templating.filename_parser:
+  #   class: Symfony\Bundle\FrameworkBundle\Templating\TemplateFilenameParser
+  #   arguments: ['@kernel']
+  # templating.finder:
+  #   public: false
+  #   class: Symfony\Bundle\FrameworkBundle\CacheWarmer\TemplateFinder
+  #   arguments: ['@kernel', '@templating.filename_parser', '%kernel.root_dir%/Resources']
+  # templating.loader.cache:
+  #   public: false
+  #   class: Symfony\Component\Templating\Loader\CacheLoader
+  #   arguments: ['@templating.loader.wrapped', '%templating.loader.cache.path%']
+  # templating.cache_warmer.template_paths:
+  #   public: false
+  #   class: Symfony\Bundle\FrameworkBundle\CacheWarmer\TemplatePathsCacheWarmer
+  #   arguments: ['@templating.finder', '@templating.locator']
+  #   tags: [{name: kernel.cache_warmer, priority: 20}]
+  #

@@ -1,0 +1,1 @@
+I am supposed to be the MockupFooBundle Resource folder.

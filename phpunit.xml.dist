@@ -27,5 +27,6 @@
 
     <php>
         <env name="DRUPAL_PATH" value="/var/www/monsite/public" />
+        <env name="FORCE_TESTS" value="0" />
     </php>
 </phpunit>

@@ -3,15 +3,17 @@
 namespace MakinaCorpus\Drupal\Sf\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\DrupalKernel;
-use Drupal\Core\DrupalKernelInterface;
 use Drupal\Core\Entity\EntityManager;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 
+use MakinaCorpus\Drupal\Sf\Kernel;
+
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Please be aware that when working with this base class, everything you do
@@ -105,7 +107,14 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         // realpath() is necessary in order to avoid symlinks messing up with
         // Drupal path when testing in a console which hadn't hardened the env
         // using a chroot() unlink PHP-FPM
-        define('DRUPAL_ROOT', realpath($directory));
+        if (defined('DRUPAL_ROOT')) {
+            if (DRUPAL_ROOT !== realpath($directory)) {
+                throw new \LogicException(sprintf("'DRUPAL_ROOT' is already defined and does not point toward the same root"));
+            }
+        } else {
+            define('DRUPAL_ROOT', realpath($directory));
+        }
+
         require_once $bootstrapInc;
 
         self::bootstrapConfiguration();
@@ -146,7 +155,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     private $accounts = [];
 
     /**
-     * @var DrupalKernelInterface
+     * @var KernelInterface
      */
     private $kernel;
 
@@ -235,9 +244,16 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @return BundleInterface[]
+     */
+    protected function addExtraBundles()
+    {
+    }
+
+    /**
      * Get kernel
      *
-     * @return DrupalKernelInterface
+     * @return KernelInterface
      */
     private function getKernel()
     {
@@ -253,8 +269,13 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
                 self::$bootstrapped = true;
             }
 
-            $this->kernel = new DrupalKernel(true);
-            $this->kernel->preHandle(Request::createFromGlobals());
+            $this->kernel = new Kernel(uniqid('test_'), true);
+
+            if ($bundles = $this->addExtraBundles()) {
+                $this->kernel->addExtraBundles($bundles);
+            }
+
+            $this->kernel->handle(Request::createFromGlobals());
             \Drupal::_setKernel($this->kernel);
         }
 
