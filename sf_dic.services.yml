@@ -39,6 +39,9 @@ services:
     class: DatabaseConnection
     factory: [Database, getConnection]
 
+  drupal.database:
+    alias: database
+
   # Form builder
   form_builder:
     class: Drupal\Core\Form\FormBuilder
