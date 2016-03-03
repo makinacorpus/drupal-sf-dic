@@ -248,6 +248,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function addExtraBundles()
     {
+        return [];
     }
 
     /**
@@ -275,7 +276,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
                 $this->kernel->addExtraBundles($bundles);
             }
 
+            $this->kernel->boot();
             $this->kernel->handle(Request::createFromGlobals());
+
             \Drupal::_setKernel($this->kernel);
         }
 
