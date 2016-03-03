@@ -34,6 +34,16 @@ services:
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\TranslationExtension
     tags: [{name: twig.extension}]
 
+  twig.extension.drupal_image:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalImageExtension
+    tags: [{name: twig.extension}]
+
+  twig.extension.drupal_render:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
+    tags: [{name: twig.extension}]
+
   #
   # Following are useful only for cache warmer, not sure we will ever use this
   # --
