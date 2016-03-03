@@ -62,10 +62,23 @@ function sf_dic_language_init() {
  * Implements hook_menu_alter().
  */
 function sf_dic_menu_alter(&$items) {
+  // Enfore the node_add() callback to use Node objects.
   foreach (node_type_get_types() as $type) {
     $path = 'node/add/' . str_replace('_', '-', $type->type);
     if (isset($items[$path])) {
       $items[$path]['page callback'] = 'sf_dic_node_add_page';
+    }
+  }
+  // We have controllers of our own, they are supposed to embed their own
+  // access control logic and proceed with other kind of no Drupal magic.
+  foreach ($items as &$item) {
+    if (isset($item['page callback']) && 'sf_dic_page' === $item['page callback']) {
+      if (!array_key_exists('type', $item)) {
+        $item['type'] = MENU_CALLBACK;
+      }
+      if (!array_key_exists('access callback', $item) && !array_key_exists('access arguments', $item)) {
+        $item['access callback'] = true;
+      }
     }
   }
 }
