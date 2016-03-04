@@ -67,7 +67,6 @@ class FileLocator extends BaseFileLocator
         if (file_exists($file = $bundle->getPath() . '/' . $overridePath)) {
             return $file;
         }
-        var_dump($file);
 
         throw new \InvalidArgumentException(sprintf('Unable to find file "%s".', $name));
     }

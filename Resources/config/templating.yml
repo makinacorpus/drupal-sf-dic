@@ -36,7 +36,7 @@ services:
 
   templating.name_parser:
     class: MakinaCorpus\Drupal\Sf\Templating\DrupalTemplateNameParser
-    arguments: ['@templating.name_parser.legacy']
+    arguments: ['@kernel', '@templating.name_parser.legacy']
 
   templating.name_parser.legacy:
     class: MakinaCorpus\Drupal\Sf\Templating\TemplateNameParser
