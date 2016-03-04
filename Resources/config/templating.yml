@@ -4,25 +4,41 @@ services:
     class: Symfony\Bundle\TwigBundle\TwigEngine
     arguments: ['@twig', '@templating.name_parser', '@templating.locator']
 
-  templating.loader.chain:
-    public: false
-    class: Symfony\Component\Templating\Loader\ChainLoader
-    arguments: ['@templating.locator']
+#
+# Is this even useful ?
+# --
+#
+#  templating.loader.chain:
+#    public: false
+#    class: Symfony\Component\Templating\Loader\ChainLoader
+#    arguments: ['@templating.locator']
 
   templating.locator:
     class: MakinaCorpus\Drupal\Sf\Templating\Loader\TemplateLocator
     arguments: ['@file_locator', '%kernel.cache_dir%']
 
+  templating.loader.drupal:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Templating\Loader\DrupalLoader
+
   templating.loader.filesystem:
     public: false
     class: MakinaCorpus\Drupal\Sf\Templating\Loader\FilesystemLoader
 
+#
+# Is this even useful ?
+# --
+#
 #  templating.engine.delegating:
 #    public: false
 #    class: Symfony\Bundle\FrameworkBundle\Templating\DelegatingEngine
 #    arguments: ['@service_container', []]
 
   templating.name_parser:
+    class: MakinaCorpus\Drupal\Sf\Templating\DrupalTemplateNameParser
+    arguments: ['@templating.name_parser.legacy']
+
+  templating.name_parser.legacy:
     class: MakinaCorpus\Drupal\Sf\Templating\TemplateNameParser
     arguments: ['@kernel']
 

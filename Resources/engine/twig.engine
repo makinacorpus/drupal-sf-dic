@@ -1,0 +1,185 @@
+<?php
+/**
+ * This was inspired by Twig For Drupal 7.
+ *
+ * But sorry for this, I do need to rewrite it fully.
+ *
+ * @see http://tfd7.rocks
+ *   For the original code, all credits to its author, it's a really good
+ *   job he did at the time. Thanks for everything!
+ *
+ * @see https://www.drupal.org/node/1545964
+ *   If you need, at any moment in time, to create a theme with a different
+ *   theme engine than it's parent, you will need the latest patches in there.
+ *   Drupal does really suck when it comes down to the theme registry, I think
+ *   the guys who wrote it were really drunk.
+ */
+
+/**
+ * Implements ENGINE_extension().
+ */
+function twig_extension() {
+  return ".html.twig";
+}
+
+/**
+ * Implements ENGINE_init().
+ */
+function twig_init($theme) {
+  @include_once dirname($theme->filename) . '/template.php';
+}
+
+/**
+ * From found template names, convert them to our specific naming convention
+ * and prey for it to work.
+ *
+ * We have to set more pragmatically usable template names from which we may
+ * derivate theme and path at runtime without performance penalty, the same
+ * way Symfony does for bundle templates, by building an identifier which is
+ * path agnostic, we will allow themers to use this syntax to use the 'extends',
+ * 'import' or 'use' Twig directives.
+ *
+ * Naming convention is:
+ *
+ *   "[theme|module]:MODULE_OR_THEME_NAME:/PATH/TO/FILE.html.twig"
+ *
+ * For example, let's say you have "funtheme" theme in the following folder:
+ *
+ *   "sites/all/themes/funtheme"
+ *
+ * And inside you have the following file:
+ *
+ *   "sites/all/themes/funtheme/templates/page.html.twig"
+ *
+ * Then its identifier will be:
+ *
+ *   "theme:funtheme:template/page.html.twig"
+ *
+ * Which means that, for example, you want to extend it into this file:
+ *
+ *   "sites/all/themes/funtheme/templates/page--some--page.html.twig"
+ *
+ * Then in your Twig file, you should use:
+ *
+ *   extends 'theme:funtheme:template/page.html.twig'
+ *
+ * Et voilà !
+ *
+ * --
+ *
+ * Technically speaking, to make this work, we need to store into the theme
+ * registry this template name into the hook info, else the theme() function
+ * will use the template full path and our template name parser will throw
+ * errors.
+ */
+function _twig_map_names(&$templates) {
+
+  $map = &drupal_static(__FUNCTION__, []);
+
+  // Build internal cache for faster lookup.
+  if (!isset($map['theme'])) {
+    foreach (list_themes() as $theme => $data) {
+      if ($data->status) {
+        $map['theme'][$theme] = drupal_get_path('theme', $theme);
+      }
+    }
+  }
+  if (!isset($map['module'])) {
+    foreach (module_implements('theme') as $module) {
+      $map['module'][$module] = drupal_get_path('module', $module);
+    }
+  }
+
+  // Hope this function will be fast enough. It will only happen during
+  // cache rebuild anyway.
+  $lookup = function ($type, $map, $name) {
+    $found = null;
+    $foundLength = 0;
+    foreach ($map as $extension => $path) {
+      $pathLength = strlen($path);
+      if ($pathLength < strlen($name) && $path === substr($name, 0, $pathLength)) {
+        // If the previously found theme as a shorter path that the one
+        // we just found, this means the theme is a subdirectory of the
+        // previous one, case in which we must reference the deeper one.
+        if (!$found || $foundLength < $pathLength) {
+          $found = $extension;
+          $foundLength = $pathLength;
+        }
+      }
+    }
+    if ($found) {
+      return $type . ':' . $found . ':' . substr($name, $foundLength + 1);
+    }
+  };
+
+  foreach ($templates as $hook => &$info) {
+
+    if (empty($info['template'])) {
+      continue; // We also have functions.
+    }
+
+    // Work with the aforementioned patch in order to allow modules to use the
+    // twig engine. When this patch is not set, this is a noop, and the module
+    // discovery will still work because the theme() function will use the
+    // current theme rendering engine, so ours, so it'll work.
+    if (null === $info['engine']) {
+      $info['engine'] = 'twig';
+    }
+
+    // In the theme registry, filename is not complete and we have to rebuild
+    // it in order to find the right module or theme. Note that from this point
+    // .html.twig extension is not there, which is a good thing because Drupal
+    // theme() function will automatically append it at the end of our name.
+    $name = $info['path'] . '/' . $info['template'];
+
+    $found = $lookup('theme', $map['theme'], $name);
+    if (!$found) {
+      // Do not lookup for modules if a theme has been found, for once
+      // we have many more modules that themes, and for twice there is
+      // absolutely no sense in writing a module inside a theme.
+      $found = $lookup('module', $map['module'], $name);
+    }
+
+    if ($found) {
+      $info['template'] = $found;
+    } else {
+      // This should not happen, we did parse templates by ourselves, but
+      // let's fail silently but log this into the watchdog.
+      trigger_error(sprintf("%s (%s): could not find the module or theme reference", $info['template'], $hook), E_USER_WARNING);
+    }
+  }
+}
+
+/**
+ * Implements ENGINE_theme().
+ *
+ * @see https://www.drupal.org/node/1545964
+ *   Any patch from comment #32 to the end is required if you wish to use
+ *   a phptemplate base theme for your custom themes.
+ */
+function twig_theme($existing, $type, $theme, $path) {
+  $templates = drupal_find_theme_functions($existing, array($theme));
+  // Allow modules to provide templates, this will trick Drupal into believing
+  // they belong to the current theme instead, and use the correct engine.
+  $theme_paths = [];
+  foreach ($existing as $theme_hook) {
+    if (!in_array($theme_hook['theme path'], $theme_paths)) {
+      $theme_paths[] = $theme_hook['theme path'];
+      $templates += drupal_find_theme_templates($existing, twig_extension(), $theme_hook['theme path']);
+    }
+  }
+  // End up with rightful templates from the given path.
+  $templates += drupal_find_theme_templates($existing, twig_extension(), $path);
+
+  // Just a little bit, just a little bit, of magic.
+  _twig_map_names($templates);
+
+  return $templates;
+}
+
+/**
+ * Implements ENGINE_render_template().
+ */
+function twig_render_template($template, $variables = []) {
+  return \Drupal::service('twig')->render($template, $variables);
+}

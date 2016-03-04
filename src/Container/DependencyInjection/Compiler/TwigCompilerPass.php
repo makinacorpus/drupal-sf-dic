@@ -4,35 +4,23 @@ namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Definition;
 
 class TwigCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $twigFilesystemLoaderDefinition = $container->getDefinition('twig.loader.filesystem');
+        if (!$container->hasDefinition('twig')) {
+            return;
+        }
 
-        // register bundles as Twig namespaces
-        foreach ($container->getParameter('kernel.bundles') as $bundle => $class) {
+        if (class_exists('\TFD_Environment')) {
+            $twigEnvDefinition = $container->getDefinition('twig');
+            $twigEnvDefinition->setClass('MakinaCorpus\Drupal\Sf\Twig\TFD\Environment');
 
-//             $dir = $container->getParameter('kernel.root_dir').'/Resources/'.$bundle.'/views';
-//             if (is_dir($dir)) {
-//                 $this->addTwigPath($twigFilesystemLoaderDefinition, $dir, $bundle);
-//             }
-
-            $reflection = new \ReflectionClass($class);
-            $dir = dirname($reflection->getFileName()).'/Resources/views';
-            if (is_dir($dir)) {
-                $this->addTwigPath($twigFilesystemLoaderDefinition, $dir, $bundle);
+            if (class_exists('\TFD_Extension')) {
+                $twigEnvDefinition->addMethodCall('addExtension', [new Definition('TFD_Extension')]);
             }
         }
-    }
-
-    private function addTwigPath($twigFilesystemLoaderDefinition, $dir, $bundle)
-    {
-        $name = $bundle;
-        if ('Bundle' === substr($name, -6)) {
-            $name = substr($name, 0, -6);
-        }
-        $twigFilesystemLoaderDefinition->addMethodCall('addPath', array($dir, $name));
     }
 }

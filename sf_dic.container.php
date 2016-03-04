@@ -9,6 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
+
 class ServiceProvider implements ServiceProviderInterface
 {
     /**
@@ -27,6 +29,8 @@ class ServiceProvider implements ServiceProviderInterface
         //   - I guess this should be in an extension file instead...
         if (class_exists('\Symfony\Bundle\TwigBundle\TwigBundle')) {
             $loader->load('templating.yml');
+
+            $container->addCompilerPass(new TwigCompilerPass());
         }
     }
 }
