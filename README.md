@@ -352,10 +352,66 @@ stack so most of its code won't be in use.
 
 #### Register one or more bundles
 
-@todo
+Bundle registration must happen before the ```sf_dic``` module ```hook_boot()```
+implementation, this means that you have only one place where you can do it:
+by implementing your own ```hook_boot()``` implementation and setting the
+weight of your module under the ```sf_dic``` module's weight.
 
-> I seriously need to write that part, but there is no event or hook allowing
-> you to register your bundles right now.
+Once you did that, and I know will know how to do it, you may register your
+bundles this way:
+
+```php
+/**
+ * Implements hook_boot().
+ */
+function MYMODULE_boot() {
+  \Drupal::registerBundles([
+    new MyVendor\SomeBundle\MyVendorSomeBundle(),
+    // [...]
+  ]);
+}
+```
+
+And that's it!
+
+## Use Twig For Drupal 7
+
+You may use [TFD7](http://tfd7.rocks/) for theming, but if you use this module,
+you should not use their provided Drupal engine.
+
+First, add the tfd7 dependency into your composer.json file, add the custom
+repository toward their git, this way:
+
+```json
+{
+    ...
+    "repositories": [
+        {
+            "type" : "vcs",
+            "url" : "git@github.com:tfd7/tfd7.git"
+        }
+    ],
+    "require" : {
+        ....
+        "symfony/dependency-injection" : "~3.0",
+        "symfony/templating" : "~3.0",
+        "symfony/twig-bridge" : "~3.0",
+        "symfony/twig-bundle" : "~3.0",
+        "tfd7/tfd7": "dev-master",
+        "twig/extensions": "~1.3",
+        "twig/twig": "~1.20|~2.0"
+    }
+}
+```
+
+Please note that if you want to use Twig, all the dependencies written above
+are mandatory, and you must use them in the specified versions. Once you
+upgraded your composer installation, copy the
+```Resources/engine/twig.engine``` file (within this module) into either one
+of the ```profiles/MYPROFILE/themes/engines/twig/twig.engine``` or
+```themes/engines/twig/twig.engine``` locations.
+
+Rebuild your cache, and that's it.
 
 ## Working with event dispatcher
 
