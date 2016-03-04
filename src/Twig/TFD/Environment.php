@@ -14,6 +14,10 @@ class Environment extends \Twig_Environment
 
         $this->autoRender = (bool)$options['autorender'];
         if ($this->autoRender) {
+            // Sad but true story, the TFD7 implementation does filter calls
+            // everywhere, while I would prefer to keep the autoescape for
+            // security, I can't because all templates generated using the TFD
+            // extension enabled will be *fully* escape (WTF, seriously)...
             $options['autoescape'] = false;
         }
 
