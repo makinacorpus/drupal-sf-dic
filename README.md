@@ -425,7 +425,7 @@ a more advanced twig usage, and benefit from all Twig advanced features, you
 need to know that all the Drupal provided Twig templates will have the following
 identifier:
 
-  ```[theme|module]:NAME:PATH/TO/FILE.html.twig```
+```[theme|module]:NAME:PATH/TO/FILE.html.twig```
 
 #### Other template usage within your twig templates
 
