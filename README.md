@@ -423,18 +423,21 @@ The only thing you have to know is that any module may provide ```.html.twig```
 files, and the twig engine will automatically take over it. If you want to do
 a more advanced twig usage, and benefit from all Twig advanced features, you
 need to know that all the Drupal provided Twig templates will have the following
-identifier: ```[theme|module]:NAME:PATH/TO/FILE.html.twig```
+identifier:
+
+    [theme|module]:NAME:PATH/TO/FILE.html.twig
 
 #### Other template usage within your twig templates
 
 For example, let's say you have the ```tabouret``` module defining the
-```tabouret/templates/chaises.html.twig```, the identifier would then
-be:
 
-```module:tabouret:templates/chaise.html.twig```
+    tabouret/templates/chaises.html.twig
 
-If you want to write a twig file extending this one, you may add into your
-```.html.twig``` file:
+the identifier would then be:
+
+module:tabouret:templates/chaise.html.twig
+
+If you want to write a twig file extending this one, you may add into your ```.html.twig``` file:
 
 ```twig
 {% extends 'module:tabouret:templates/chaise.html.twig' %}
