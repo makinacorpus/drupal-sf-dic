@@ -28,13 +28,13 @@ class DrupalTemplateReference extends BaseTemplateReference
 
     public function getPath()
     {
-        return realpath(
+        return
             DRUPAL_ROOT
                 . '/' . drupal_get_path($this->parameters['type'], $this->parameters['name'])
                 . '/' . $this->parameters['path']
                 . '.' . $this->parameters['format']
                 . '.' . $this->parameters['engine']
-        );
+        ;
     }
 
     /**
