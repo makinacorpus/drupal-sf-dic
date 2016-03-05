@@ -106,7 +106,7 @@ class AliasManager implements AliasManagerInterface
             }
 
             // Also check for whitelist
-            if (!isset($this->whitelist[strtok($lookup, '/')])) {
+            if (false !== $this->whitelist && !isset($this->whitelist[strtok($lookup, '/')])) {
                 return $lookup;
             }
         }
