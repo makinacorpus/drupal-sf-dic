@@ -80,6 +80,8 @@ class DrupalTemplateNameParser extends BaseTemplateNameParser
             return $this->fallback($name);
         }
 
+        $realname = $matches[0];
+
         try {
             // Problem is that our convention matches the same as symfony,
             // so we do need to ensure module or theme exists, if not then
@@ -99,7 +101,7 @@ class DrupalTemplateNameParser extends BaseTemplateNameParser
 
             $template = new DrupalTemplateReference($matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
 
-            return $this->cache[$name] = $template;
+            return $this->cache[$realname] = $template;
 
         } catch (\Exception $e) {
             return $this->fallback($name);
