@@ -14,6 +14,7 @@ class DrupalImageExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFunction('image', [$this, 'renderImage'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFunction('image_src', [$this, 'imageSrc'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -48,6 +49,30 @@ class DrupalImageExtension extends \Twig_Extension
         }
 
         return theme($hook, ['path' => $uri, 'attributes'  => $attributes] + $options);
+    }
+
+    public function imageSrc($image, $style = null)
+    {
+        if (empty($image)) {
+            return '';
+        }
+
+        $uri = null;
+
+        if (is_scalar($image)) {
+            $uri = (string)$image;
+        } else {
+            if (is_object($image)) {
+                $image = (array)$image;
+            }
+            $uri = $image['uri'];
+        }
+
+        if ($style) {
+            return image_style_url($style, $uri);
+        } else {
+            return file_create_url($uri);
+        }
     }
 
     /**
