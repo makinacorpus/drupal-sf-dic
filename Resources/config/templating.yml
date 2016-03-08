@@ -55,6 +55,11 @@ services:
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalImageExtension
     tags: [{name: twig.extension}]
 
+  twig.extension.drupal_pager:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPagerExtension
+    tags: [{name: twig.extension}]
+
   twig.extension.drupal_render:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
