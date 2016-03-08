@@ -2,7 +2,9 @@
 
 namespace Drupal\Core\Path;
 
-class AliasManager implements AliasManagerInterface
+use Drupal\Core\CacheDecorator\CacheDecoratorInterface;
+
+class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
 {
     /**
      * Looking up for a source
@@ -40,23 +42,37 @@ class AliasManager implements AliasManagerInterface
     protected $excludeAdminPath = true;
 
     /**
+     * @var boolean
+     */
+    protected $doCache = true;
+
+    /**
+     * @var string
+     */
+    protected $cacheKey;
+
+    /**
      * Default constructor
      *
      * @param AliasStorageInterface $storage
      */
-    public function __construct(AliasStorageInterface $storage, $excludeAdminPath = true)
+    public function __construct(AliasStorageInterface $storage, $excludeAdminPath = true, $doCache = true)
     {
         $this->storage = $storage;
         $this->excludeAdminPath = $excludeAdminPath;
+        $this->doCache = $doCache;
 
         $this->whitelist = $this->whitelistInit();
 
         if (null === $this->whitelist) {
             $this->whitelistRebuild();
         }
+        if ($this->doCache) {
+            $this->cacheKey = 'sf:' . current_path();
+            $this->initCache();
+        }
 
-        $this->data[self::ALIAS] = [];
-        $this->data[self::SOURCE] = [];
+        $this->data += [self::ALIAS => [], self::SOURCE => []];
     }
 
     public function whitelistInit()
@@ -182,5 +198,29 @@ class AliasManager implements AliasManagerInterface
         }
 
         $this->dataIsUpdated = true;
+    }
+
+    protected function initCache()
+    {
+        if ($item = cache_get($this->cacheKey, 'cache_path')) { // FIXME
+            $this->data = $item->data;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setCacheKey($key)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function writeCache()
+    {
+        if ($this->dataIsUpdated && $this->doCache) {
+            cache_set($this->cacheKey, $this->data, 'cache_path', time() + (60 * 60 * 24)); // FIXME
+        }
     }
 }
