@@ -11,6 +11,9 @@ use Drupal\user\User;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -179,13 +182,27 @@ function sf_dic_page($controller) {
     $controller->setContainer(\Drupal::getContainer());
   }
 
-  $ret = call_user_func_array([$controller, $method], $args);
+  try {
+    $ret = call_user_func_array([$controller, $method], $args);
 
-  // @todo Partial support only of symfony http response, headers and others
-  //   are ignored, we should probably have a custom delivery callback in order
-  //   to fully support this.
-  if ($ret instanceof Response) {
-    $ret = (string)$ret->getContent();
+    // @todo Partial support only of symfony http response, headers and others
+    //   are ignored, we should probably have a custom delivery callback in order
+    //   to fully support this.
+    if ($ret instanceof Response) {
+      $ret = (string)$ret->getContent();
+    }
+  } catch (AccessDeniedHttpException $e) {
+    return MENU_ACCESS_DENIED;
+  } catch (NotFoundHttpException $e) {
+    return MENU_NOT_FOUND;
+  } catch (HttpException $e) {
+    switch ($e->getStatusCode()) {
+      case 403:
+        return MENU_ACCESS_DENIED;
+      case 404:
+        return MENU_NOT_FOUND;
+    }
+    throw $e;
   }
 
   return $ret;
