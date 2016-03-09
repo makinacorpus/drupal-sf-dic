@@ -80,6 +80,10 @@ class DefaultAliasStorage implements AliasStorageInterface
      */
     public function load($conditions)
     {
+        if (!$conditions) {
+            return;
+        }
+
         $select = $this->db->select('url_alias', 'u');
 
         foreach ($conditions as $field => $value) {
@@ -108,6 +112,10 @@ class DefaultAliasStorage implements AliasStorageInterface
      */
     public function delete($conditions)
     {
+        if (!$conditions) {
+            return;
+        }
+
         $path = $this->load($conditions);
         $query = $this->db->delete('url_alias');
 

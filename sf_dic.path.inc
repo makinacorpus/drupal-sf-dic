@@ -158,6 +158,9 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  * {@inheritdoc}
  */
 function path_load($conditions) {
+  if (!is_array($conditions)) {
+    $conditions = ['pid' => $conditions];
+  }
   return \Drupal::service('path.alias_storage')->load($conditions);
 }
 
