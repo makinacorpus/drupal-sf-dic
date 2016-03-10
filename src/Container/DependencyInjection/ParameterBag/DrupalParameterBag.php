@@ -18,7 +18,8 @@ class DrupalParameterBag extends ParameterBag
             return parent::get($name);
         }
 
-        trigger_error(sprintf("%s: container parameter or drupal variable is undefined", $name), E_USER_DEPRECATED);
+        // This should be logged, somehow
+        // trigger_error(sprintf("%s: container parameter or drupal variable is undefined", $name), E_USER_DEPRECATED);
 
         return null;
     }
