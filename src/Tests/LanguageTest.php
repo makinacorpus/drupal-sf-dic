@@ -52,6 +52,10 @@ class LanguageTest extends AbstractDrupalTest
         $this->getDrupalContainer();
 
         $global = $GLOBALS['language'];
+        if ('en' !== $global->getId()) {
+            // @todo this needs to be forced at some point...
+            $this->markTestSkipped("This test must be run in an english Drupal");
+        }
 
         $this->assertInstanceOf('\Drupal\Core\Language\Language', $global);
         $this->assertInstanceOf('\Drupal\Core\Language\LanguageInterface', $global);
