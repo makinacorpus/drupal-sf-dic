@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\user\User;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -188,6 +189,11 @@ function sf_dic_page($controller) {
     // @todo Partial support only of symfony http response, headers and others
     //   are ignored, we should probably have a custom delivery callback in order
     //   to fully support this.
+    if ($ret instanceof JsonResponse) {
+      $ret->send();
+      drupal_exit();
+      return;
+    }
     if ($ret instanceof Response) {
       $ret = (string)$ret->getContent();
     }
