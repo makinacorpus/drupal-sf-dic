@@ -67,6 +67,16 @@ class AccountProxy implements AccountInterface
     }
 
     /**
+     * Sad but true story, session.inc does a few empty($user->uid) checks
+     * which will fail without this implemented, making user session to be
+     * dropped at the first site hit.
+     */
+    public function __isset($name)
+    {
+        return ($this->account && property_exists($this->account, $name)) || property_exists($this->originalAccount, $name);
+    }
+
+    /**
      * Set original account as stdClass that Drupal 7 will in globals
      */
     public function setOriginalAccount($account)
