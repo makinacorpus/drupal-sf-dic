@@ -31,7 +31,11 @@ function sf_dic_boot() {
   \Drupal::_getKernel();
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
-  $GLOBALS['conf']['path_inc'] = substr(__DIR__, strlen(realpath(DRUPAL_ROOT))) . '/sf_dic.path.inc';
+  // Do not alter it when the function already exists (mostly happend at site
+  // install) - else it will, in some rare case, fail batlantly.
+  if (!function_exists('drupal_path_initialize')) {
+    $GLOBALS['conf']['path_inc'] = substr(__DIR__, strlen(realpath(DRUPAL_ROOT))) . '/sf_dic.path.inc';
+  }
 
   // Forces Drupal to switch to multilingual
   if (empty($GLOBALS['conf']['language_count']) || $GLOBALS['conf']['language_count'] < 2) {
