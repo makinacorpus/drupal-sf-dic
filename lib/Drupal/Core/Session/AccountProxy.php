@@ -45,7 +45,6 @@ class AccountProxy implements AccountInterface
      */
     public function __set($name, $value)
     {
-        // throw new \LogicException("You should never attempt to update the global \$user");
         $this->originalAccount->{$name} = $value;
     }
 
@@ -58,10 +57,12 @@ class AccountProxy implements AccountInterface
             if (property_exists($this->account, $name)) {
                 return $this->account->{$name};
             }
-        } else  {
-            if (property_exists($this->originalAccount, $name)) {
-                return $this->originalAccount->{$name};
-            }
+        }
+        // A few properties don't exist on the {users} table structure but are
+        // set and read by the session handler, such as the 'timestamp' property
+        // set in _druapl_session_read() and read in _drupal_session_write().
+        if (property_exists($this->originalAccount, $name)) {
+            return $this->originalAccount->{$name};
         }
         throw new \LogicException(sprintf("Attempt to access the non existing property '%s' on the global \$user", $name));
     }
