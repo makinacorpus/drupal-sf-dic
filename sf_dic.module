@@ -135,6 +135,29 @@ function sf_dic_twig_render($view, $parameters) {
 }
 
 /**
+ * Create a new instance of plugin, the hard way
+ *
+ * @param string $class
+ *   Class name.
+ * @param mixed[] $configuration
+ *   The plugin configuration.
+ *
+ * @return mixed
+ *   The plugin instance.
+ */
+function sf_dic_plugin_create($class, $configuration = []) {
+  $r = new ReflectionClass($class);
+  if ($r->implementsInterface('Drupal\Core\Plugin\ContainerFactoryPluginInterface')) {
+    $instance = call_user_func([$class, 'create'], \Drupal::getContainer(), $configuration, null, null);
+  } else if ($r->isSubclassOf('Drupal\Core\Plugin\PluginBase')) {
+    $instance = $r->newInstance($configuration, null, null);
+  } else {
+    throw new \InvalidArgumentException(sprintf("%s: is not a plugin", $class));
+  }
+  return $instance;
+}
+
+/**
  * Menu callback for doing forms.
  */
 function sf_dic_page($controller) {
