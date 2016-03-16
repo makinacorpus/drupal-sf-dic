@@ -89,6 +89,14 @@ class Node implements NodeInterface
     /**
      * {@inheritdoc}
      */
+    public function url($rel = 'canonical', $options = [])
+    {
+        return url('node/' . $this->id(), $options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createDuplicate()
     {
         $node = clone $this;

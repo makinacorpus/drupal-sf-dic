@@ -81,6 +81,25 @@ interface EntityInterface extends AccessibleInterface
     public function label();
 
     /**
+     * Gets the public URL for this entity.
+     *
+     * @param string $rel
+     *   The link relationship type, for example: canonical or edit-form.
+     * @param array $options
+     *   See \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
+     *   the available options.
+     *
+     * @return string
+     *   The URL for this entity.
+     *
+     * @deprecated in Drupal 8.0.0, intended to be removed in Drupal 9.0.0
+     *   Please use toUrl() instead.
+     *
+     * @see \Drupal\Core\Entity\EntityInterface::toUrl
+     */
+    public function url($rel = 'canonical', $options = array());
+
+    /**
      * Creates a duplicate of the entity.
      *
      * @return static

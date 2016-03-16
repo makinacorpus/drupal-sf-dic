@@ -73,6 +73,14 @@ class User extends Account implements UserInterface
     /**
      * {@inheritdoc}
      */
+    public function url($rel = 'canonical', $options = [])
+    {
+        return url('user/' . $this->id(), $options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createDuplicate()
     {
         $user = clone $this;
