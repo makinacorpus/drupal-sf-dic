@@ -41,7 +41,15 @@ abstract class Controller implements ContainerAwareInterface
      */
     protected function generateUrl($route, $parameters = array(), $referenceType = 0)
     {
-        return $this->container->get('router')->generate($route, $parameters, $referenceType);
+        if ($parameters) {
+            $tokens = [];
+            foreach ($parameters as $key => $value) {
+                $tokens['%' . $key] = $value;
+            }
+            $route = strtr($route, $tokens);
+        }
+
+        return url($route);
     }
 
     /**
@@ -71,7 +79,7 @@ abstract class Controller implements ContainerAwareInterface
      */
     protected function redirect($url, $status = 302)
     {
-        return new RedirectResponse($url, $status);
+        drupal_goto($url, [], $status);
     }
 
     /**
