@@ -28,6 +28,18 @@ class Drupal
         self::$kernel = $kernel;
     }
 
+    static private function _buildKernel()
+    {
+        if (!self::$kernel) {
+            $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
+            $debug  = empty($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
+
+            self::$kernel = new Kernel($env, $debug);
+        }
+
+        return self::$kernel;
+    }
+
     /**
      * Register bundles
      *
@@ -40,16 +52,8 @@ class Drupal
      */
     static public function registerBundles($bundles)
     {
-        if (self::$kernel) {
-            throw new \LogicException("\Drupal::registerBundles() called too late");
-        }
-
-        $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
-        $debug  = empty($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
-
-        self::$kernel = new Kernel($env, $debug);
-        self::$kernel->addExtraBundles($bundles);
-        self::$kernel->handle(Request::createFromGlobals());
+        $kernel = self::_buildKernel();
+        $kernel->addExtraBundles($bundles);
     }
 
     /**
@@ -59,10 +63,7 @@ class Drupal
      */
     static public function _getKernel()
     {
-        if (!self::$kernel) {
-            self::registerBundles([]);
-        }
-        return self::$kernel;
+        return self::_buildKernel();
     }
 
     /**

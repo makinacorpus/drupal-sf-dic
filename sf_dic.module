@@ -28,7 +28,7 @@ function sf_dic_boot() {
   // hook_boot() implementation will keep living in here. This means that
   // there is absolutly no way to allow cache backends services to be in
   // the service container, sad, but true story.
-  \Drupal::_getKernel();
+  \Drupal::_getKernel()->handle(Request::createFromGlobals());
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   // Do not alter it when the function already exists (mostly happend at site

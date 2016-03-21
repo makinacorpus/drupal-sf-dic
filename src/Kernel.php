@@ -71,6 +71,10 @@ class Kernel extends BaseKernel
      */
     public function addExtraBundles($bundles)
     {
+        if ($this->booted) {
+            throw new \LogicException("Kernel is booted, you cannot add extra bundles anymore");
+        }
+
         if (!is_array($bundles)) {
             $bundles = [$bundles];
         }
