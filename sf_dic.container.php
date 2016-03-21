@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 
 class ServiceProvider implements ServiceProviderInterface
@@ -23,6 +24,10 @@ class ServiceProvider implements ServiceProviderInterface
         $container->addCompilerPass(
             new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber')
         );
+
+        if (class_exists('Symfony\\Component\\Console\\Command\\Command')) {
+            $container->addCompilerPass(new AddConsoleCommandPass());
+        }
 
         // TwigBundle will automatically be registered in the kernel.
         // @todo
