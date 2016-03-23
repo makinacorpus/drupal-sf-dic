@@ -142,4 +142,11 @@ interface AliasStorageInterface
      *   TRUE if any alias exists, FALSE otherwise.
      */
     public function pathHasMatchingAlias($initial_substring);
+
+    /**
+     * Get path alias whitelist.
+     *
+     * @return string[]
+     */
+    public function getWhitelist();
 }

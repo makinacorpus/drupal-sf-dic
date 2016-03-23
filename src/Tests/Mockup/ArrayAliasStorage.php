@@ -133,4 +133,12 @@ class ArrayAliasStorage implements AliasStorageInterface
     {
         throw new \Exception("This object is not meant to test that");
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getWhitelist()
+    {
+        return [];
+    }
 }

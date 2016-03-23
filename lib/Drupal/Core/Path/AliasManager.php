@@ -89,24 +89,20 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
      */
     public function whitelistRebuild($source = null)
     {
-        // When paths are inserted, only rebuild the whitelist if the system
-        // path has a top level component which is not already in the whitelist.
-        if (!empty($source)) {
-            if (isset($this->whitelist[strtok($source, '/')])) {
-                return;
-            }
-        }
-
         // For each alias in the database, get the top level component of the
         // system path it corresponds to. This is the portion of the path before
         // the first '/', if present, otherwise the whole path itself.
         // PS: Sorry for hardcoded db_query()
         $this->whitelist = [];
 
-        $result = db_query("SELECT DISTINCT SUBSTRING_INDEX(source, '/', 1) AS path FROM {url_alias}");
+        $storageWhitelist = $this->storage->getWhitelist();
 
-        foreach ($result as $row) {
-            $this->whitelist[$row->path] = TRUE;
+        if (!$storageWhitelist) {
+            $this->whitelist = [];
+        } else {
+            foreach ($storageWhitelist as $path) {
+                $this->whitelist[$path] = true;
+            }
         }
 
         variable_set('path_alias_whitelist', $this->whitelist);

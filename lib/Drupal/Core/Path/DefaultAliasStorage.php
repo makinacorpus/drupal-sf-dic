@@ -283,4 +283,12 @@ class DefaultAliasStorage implements AliasStorageInterface
             ->fetchField()
         ;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getWhitelist()
+    {
+        return $this->db->query("SELECT DISTINCT SUBSTRING_INDEX(source, '/', 1) AS path FROM {url_alias}")->fetchCol();
+    }
 }
