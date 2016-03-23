@@ -22,7 +22,7 @@ abstract class FormBase implements FormInterface
     /**
      * {@inheritdoc}
      */
-    public static function create(ContainerInterface $container)
+    static public function create(ContainerInterface $container)
     {
         return new static();
     }

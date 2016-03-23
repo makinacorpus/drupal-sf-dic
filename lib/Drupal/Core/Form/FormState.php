@@ -461,6 +461,8 @@ class FormState implements FormStateInterface
      */
     public function setValueForElement(array $element, $value)
     {
+        form_set_value($element, $value, $this->data);
+
         return $this->setValue($element['#parents'], $value);
     }
 
