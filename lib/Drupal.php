@@ -73,7 +73,12 @@ class Drupal
      */
     static public function getContainer()
     {
-        return self::_getKernel()->getContainer();
+        $kernel = self::_getKernel();
+
+        // We consider that once this called you cannot register bundles anymore
+        $kernel->boot();
+
+        return $kernel->getContainer();
     }
 
     /**
