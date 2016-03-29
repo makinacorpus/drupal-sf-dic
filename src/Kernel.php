@@ -7,7 +7,6 @@ use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
 
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
-use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -108,8 +107,29 @@ class Kernel extends BaseKernel
     public function registerBundles()
     {
         // @todo - I guess this should happen elsewhere...
-        if ($this->inDrupal && class_exists('\Symfony\Bundle\TwigBundle\TwigBundle')) {
-            $this->extraBundles[] = new TwigBundle();
+        if ($this->inDrupal) {
+
+            // Registering TwigBundle will provide a full Twig environement
+            // for our Drupal site but won't have any major impact on the rest
+            // so we can safely assume that our users will always want it
+            if (class_exists('\Symfony\Bundle\TwigBundle\TwigBundle')) {
+                $this->extraBundles[] = new \Symfony\Bundle\TwigBundle\TwigBundle();
+            }
+
+            // But, for the next three, it sounds more complicated, this will
+            // bring a lot of things in there they probably won't want, let's
+            // just give them a choice to disable it
+            if (variable_get('kernel.symfony_all_the_way', true)) {
+                if (class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
+                    $this->extraBundles[] = new \Symfony\Bundle\FrameworkBundle\FrameworkBundle();
+                }
+                if (class_exists('\Symfony\Bundle\MonologBundle\MonologBundle')) {
+                    $this->extraBundles[] = new \Symfony\Bundle\MonologBundle\MonologBundle();
+                }
+                if (class_exists('\Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle')) {
+                    $this->extraBundles[] = new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle();
+                }
+            }
         }
 
         return $this->extraBundles;
@@ -120,6 +140,10 @@ class Kernel extends BaseKernel
      */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
+        // @todo This needs to be overridable, and should be controlled by the
+        // site owner instead... Maybe this could be loaded from settings.php
+        // file at some point, or just put into the site/default/config folder
+        $loader->load(__DIR__ . '/../Resources/config/config.yml');
     }
 
     /**

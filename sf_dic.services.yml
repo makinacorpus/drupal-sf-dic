@@ -1,7 +1,3 @@
-parameters:
-  kernel.environment: prod
-  kernel.debug: false
-
 services:
 
   # Register the container itself as a synthetic service for the modules to be

@@ -1,0 +1,23 @@
+framework:
+    #esi:             ~
+    #translator:      { fallbacks: ["%locale%"] }
+    #secret:          "%secret%"
+    #router:
+    #    resource: "%kernel.root_dir%/config/routing.yml"
+    #    strict_requirements: ~
+    form:            ~
+    #csrf_protection: ~
+    validation:      { enable_annotations: true }
+    # templating:
+    #     engines: ['twig']
+    default_locale:  "%locale%"
+    fragments:       ~
+    http_method_override: true
+    assets: ~
+
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+    form_themes:
+        - "bootstrap_3_layout.html.twig"
+        - "bootstrap_3_horizontal_layout.html.twig"
