@@ -31,6 +31,11 @@ class Kernel extends BaseKernel
     protected $inDrupal = true;
 
     /**
+     * @var boolean
+     */
+    protected $isFullStack = false;
+
+    /**
      * Default constructor
      *
      * @param string $environment
@@ -122,6 +127,7 @@ class Kernel extends BaseKernel
             if (variable_get('kernel.symfony_all_the_way', true)) {
                 if (class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
                     $this->extraBundles[] = new \Symfony\Bundle\FrameworkBundle\FrameworkBundle();
+                    $this->isFullStack = true;
                 }
                 if (class_exists('\Symfony\Bundle\MonologBundle\MonologBundle')) {
                     $this->extraBundles[] = new \Symfony\Bundle\MonologBundle\MonologBundle();
@@ -143,7 +149,9 @@ class Kernel extends BaseKernel
         // @todo This needs to be overridable, and should be controlled by the
         // site owner instead... Maybe this could be loaded from settings.php
         // file at some point, or just put into the site/default/config folder
-        $loader->load(__DIR__ . '/../Resources/config/config.yml');
+        if ($this->isFullStack) {
+            $loader->load(__DIR__ . '/../Resources/config/config.yml');
+        }
     }
 
     /**
