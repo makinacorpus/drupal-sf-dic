@@ -165,11 +165,11 @@ function twig_theme($existing, $type, $theme, $path) {
   foreach ($existing as $theme_hook) {
     if (!in_array($theme_hook['theme path'], $theme_paths)) {
       $theme_paths[] = $theme_hook['theme path'];
-      $templates += drupal_find_theme_templates($existing, twig_extension(), $theme_hook['theme path']);
+      $templates = array_merge($templates, drupal_find_theme_templates($existing, twig_extension(), $theme_hook['theme path']));
     }
   }
   // End up with rightful templates from the given path.
-  $templates += drupal_find_theme_templates($existing, twig_extension(), $path);
+  $templates = array_merge($templates, drupal_find_theme_templates($existing, twig_extension(), $path));
 
   // Just a little bit, just a little bit, of magic.
   _twig_map_names($templates);
