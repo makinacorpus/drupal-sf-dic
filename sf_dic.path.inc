@@ -168,10 +168,13 @@ function path_load($conditions) {
  * {@inheritdoc}
  */
 function path_save(&$path) {
+  if (empty($path['language']) && isset($path['langcode'])) {
+    $path['language'] = $path['langcode']; // Tiny bit of compat and flexibility.
+  }
   \Drupal::service('path.alias_storage')->save(
     $path['source'],
     $path['alias'],
-    isset($path['langcode']) ? $path['langcode'] : LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    isset($path['language']) ? $path['language'] : LanguageInterface::LANGCODE_NOT_SPECIFIED,
     isset($path['pid']) ? $path['pid'] : null
   );
   \Drupal::service('path.alias_manager')->cacheClear($path['source']);
