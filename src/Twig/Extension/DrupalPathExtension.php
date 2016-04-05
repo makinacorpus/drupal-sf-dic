@@ -17,9 +17,17 @@ class DrupalPathExtension extends \Twig_Extension
         ];
     }
 
-    public function createUrl($path = null, array $options = [])
+    public function createUrl($route, array $parameters = [])
     {
-        return url($path, $options = []);
+        if ($parameters) {
+            $tokens = [];
+            foreach ($parameters as $key => $value) {
+                $tokens['%' . $key] = $value;
+            }
+            $route = strtr($route, $tokens);
+        }
+
+        return url($route);
     }
 
     /**
