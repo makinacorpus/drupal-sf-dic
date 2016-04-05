@@ -32,7 +32,7 @@ class Drupal
     {
         if (!self::$kernel) {
             $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
-            $debug  = empty($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
+            $debug  = !isset($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
 
             self::$kernel = new Kernel($env, $debug);
         }
