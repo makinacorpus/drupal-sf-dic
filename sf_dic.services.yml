@@ -146,6 +146,9 @@ services:
     parent: logger.channel_base
     arguments: ['form']
 
+  session:
+    class: MakinaCorpus\Drupal\Sf\Session\DrupalSession
+
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]

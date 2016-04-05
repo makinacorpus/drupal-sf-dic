@@ -60,6 +60,11 @@ services:
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPagerExtension
     tags: [{name: twig.extension}]
 
+  twig.extension.drupal_path:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPathExtension
+    tags: [{name: twig.extension}]
+
   twig.extension.drupal_render:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
