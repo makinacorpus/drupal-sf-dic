@@ -69,7 +69,6 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         }
         if ($this->doCache) {
             $this->cacheKey = 'sf:' . current_path();
-            $this->initCache();
         }
 
         $this->data += [self::ALIAS => [], self::SOURCE => []];
@@ -133,6 +132,13 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         } else {
             $type = self::ALIAS;
             $dest = self::SOURCE;
+
+            if (!isset($this->data[self::ALIAS]) || !isset($this->data[self::ALIAS][$langcode])) {
+                // This is the very first hit we get outside of the whitelist
+                // actually asking a database lookup for the alias, so we can
+                // preload the sources for the current page from here
+                $this->data[self::ALIAS][$langcode] = $this->preloadSourceItems($langcode);
+            }
         }
 
         if (isset($this->data[$type][$langcode][$lookup])) {
@@ -196,11 +202,26 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         $this->dataIsUpdated = true;
     }
 
-    protected function initCache()
+    protected function preloadSourceItems($langcode)
     {
         if ($item = cache_get($this->cacheKey, 'cache_path')) { // FIXME
-            $this->data = $item->data;
+            $sources = $item->data;
+
+            if (!empty($sources)) {
+                $aliases = $this->storage->preloadPathAlias($item->data, $langcode);
+
+                // Also set to false anything that is not set.
+                foreach ($sources as $source) {
+                    if (!isset($aliases[$source])) {
+                        $aliases[$source] = false;
+                    }
+                }
+
+                return $aliases;
+            }
         }
+
+        return [];
     }
 
     /**
@@ -216,7 +237,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
     public function writeCache()
     {
         if ($this->dataIsUpdated && $this->doCache) {
-            cache_set($this->cacheKey, $this->data, 'cache_path', time() + (60 * 60 * 24)); // FIXME
+            // This a very tricky but efficient way of doing thing from Drupal
+            // core, they only store the sources (not the associated aliases)
+            // which will allow, on next page hit, to reload all aliases in
+            // one SQL query, ensuring we won't have cached aliases anywhere
+            cache_set($this->cacheKey, array_keys(current($this->data[self::ALIAS])), 'cache_path', time() + (60 * 60 * 24)); // FIXME
         }
     }
 }

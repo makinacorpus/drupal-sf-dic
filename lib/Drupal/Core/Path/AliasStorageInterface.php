@@ -119,6 +119,20 @@ interface AliasStorageInterface
     public function aliasExists($alias, $langcode, $source = NULL);
 
     /**
+     * Pre-loads path alias information for a given list of source paths.
+     *
+     * @param array $preloaded
+     *   Paths that need preloading of aliases.
+     * @param string $langcode
+     *   Language code to search the path with. If there's no path defined for
+     *   that language it will search paths without language.
+     *
+     * @return string[]
+     *   Source (keys) to alias (values) mapping.
+     */
+    public function preloadPathAlias($sources, $langcode);
+
+    /**
      * Loads aliases for admin listing.
      *
      * @param array $header

@@ -237,6 +237,54 @@ class DefaultAliasStorage implements AliasStorageInterface
     /**
      * {@inheritdoc}
      */
+    public function preloadPathAlias($sources, $langcode)
+    {
+        // VERY IMPORTANT PIECE OF DOCUMENTATION, BECAUSE CORE DOES NOT
+        // DOCUMENT IT VERY WELL:
+        //  - the query inverse all the orders 'pid' and 'language' compared
+        //    to the original ::lookupPathAlias() method
+        //  - smart little bitches, it seems they didn't know how to write it
+        //    correctly in SQL (and neither do I actually) - so they rely on
+        //    the fetchAllKeyed() method, which iterates in order on the rows
+        //    making them squashing the previously fetched one
+
+        $query = $this
+            ->db
+            ->select('url_alias', 'u')
+            ->fields('u', ['source', 'alias'])
+        ;
+
+        $condition = new \DatabaseCondition('OR');
+        foreach ($sources as $source) {
+            // See the queries above. Use LIKE for case-insensitive matching.
+            $condition->condition('u.source', $this->db->escapeLike($source), 'LIKE');
+        }
+        $query->condition($condition);
+
+        if (LanguageInterface::LANGCODE_NOT_SPECIFIED === $langcode) {
+            $langcodeList = [$langcode];
+        } else {
+            $langcodeList = [$langcode, LanguageInterface::LANGCODE_NOT_SPECIFIED];
+            // !!! condition here is inversed from the lookup*() methods
+            if (LanguageInterface::LANGCODE_NOT_SPECIFIED > $langcode) {
+                $query->orderBy('u.language', 'DESC');
+            } else {
+                $query->orderBy('u.language', 'ASC');
+            }
+        }
+
+        return $query
+            // !!! order here is inversed from the lookup*() methods
+            ->orderBy('u.pid', 'ASC')
+            ->condition('u.language', $langcodeList)
+            ->execute()
+            ->fetchAllKeyed()
+        ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getAliasesForAdminListing($header, $keys = NULL)
     {
         $query = $this
