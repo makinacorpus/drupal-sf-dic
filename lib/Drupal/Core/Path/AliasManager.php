@@ -241,7 +241,16 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
             // core, they only store the sources (not the associated aliases)
             // which will allow, on next page hit, to reload all aliases in
             // one SQL query, ensuring we won't have cached aliases anywhere
-            cache_set($this->cacheKey, array_keys(current($this->data[self::ALIAS])), 'cache_path', time() + (60 * 60 * 24)); // FIXME
+            
+            // RLE: FIXME: Notice: I have array('dts' => array(), 'src' => array('en'=>array('/admin/dashboard'=>false))
+            // so $this->data[self::ALIAS] with 'dst' as ALIAS is array()
+            // and current of array() is FALSE ==> array_keys of FALSe is a notice
+            $arr = current($this->data[self::ALIAS]);
+            if (is_array($arr)) {
+                cache_set($this->cacheKey, array_keys($arr), 'cache_path', time() + (60 * 60 * 24)); // FIXME
+            //} else {
+                // ? FIXME
+            }
         }
     }
 }
