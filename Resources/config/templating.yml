@@ -70,6 +70,11 @@ services:
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
     tags: [{name: twig.extension}]
 
+  twig.extension.drupal_node:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalNodeExtension
+    tags: [{name: twig.extension}]
+
   #
   # Following are useful only for cache warmer, not sure we will ever use this
   # --
