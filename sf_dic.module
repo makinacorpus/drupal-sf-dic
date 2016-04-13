@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Implements hook_boot().
  */
 function sf_dic_boot() {
+
   // There is no way to allow this module to get the enabled module list
   // before the DRUPAL_BOOTSTRAP_CONFIGURATION phase (if you are lucky and
   // caches are set) or before the DRUPAL_BOOTSTRAP_DATABASE phase (because
