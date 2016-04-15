@@ -13,10 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class Kernel extends BaseKernel
 {
@@ -88,21 +86,6 @@ class Kernel extends BaseKernel
                 throw new \LogicException(sprintf("Bundle must be an instance of Symfony\Component\HttpKernel\Bundle\BundleInterface"));
             }
             $this->extraBundles[] = $bundle;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        if (false === $this->booted) {
-            $this->boot();
-        }
-
-        // Sorry, no real request handle there since we are in a Drupal instance
-        if ($this->container->has('request_stack')) {
-            $this->container->get('request_stack')->push($request);
         }
     }
 

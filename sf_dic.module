@@ -17,6 +17,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Implements hook_boot().
@@ -30,7 +31,8 @@ function sf_dic_boot() {
   // hook_boot() implementation will keep living in here. This means that
   // there is absolutly no way to allow cache backends services to be in
   // the service container, sad, but true story.
-  \Drupal::_getKernel()->handle(Request::createFromGlobals());
+  \Drupal::_getKernel();
+  \Drupal::requestStack()->push(Request::createFromGlobals());
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   // Do not alter it when the function already exists (mostly happend at site
@@ -69,6 +71,38 @@ function sf_dic_language_init() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function sf_dic_menu() {
+  $items = [];
+  // Do not force this behavior, it would be so wrong.
+  if (variable_get('kernel.symfony_router_enable')) {
+    $container = \Drupal::getContainer();
+    if ($container->has('router')) {
+      /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+      $router = $container->get('router');
+      foreach ($router->getRouteCollection() as $route) {
+        /** @var \Symfony\Component\Routing\Route $route */
+        if ($route->getHost()) {
+          continue; // Not for us.
+        }
+        // Build a fake Drupal menu entry for each route and pray.
+        $path = [];
+        foreach (explode('/', trim($route->getPath(), '/')) as $part) {
+          if ('{' === $part[0] && '}' === $part[strlen($part) - 1]) {
+            $path[] = '%';
+          } else {
+            $path[] = $part;
+          }
+        }
+        $items[implode('/', $path)] = ['page callback' => 'sf_dic_router'];
+      }
+    }
+  }
+  return $items;
+}
+
+/**
  * Implements hook_menu_alter().
  */
 function sf_dic_menu_alter(&$items) {
@@ -82,7 +116,7 @@ function sf_dic_menu_alter(&$items) {
   // We have controllers of our own, they are supposed to embed their own
   // access control logic and proceed with other kind of no Drupal magic.
   foreach ($items as &$item) {
-    if (isset($item['page callback']) && 'sf_dic_page' === $item['page callback']) {
+    if (isset($item['page callback']) && ('sf_dic_page' === $item['page callback'] || 'sf_dic_router' === $item['page callback'])) {
       if (!array_key_exists('type', $item)) {
         $item['type'] = MENU_CALLBACK;
       }
@@ -160,7 +194,19 @@ function sf_dic_plugin_create($class, $configuration = []) {
 }
 
 /**
- * Menu callback for doing forms.
+ * Menu callback for using Symfony real router.
+ */
+function sf_dic_router() {
+  $response = \Drupal::service('kernel')->handle(
+    \Drupal::requestStack()->getCurrentRequest(),
+    HttpKernelInterface::MASTER_REQUEST,
+    false
+  );
+  var_dump($response);
+}
+
+/**
+ * Menu callback for using controllers via hook_menu().
  */
 function sf_dic_page($controller) {
   $args = func_get_args();

@@ -9,10 +9,10 @@ services:
   kernel:
     class: Symfony\Component\HttpKernel\KernelInterface
     factory: [Drupal, _getKernel]
-
+  # Following is the actual Symfony definition
   http_kernel:
-    class: Symfony\Component\HttpKernel\HttpKernelInterface
-    factory: ["@kernel", getHttpKernel]
+    class: Symfony\Component\HttpKernel\HttpKernel
+    arguments: ["@event_dispatcher", "@controller_resolver", "@request_stack"]
 
   # For symfony compatibility
   file_locator:

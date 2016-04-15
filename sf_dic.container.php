@@ -20,6 +20,8 @@ class ServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerBuilder $container)
     {
+        $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
+
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
