@@ -71,6 +71,25 @@ function sf_dic_language_init() {
 }
 
 /**
+ * Ensure menu item type is understandable for Drupal.
+ *
+ * @param scalar[] $item
+ */
+function _sf_dic_menu_type(&$item) {
+  if (!isset($item['type']) || is_numeric($item['type'])) {
+    return;
+  }
+  $realType = 0;
+  foreach (explode('|', $item['type']) as $const) {
+    $const = trim(strtoupper($const));
+    if ('MENU_' === substr($const, 0, 5) && defined($const)) {
+      $realType |= constant($const);
+    }
+  }
+  $item['type'] = $realType;
+}
+
+/**
  * Implements hook_menu().
  */
 function sf_dic_menu() {
@@ -95,7 +114,15 @@ function sf_dic_menu() {
             $path[] = $part;
           }
         }
-        $items[implode('/', $path)] = ['page callback' => 'sf_dic_router'];
+        $item = ['page callback' => 'sf_dic_router'];
+        // Allow the bundle routing file to describe Drupal menu item options.
+        $options = $route->getOption('drupal');
+        if ($options) {
+          $item += $options;
+          _sf_dic_menu_type($item);
+        }
+        // And we're good to go!
+        $items[implode('/', $path)] = $item;
       }
     }
   }
@@ -194,15 +221,55 @@ function sf_dic_plugin_create($class, $configuration = []) {
 }
 
 /**
+ * Deal with anything returned by a Symfony style controller.
+ *
+ * @param mixed $response
+ */
+function _sf_dic_response($response) {
+  // @todo Partial support only of symfony http response, headers and others
+  //   are ignored, we should probably have a custom delivery callback in order
+  //   to fully support this.
+  if ($response instanceof JsonResponse ||
+      $response instanceof StreamedResponse ||
+      ($response instanceof Response && 'application/xml' === $response->headers->get('Content-Type'))
+  ) {
+    $response->send();
+    drupal_exit();
+    return;
+  }
+  if ($response instanceof Response) {
+    $response = (string)$response->getContent();
+  }
+  return $response;
+}
+
+/**
  * Menu callback for using Symfony real router.
  */
 function sf_dic_router() {
-  $response = \Drupal::service('kernel')->handle(
-    \Drupal::requestStack()->getCurrentRequest(),
-    HttpKernelInterface::MASTER_REQUEST,
-    false
-  );
-  var_dump($response);
+  try {
+    $ret = _sf_dic_response(
+      \Drupal::service('kernel')->handle(
+        \Drupal::requestStack()->getCurrentRequest(),
+        HttpKernelInterface::MASTER_REQUEST,
+        false
+      )
+    );
+  } catch (AccessDeniedHttpException $e) {
+    return MENU_ACCESS_DENIED;
+  } catch (NotFoundHttpException $e) {
+    return MENU_NOT_FOUND;
+  } catch (HttpException $e) {
+    switch ($e->getStatusCode()) {
+      case 403:
+        return MENU_ACCESS_DENIED;
+      case 404:
+        return MENU_NOT_FOUND;
+    }
+    throw $e;
+  }
+
+  return $ret;
 }
 
 /**
@@ -259,22 +326,7 @@ function sf_dic_page($controller) {
   }
 
   try {
-    $ret = call_user_func_array([$controller, $method], $args);
-
-    // @todo Partial support only of symfony http response, headers and others
-    //   are ignored, we should probably have a custom delivery callback in order
-    //   to fully support this.
-    if ($ret instanceof JsonResponse ||
-        $ret instanceof StreamedResponse ||
-        ($ret instanceof Response && 'application/xml' === $ret->headers->get('Content-Type'))
-    ) {
-      $ret->send();
-      drupal_exit();
-      return;
-    }
-    if ($ret instanceof Response) {
-      $ret = (string)$ret->getContent();
-    }
+    $ret = _sf_dic_response(call_user_func_array([$controller, $method], $args));
   } catch (AccessDeniedHttpException $e) {
     return MENU_ACCESS_DENIED;
   } catch (NotFoundHttpException $e) {
