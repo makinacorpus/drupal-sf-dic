@@ -49,7 +49,16 @@ function sf_dic_boot() {
   // This is needed to allow modules to manipulate a UserInterface instance
   // for anonymous user. Note that we don't need to put anything in the user
   // structure since that drupal_anonymous_user() will do it for us.
-  $GLOBALS['conf']['drupal_anonymous_user_object'] = new User();
+  $anonymous = new User();
+  $GLOBALS['conf']['drupal_anonymous_user_object'] = $anonymous;
+  if (!$GLOBALS['user']->uid) {
+    // For older version of core, the 'drupal_anonymous_user_object' is not
+    // being used, and may cause serious trouble if object oriented code
+    // attempts ot use the anonymous user; let's replace it directly from
+    // here. We can't protected code using drupal_anonymous_user() function
+    // though.
+    $GLOBALS['user'] = $anonymous;
+  }
   $accountProxy = \Drupal::service('current_user');
   $accountProxy->setOriginalAccount($GLOBALS['user']);
   $GLOBALS['user'] = $accountProxy;

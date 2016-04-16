@@ -100,8 +100,10 @@ class AccountProxy implements AccountInterface
             if ($this->originalAccount && $this->originalAccount->uid) {
                 // Prey for Drupal being correctly initialized at this point
                 $this->account = $this->entityManager->getStorage('user')->load($this->originalAccount->uid);
-            } else {
-                $this->account = drupal_anonymous_user();
+            } else if ($this->originalAccount) {
+                // User is not logged in, but we do have already a User
+                // instance for anonymous user set
+                $this->account = $this->originalAccount;
             }
         }
 
