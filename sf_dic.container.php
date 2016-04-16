@@ -5,6 +5,7 @@ namespace Drupal\Module\sf_dic;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ParametersToVariablesPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 
@@ -26,6 +27,7 @@ class ServiceProvider implements ServiceProviderInterface
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
         $container->addCompilerPass(new ParametersToVariablesPass());
+        $container->addCompilerPass(new FrameworkBundleIntegrationPass());
 
         if (class_exists('Symfony\\Component\\Console\\Command\\Command')) {
             $container->addCompilerPass(new AddConsoleCommandPass());
