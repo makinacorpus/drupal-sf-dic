@@ -50,6 +50,7 @@ function sf_dic_boot() {
   // for anonymous user. Note that we don't need to put anything in the user
   // structure since that drupal_anonymous_user() will do it for us.
   $anonymous = new User();
+  $anonymous->roles = [DRUPAL_ANONYMOUS_RID => 'anonymous user'];
   $GLOBALS['conf']['drupal_anonymous_user_object'] = $anonymous;
   if (!$GLOBALS['user']->uid) {
     // For older version of core, the 'drupal_anonymous_user_object' is not
