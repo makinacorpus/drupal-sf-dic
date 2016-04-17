@@ -26,6 +26,9 @@ class ServiceProvider implements ServiceProviderInterface
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
 
+        // @todo this in the end was a very, very bad idea
+        // $container->addCompilerPass(new ParametersToVariablesPass());
+
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
 
