@@ -1,18 +1,22 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Routing\Generator;
+namespace MakinaCorpus\Drupal\Sf\Routing;
 
-use Symfony\Component\Routing\Generator\UrlGenerator as BaseUrlGenerator;
+use Symfony\Bundle\FrameworkBundle\Routing\Router as BaseRouter;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
-class UrlGenerator extends BaseUrlGenerator
+class Router extends BaseRouter
 {
     /**
      * {@inheritdoc}
      */
     public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
     {
-        if (null === $this->routes->get($name)) {
-
+        try {
+            return $this->getGenerator()->generate($name, $parameters, $referenceType);
+        } catch (RouteNotFoundException $e) {
+            // @todo
+            //   should we use drupal_valid_path() ?
             // Drupal to the rescue
             // @todo From what I remember, there was a few other stuff to take
             // care of in this... can't really remember what...
@@ -26,7 +30,5 @@ class UrlGenerator extends BaseUrlGenerator
 
             return url($name, ['absolute' => self::ABSOLUTE_URL === $referenceType]);
         }
-
-        return parent::generate($name, $parameters, $referenceType);
     }
 }

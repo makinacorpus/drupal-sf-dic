@@ -13,6 +13,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 
 class ServiceProvider implements ServiceProviderInterface
 {
@@ -26,8 +27,7 @@ class ServiceProvider implements ServiceProviderInterface
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
-        $container->addCompilerPass(new ParametersToVariablesPass());
-        $container->addCompilerPass(new FrameworkBundleIntegrationPass());
+        $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
 
         if (class_exists('Symfony\\Component\\Console\\Command\\Command')) {
             $container->addCompilerPass(new AddConsoleCommandPass());
