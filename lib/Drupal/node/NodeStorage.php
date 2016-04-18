@@ -13,7 +13,13 @@ class NodeStorage extends DefaultEntityStorageProxy
     public function create(array $values = array())
     {
         // @todo Handle values
-        return new Node();
+        $node = new Node();
+
+        foreach ($values as $key => $value) {
+            $node->$key = $value;
+        }
+
+        return $node;
     }
 
     /**
