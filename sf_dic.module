@@ -32,7 +32,12 @@ function sf_dic_boot() {
   // there is absolutly no way to allow cache backends services to be in
   // the service container, sad, but true story.
   \Drupal::_getKernel();
-  \Drupal::requestStack()->push(Request::createFromGlobals());
+  \Drupal::requestStack()->push(
+      // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
+      // pragmatically find it, since we do need Drupal alias replacement to
+      // have been done.
+      MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
+  );
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   // Do not alter it when the function already exists (mostly happend at site
@@ -258,12 +263,12 @@ function _sf_dic_response($response) {
  */
 function sf_dic_router() {
   try {
+
+    $request = \Drupal::requestStack()->getCurrentRequest();
+
     $ret = _sf_dic_response(
-      \Drupal::service('kernel')->handle(
-        \Drupal::requestStack()->getCurrentRequest(),
-        HttpKernelInterface::MASTER_REQUEST,
-        false
-      )
+      \Drupal::service('kernel')
+        ->handle($request, HttpKernelInterface::MASTER_REQUEST, false)
     );
   } catch (AccessDeniedHttpException $e) {
     return MENU_ACCESS_DENIED;
