@@ -9,6 +9,8 @@ services:
   kernel:
     class: Symfony\Component\HttpKernel\KernelInterface
     factory: [Drupal, _getKernel]
+  # Null implementation of the controller resolver when not using fullstack is
+  # spawned using the FrameworkBundleIntegrationPass compiler pass, get over it!
   # Following is the actual Symfony definition
   http_kernel:
     class: Symfony\Component\HttpKernel\HttpKernel
