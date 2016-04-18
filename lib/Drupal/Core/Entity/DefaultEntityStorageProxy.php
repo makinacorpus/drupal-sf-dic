@@ -50,7 +50,7 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
      */
     public function resetCache(array $ids = NULL)
     {
-        $this->getController()->resetCache();
+        $this->getController()->resetCache($ids);
     }
 
     /**
