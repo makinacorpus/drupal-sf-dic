@@ -14,7 +14,13 @@ class DrupalPagerExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFunction('pager', [$this, 'renderPager'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFunction('pager_existing', [$this, 'renderExistingPager'], ['is_safe' => ['html']]),
         ];
+    }
+
+    public function renderExistingPager($element = 0)
+    {
+        return theme('pager', ['element' => $element]);
     }
 
     public function renderPager($limit, $total, $element = 0)

@@ -2,6 +2,8 @@
 
 namespace MakinaCorpus\Drupal\Sf\Twig\Extension;
 
+use MakinaCorpus\Drupal\Sf\Routing\Router;
+
 /**
  * Drupal various rendering functions
  */
@@ -19,15 +21,7 @@ class DrupalPathExtension extends \Twig_Extension
 
     public function createUrl($route, array $parameters = [])
     {
-        if ($parameters) {
-            $tokens = [];
-            foreach ($parameters as $key => $value) {
-                $tokens['%' . $key] = $value;
-            }
-            $route = strtr($route, $tokens);
-        }
-
-        return url($route);
+        return Router::generateDrupalUrl($route, $parameters);
     }
 
     /**

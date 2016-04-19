@@ -7,10 +7,39 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class Router extends BaseRouter
 {
+    static public function generateDrupalUrl($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    {
+        $options = [];
+
+        if ($parameters) {
+            $tokens = [];
+
+            foreach ($parameters as $key => $value) {
+                $token = '%' . $key;
+
+                if (false === strpos($name, $token)) {
+                    // We must, as per twig path() function signature, add unused
+                    // parameters as GET parameters
+                    $options['query'][$key] = $value;
+                } else {
+                    $tokens[$token] = $value;
+                }
+            }
+
+            $name = strtr($name, $tokens);
+        }
+
+        if (self::ABSOLUTE_URL === $referenceType) {
+            $options['absolute'] = true;
+        }
+
+        return url($name, $options);
+    }
+
     /**
      * {@inheritdoc}
      */
-    public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
+    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
         try {
             return $this->getGenerator()->generate($name, $parameters, $referenceType);
@@ -20,15 +49,7 @@ class Router extends BaseRouter
             // Drupal to the rescue
             // @todo From what I remember, there was a few other stuff to take
             // care of in this... can't really remember what...
-            if ($parameters) {
-                $tokens = [];
-                foreach ($parameters as $key => $value) {
-                    $tokens['%' . $key] = $value;
-                }
-                $name = strtr($name, $tokens);
-            }
-
-            return url($name, ['absolute' => self::ABSOLUTE_URL === $referenceType]);
+            return self::generateDrupalUrl($name, $parameters, $referenceType);
         }
     }
 }

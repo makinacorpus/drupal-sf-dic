@@ -33,10 +33,10 @@ function sf_dic_boot() {
   // the service container, sad, but true story.
   \Drupal::_getKernel();
   \Drupal::requestStack()->push(
-      // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
-      // pragmatically find it, since we do need Drupal alias replacement to
-      // have been done.
-      MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
+    // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
+    // pragmatically find it, since we do need Drupal alias replacement to
+    // have been done.
+    MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
   );
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
@@ -112,6 +112,14 @@ function sf_dic_menu() {
   // Do not force this behavior, it would be so wrong.
   if (variable_get('kernel.symfony_router_enable')) {
     $container = \Drupal::getContainer();
+    // Allow fragment renderers to work.
+    if ($container->hasParameter('fragment.path')) {
+      $items[trim($container->getParameter('fragment.path'), '/')] = [
+        'page callback'   => 'sf_dic_router',
+        'access callback' => true,
+      ];
+    }
+    // Build the routing table from Symfony router.
     if ($container->has('router')) {
       /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
       $router = $container->get('router');
@@ -241,13 +249,21 @@ function sf_dic_plugin_create($class, $configuration = []) {
  * @param mixed $response
  */
 function _sf_dic_response($response) {
+  $container = \Drupal::getContainer();
+  $isFragmentRoute = false;
+  // Allow fragment renderers to work.
+  if ($container->hasParameter('fragment.path')) {
+    $fragmentPath = $container->getParameter('fragment.path');
+    $isFragmentRoute = current_path() === trim($fragmentPath, '/');
+  }
   // @todo Partial support only of symfony http response, headers and others
   //   are ignored, we should probably have a custom delivery callback in order
   //   to fully support this.
   if ($response instanceof JsonResponse ||
       $response instanceof StreamedResponse ||
-      ($response instanceof Response && 'application/xml' === $response->headers->get('Content-Type'))
-  ) {
+      ($response instanceof Response && 'application/xml' === $response->headers->get('Content-Type')) ||
+      $isFragmentRoute
+  ){
     $response->send();
     drupal_exit();
     return;
@@ -263,9 +279,7 @@ function _sf_dic_response($response) {
  */
 function sf_dic_router() {
   try {
-
     $request = \Drupal::requestStack()->getCurrentRequest();
-
     $ret = _sf_dic_response(
       \Drupal::service('kernel')
         ->handle($request, HttpKernelInterface::MASTER_REQUEST, false)
