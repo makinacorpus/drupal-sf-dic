@@ -6,7 +6,6 @@ use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
-use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ParametersToVariablesPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 
 use Symfony\Component\Config\FileLocator;
@@ -25,9 +24,6 @@ class ServiceProvider implements ServiceProviderInterface
         $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
-
-        // @todo this in the end was a very, very bad idea
-        // $container->addCompilerPass(new ParametersToVariablesPass());
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);

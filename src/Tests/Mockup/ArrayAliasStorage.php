@@ -137,6 +137,14 @@ class ArrayAliasStorage implements AliasStorageInterface
     /**
      * {@inheritdoc}
      */
+    public function preloadPathAlias($sources, $langcode)
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getWhitelist()
     {
         return [];

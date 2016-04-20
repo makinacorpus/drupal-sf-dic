@@ -8,6 +8,7 @@
 namespace Drupal\Core\Session;
 
 use Drupal\Core\Entity\EntityManager;
+use Drupal\user\User;
 
 /**
  * This is inspired from Drupal 8 homonymous class, but this is not the same
@@ -104,6 +105,16 @@ class AccountProxy implements AccountInterface
                 // User is not logged in, but we do have already a User
                 // instance for anonymous user set
                 $this->account = $this->originalAccount;
+            }
+        }
+
+        if (!$this->account instanceof AccountInterface) {
+            // @todo why do the hell this happens only during unit tests?
+            //   seriously god I hate Drupal, and whatever is arround it
+            $values = (array)$this->account;
+            $this->account = new User();
+            foreach ($values as $key => $value) {
+                $this->account->{$key} = $value;
             }
         }
 

@@ -277,7 +277,13 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             }
 
             $this->kernel->boot();
-            $this->kernel->handle(Request::createFromGlobals());
+            $this
+                ->kernel
+                ->getContainer()
+                ->get('request_stack')
+                ->push(
+                    \MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
+                );
 
             \Drupal::_setKernel($this->kernel);
         }
