@@ -20,13 +20,13 @@ interface EntityStorageInterface
      * Loads one or more entities.
      *
      * @param $ids
-     *   An array of entity IDs, or NULL to load all entities.
+     *   An array of entity IDs, or FALSE to load all entities.
      *
      * @return \Drupal\Core\Entity\EntityInterface[]
      *   An array of entity objects indexed by their IDs. Returns an empty array
      *   if no matching entities are found.
      */
-    public function loadMultiple(array $ids = NULL);
+    public function loadMultiple($ids = FALSE);
 
     /**
      * Loads one entity.

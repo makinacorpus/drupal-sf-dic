@@ -56,7 +56,7 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function loadMultiple(array $ids = NULL)
+    public function loadMultiple($ids = FALSE)
     {
         return $this->getController()->load($ids);
     }
