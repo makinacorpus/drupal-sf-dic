@@ -202,6 +202,6 @@ class DrupalSession extends Session
      */
     public function getFlashBag()
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        return new DrupalFlashBag();
     }
 }
