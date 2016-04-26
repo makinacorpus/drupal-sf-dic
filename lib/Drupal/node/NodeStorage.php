@@ -29,10 +29,10 @@ class NodeStorage extends DefaultEntityStorageProxy
     {
         return node_delete_multiple(
             array_map(
-                $entities,
-                function (NodeInterface $entity) {
-                    return $entity->id();
-                }
+                function ($entity) {
+                    return is_numeric($entity) ? $entity : $entity->id();
+                },
+                $entities
             )
         );
     }
