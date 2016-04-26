@@ -18,6 +18,11 @@ class TranslationExtension extends \Twig_Extension
     private $translator;
     private $translationNodeVisitor;
 
+    public function getTranslator()
+    {
+        return $this;
+    }
+
     public function __construct(\Twig_NodeVisitorInterface $translationNodeVisitor = null)
     {
         if (!$translationNodeVisitor) {
@@ -80,9 +85,24 @@ class TranslationExtension extends \Twig_Extension
         ]);
     }
 
-    public function transchoice($message, $count, array $arguments = array(), $domain = null, $locale = null)
+    public function transChoice($message, $count, array $arguments = array(), $domain = null, $locale = null)
     {
-        return format_plural($count, strtr($message, '%count%', '@count'), $arguments, [
+        $singular = null;
+        $plural = null;
+
+        $forms = explode('|', $message);
+        foreach ($forms as $form) {
+            if (false !== strpos($form, '{1}')) {
+                $singular = str_replace('{1}', '@count', $form);
+            }
+            if (false !== strpos($form, 'Inf[')) {
+                $plural = preg_replace('/\]\d+,Inf\[/', '@count', $form);
+            }
+        }
+
+        $arguments['@count'] = $count;
+
+        return format_plural($count, $singular, $plural, $arguments, [
             'context'   => $domain, // Sorry for this
             'langcode'  => $locale,
         ]);
