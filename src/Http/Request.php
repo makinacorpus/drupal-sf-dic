@@ -27,7 +27,11 @@ class Request extends BaseRequest
             $queryString = $this->server->get('QUERY_STRING');
             $queryString = preg_replace('/q=[^&]*/', '', $queryString);
             if ('&' === $queryString[0]) {
-                $queryString = substr($queryString, 1);
+                if ('&' === $queryString) {
+                    $queryString = '';
+                } else {
+                    $queryString = substr($queryString, 1);
+                }
             }
             $this->server->set('QUERY_STRING', $queryString);
 
@@ -36,5 +40,13 @@ class Request extends BaseRequest
         }
 
         return $requestUri;
+    }
+
+    public function getQueryString()
+    {
+        // Force prepareRequestUri() to be called before query string is fetched
+        $this->getRequestUri();
+
+        return parent::getQueryString();
     }
 }
