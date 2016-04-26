@@ -1,3 +1,9 @@
+# This file remains a sample, used per default if nothing else found, but
+# if you need to override it, please copy this file into:
+#    sites/MY_SITE/config.yml
+# and change the copied file, after a cache clear, the kernel will find
+# it and load it instead.
+
 framework:
     #esi:             ~
     #translator:      { fallbacks: ["%locale%"] }

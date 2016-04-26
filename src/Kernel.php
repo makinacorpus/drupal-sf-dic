@@ -118,6 +118,9 @@ class Kernel extends BaseKernel
                 if (class_exists('\Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle')) {
                     $this->extraBundles[] = new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle();
                 }
+                if (class_exists('\Doctrine\Bundle\DoctrineBundle\DoctrineBundle')) {
+                    $this->extraBundles[] = new Doctrine\Bundle\DoctrineBundle\DoctrineBundle();
+                }
             }
         }
 
@@ -133,7 +136,12 @@ class Kernel extends BaseKernel
         // site owner instead... Maybe this could be loaded from settings.php
         // file at some point, or just put into the site/default/config folder
         if ($this->isFullStack) {
-            $loader->load(__DIR__ . '/../Resources/config/config.yml');
+            $custom = DRUPAL_ROOT . '/' . conf_path() . '/config.yml';
+            if (file_exists($custom)) {
+                $loader->load($custom);
+            } else {
+                $loader->load(__DIR__ . '/../Resources/config/config.yml');
+            }
         }
     }
 
