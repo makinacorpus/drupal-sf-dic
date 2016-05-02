@@ -87,6 +87,20 @@ function sf_dic_language_init() {
 }
 
 /**
+ * Menu access helper in case you need to do access checks on nodes in menu
+ * but still use a node identifier instead of a node object
+ */
+function sf_dic_menu_node_access($op, $node) {
+  if (is_numeric($node)) {
+    $node = node_load($node);
+  }
+  if (!$node) {
+    return false;
+  }
+  return node_access($op, $node);
+}
+
+/**
  * Ensure menu item type is understandable for Drupal.
  *
  * @param scalar[] $item
