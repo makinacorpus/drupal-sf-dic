@@ -3,7 +3,6 @@
 namespace Drupal\node;
 
 use Drupal\Core\Entity\DefaultEntityStorageProxy;
-use Drupal\Core\Entity\EntityInterface;
 
 class NodeStorage extends DefaultEntityStorageProxy
 {
@@ -40,7 +39,7 @@ class NodeStorage extends DefaultEntityStorageProxy
     /**
      * {@inheritdoc}
      */
-    public function save(EntityInterface $entity)
+    public function save($entity)
     {
         return node_save($entity);
     }

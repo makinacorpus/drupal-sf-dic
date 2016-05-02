@@ -122,7 +122,7 @@ interface EntityStorageInterface
      * @throws \Drupal\Core\Entity\EntityStorageException
      *   In case of failures, an exception is thrown.
      */
-    public function save(EntityInterface $entity);
+    public function save($entity);
 
     /**
      * Gets the entity type ID.

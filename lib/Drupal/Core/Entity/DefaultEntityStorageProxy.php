@@ -100,6 +100,41 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
     }
 
     /**
+     * Attempt to use a callback, if any exists
+     *
+     * When dealing with Drupal 7 core or contrib entities, most modules will
+     * actually implement "ENTITYTYPE_(delete|save)[_multiple]" callbacks,
+     * let's attempt to use them transparently if possible.
+     *
+     * @param string $op
+     * @param string $isMultiple
+     * @param object|object[] $input
+     *
+     * @return void|mixed
+     */
+    protected function attemptCallbackUse($op, $isMultiple, $input)
+    {
+        if ($isMultiple) {
+
+            if (!is_array($input)) {
+                throw new \InvalidArgumentException("Cannot proceed with multiple without an array as parameter");
+            }
+
+            $function = $this->entityType . '_' . $op . '_multiple';
+        } else {
+            $function = $this->entityType . '_' . $op;
+        }
+
+        if (function_exists($function)) {
+            return $function($input);
+        }
+
+        if (!$isMultiple) {
+            return $this->attemptCallbackUse($op, true, [$input]);
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function loadRevision($revision_id)
@@ -120,7 +155,7 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
      */
     public function create(array $values = array())
     {
-        throw new \Exception("Not implemented yet");
+        return (object)$values;
     }
 
     /**
@@ -128,14 +163,14 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
      */
     public function delete(array $entities)
     {
-        throw new \Exception("Not implemented yet");
+        return $this->attemptCallbackUse('delete', true, $entities);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function save(EntityInterface $entity)
+    public function save($entity)
     {
-        throw new \Exception("Not implemented yet");
+        return $this->attemptCallbackUse('save', false, $entity);
     }
 }

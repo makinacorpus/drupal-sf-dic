@@ -28,6 +28,10 @@ class EntityManager
                 return new UserStorage($entityType);
 
             default:
+                if (!entity_get_info($entityType)) {
+                    throw new \InvalidArgumentException(sprintf('%s: entity type does not exist', $entityType));
+                }
+
                 return new DefaultEntityStorageProxy($entityType);
         }
     }

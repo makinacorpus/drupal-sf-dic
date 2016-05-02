@@ -3,7 +3,6 @@
 namespace Drupal\user;
 
 use Drupal\Core\Entity\DefaultEntityStorageProxy;
-use Drupal\Core\Entity\EntityInterface;
 
 class UserStorage extends DefaultEntityStorageProxy
 {
@@ -34,7 +33,7 @@ class UserStorage extends DefaultEntityStorageProxy
     /**
      * {@inheritdoc}
      */
-    public function save(EntityInterface $entity)
+    public function save($entity)
     {
         return user_save($entity);
     }
