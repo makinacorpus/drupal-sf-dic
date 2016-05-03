@@ -52,6 +52,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
     protected $cacheKey;
 
     /**
+     * @var boolean
+     */
+    protected $isPreloaded = false;
+
+    /**
      * Default constructor
      *
      * @param AliasStorageInterface $storage
@@ -133,11 +138,12 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
             $type = self::ALIAS;
             $dest = self::SOURCE;
 
-            if (!isset($this->data[self::ALIAS]) || !isset($this->data[self::ALIAS][$langcode])) {
-                // This is the very first hit we get outside of the whitelist
-                // actually asking a database lookup for the alias, so we can
-                // preload the sources for the current page from here
-                $this->data[self::ALIAS][$langcode] = $this->preloadSourceItems($langcode);
+            if ($this->doCache && !$this->isPreloaded) {
+                if (empty($this->data[self::ALIAS][$langcode])) {
+                    $this->data[self::ALIAS][$langcode] = [];
+                }
+                $this->data[self::ALIAS][$langcode] += $this->preloadSourceItems($langcode);
+                $this->isPreloaded = true;
             }
         }
 
