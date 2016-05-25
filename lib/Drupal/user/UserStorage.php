@@ -12,7 +12,10 @@ class UserStorage extends DefaultEntityStorageProxy
     public function create(array $values = array())
     {
         // @todo Handle values
-        return new User();
+        $user = new User();
+        $user->setIsNew(true);
+
+        return $user;
     }
 
     /**
@@ -35,6 +38,10 @@ class UserStorage extends DefaultEntityStorageProxy
      */
     public function save($entity)
     {
+        if ($entity instanceof User) {
+            $entity->setIsNew(false);
+        }
+
         return user_save($entity);
     }
 }

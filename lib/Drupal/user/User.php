@@ -15,6 +15,8 @@ use Drupal\Core\Session\AccountInterface;
  */
 class User extends Account implements UserInterface
 {
+    protected $isNew = false;
+
     /**
      * {@inheritdoc}
      */
@@ -41,9 +43,17 @@ class User extends Account implements UserInterface
     /**
      * {@inheritdoc}
      */
+    public function setIsNew($toggle = true)
+    {
+        $this->isNew = (bool)$toggle;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isNew()
     {
-        return null === $this->uid;
+        return !$this->uid && $this->isNew;
     }
 
     /**
