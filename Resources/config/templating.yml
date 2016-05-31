@@ -50,29 +50,9 @@ services:
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\TranslationExtension
     tags: [{name: twig.extension}]
 
-  twig.extension.drupal_image:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalImageExtension
-    tags: [{name: twig.extension}]
-
-  twig.extension.drupal_pager:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPagerExtension
-    tags: [{name: twig.extension}]
-
   twig.extension.drupal_path:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPathExtension
-    tags: [{name: twig.extension}]
-
-  twig.extension.drupal_render:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
-    tags: [{name: twig.extension}]
-
-  twig.extension.drupal_node:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalNodeExtension
     tags: [{name: twig.extension}]
 
   #

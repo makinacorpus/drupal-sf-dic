@@ -151,6 +151,30 @@ services:
   session:
     class: MakinaCorpus\Drupal\Sf\Session\DrupalSession
 
+  # Register a few Drupal twig helpers, no matter we are using it or not they
+  # will be ignored if no twig is running, but aside of that, if Twig is there
+  # but not the bundle, this'll work gracefully
+  twig.extension.drupal_file:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalFileExtension
+    tags: [{name: twig.extension}]
+  twig.extension.drupal_image:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalImageExtension
+    tags: [{name: twig.extension}]
+  twig.extension.drupal_node:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalNodeExtension
+    tags: [{name: twig.extension}]
+  twig.extension.drupal_pager:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPagerExtension
+    tags: [{name: twig.extension}]
+  twig.extension.drupal_render:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
+    tags: [{name: twig.extension}]
+
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]
