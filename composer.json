@@ -30,15 +30,16 @@
 	},
 	"require" : {
 		"psr/log" : "1.*",
-		"symfony/config" : "~2.8|~3.0",
+		"symfony/config" : "~3.0",
 		"symfony/dependency-injection" : "~3.0",
-		"symfony/event-dispatcher" : "~2.8|~3.0",
-		"symfony/expression-language" : "~2.8|~3.0",
-		"symfony/http-foundation" : "~2.8|~3.0",
-		"symfony/http-kernel" : "~2.8|~3.0",
-		"symfony/yaml" : "~2.8|~3.0"
+		"symfony/event-dispatcher" : "~3.0",
+		"symfony/expression-language" : "~3.0",
+		"symfony/http-foundation" : "~3.0",
+		"symfony/http-kernel" : "~3.0",
+		"symfony/yaml" : "~3.0"
 	},
 	"suggests" : {
-		"monolog/monolog" : "*"
+		"monolog/monolog" : "Integrates the Drupal 8 logger to monolog",
+		"symfony/symfony" : "Replaces Symfony components with the full stack framework and brings everything into Drupal"
 	}
 }
