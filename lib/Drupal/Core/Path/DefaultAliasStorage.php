@@ -46,7 +46,6 @@ class DefaultAliasStorage implements AliasStorageInterface
         ];
 
         if ($pid) {
-            $path['pid'] = $pid;
 
             $this
                 ->db
@@ -56,7 +55,9 @@ class DefaultAliasStorage implements AliasStorageInterface
                 ->execute()
             ;
 
-            $this->moduleHandler->invokeAll('path_insert', [$path]);
+            $this->moduleHandler->invokeAll('path_update', [$path]);
+
+            $path['pid'] = $pid;
 
         } else {
 
@@ -67,7 +68,7 @@ class DefaultAliasStorage implements AliasStorageInterface
                 ->execute()
             ;
 
-            $this->moduleHandler->invokeAll('path_update', [$path]);
+            $this->moduleHandler->invokeAll('path_insert', [$path]);
         }
 
         \Drupal::service('path.alias_manager')->cacheClear($source);
