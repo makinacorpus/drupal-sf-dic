@@ -167,7 +167,7 @@ function path_load($conditions) {
 /**
  * {@inheritdoc}
  */
-function path_save(&$path) {
+function path_save(&$path, $clearCaches = true) {
   if (empty($path['language']) && isset($path['langcode'])) {
     $path['language'] = $path['langcode']; // Tiny bit of compat and flexibility.
   }
@@ -177,7 +177,9 @@ function path_save(&$path) {
     isset($path['language']) ? $path['language'] : LanguageInterface::LANGCODE_NOT_SPECIFIED,
     isset($path['pid']) ? $path['pid'] : null
   );
-  \Drupal::service('path.alias_manager')->cacheClear($path['source']);
+  if ($clearCaches) {
+    \Drupal::service('path.alias_manager')->cacheClear($path['source']);
+  }
 }
 
 /**

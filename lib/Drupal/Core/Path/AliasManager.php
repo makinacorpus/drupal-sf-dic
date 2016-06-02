@@ -47,6 +47,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
     protected $doCache = true;
 
     /**
+     * @var boolean
+     */
+    protected $cacheKillSwitch = false;
+
+    /**
      * @var string
      */
     protected $cacheKey;
@@ -77,6 +82,13 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         }
 
         $this->data += [self::ALIAS => [], self::SOURCE => []];
+    }
+
+    public function doNotCache()
+    {
+        $this->doCache = false;
+        $this->cacheKillSwitch = true;
+        $this->data = [];
     }
 
     public function whitelistInit()
@@ -192,6 +204,10 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
      */
     public function cacheClear($source = null)
     {
+        if ($this->cacheKillSwitch) {
+            return;
+        }
+
         $this->whitelistRebuild($source);
 
         if ($source) {
@@ -242,7 +258,7 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
      */
     public function writeCache()
     {
-        if ($this->dataIsUpdated && $this->doCache) {
+        if (!$this->cacheKillSwitch && $this->dataIsUpdated && $this->doCache) {
             // This a very tricky but efficient way of doing thing from Drupal
             // core, they only store the sources (not the associated aliases)
             // which will allow, on next page hit, to reload all aliases in
