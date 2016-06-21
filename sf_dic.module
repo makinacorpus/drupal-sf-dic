@@ -337,6 +337,9 @@ function sf_dic_page($controller) {
 
   if (class_exists($controller)) {
     $controller = new $controller();
+  } else if (class_exists($controller . 'Controller')) {
+    $controller .= 'Controller';
+    $controller = new $controller();
   } else if (\Drupal::hasService($controller)) {
     $controller = \Drupal::service($controller);
   } else {
