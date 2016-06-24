@@ -1,3 +1,6 @@
+parameters:
+  debug.container.dump: '%kernel.cache_dir%/%kernel.container_class%.xml'
+
 services:
 
   # Register the container itself as a synthetic service for the modules to be

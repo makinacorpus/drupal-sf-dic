@@ -5,6 +5,7 @@ namespace Drupal\Module\sf_dic;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 
@@ -39,6 +40,14 @@ class ServiceProvider implements ServiceProviderInterface
             $loader->load('templating.yml');
 
             $container->addCompilerPass(new TwigCompilerPass());
+        }
+
+        if (!variable_get('kernel.symfony_all_the_way', false)) {
+            if (!class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
+                if ($container->getParameter('kernel.debug')) {
+                    $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
+                }
+            }
         }
     }
 }
