@@ -97,7 +97,7 @@ function _twig_map_names(&$templates) {
     $foundLength = 0;
     foreach ($map as $extension => $path) {
       $pathLength = strlen($path);
-      if ($pathLength < strlen($name) && $path === substr($name, 0, $pathLength)) {
+      if ($pathLength && $pathLength < strlen($name) && $path === substr($name, 0, $pathLength)) {
         // If the previously found theme as a shorter path that the one
         // we just found, this means the theme is a subdirectory of the
         // previous one, case in which we must reference the deeper one.
