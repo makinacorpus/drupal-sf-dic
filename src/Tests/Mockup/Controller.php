@@ -53,7 +53,7 @@ class Controller
         return "it is still working, $a, $b, $c";
     }
 
-    public function anActionWith2Requests($a, Request $request, $b, $c, Request $request)
+    public function anActionWith2Requests($a, Request $request, $b, $c, Request $request2)
     {
         return "it works again, $a, $b, $c";
     }
