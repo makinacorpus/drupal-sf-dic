@@ -276,7 +276,8 @@ function _sf_dic_response($response) {
   //   to fully support this.
   if ($response instanceof JsonResponse ||
       $response instanceof StreamedResponse ||
-      ($response instanceof Response && 'application/xml' === $response->headers->get('Content-Type')) ||
+      ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/xml')) ||
+      ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
       $isFragmentRoute
   ){
     $response->send();
