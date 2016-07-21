@@ -118,9 +118,9 @@ class Kernel extends BaseKernel
                 if (class_exists('\Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle')) {
                     $this->extraBundles[] = new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle();
                 }
-                if (class_exists('\Doctrine\Bundle\DoctrineBundle\DoctrineBundle')) {
-                    $this->extraBundles[] = new Doctrine\Bundle\DoctrineBundle\DoctrineBundle();
-                }
+//                 if (class_exists('\Doctrine\Bundle\DoctrineBundle\DoctrineBundle')) {
+//                     $this->extraBundles[] = new Doctrine\Bundle\DoctrineBundle\DoctrineBundle();
+//                 }
             }
         }
 
