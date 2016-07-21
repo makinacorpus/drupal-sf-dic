@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  * Implements hook_boot().
  */
 function sf_dic_boot() {
+  global $is_https;
 
   // There is no way to allow this module to get the enabled module list
   // before the DRUPAL_BOOTSTRAP_CONFIGURATION phase (if you are lucky and
@@ -37,8 +38,14 @@ function sf_dic_boot() {
     // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
     // pragmatically find it, since we do need Drupal alias replacement to
     // have been done.
-    MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
+    $request = MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
   );
+
+  // It may happen that https state is not detected due to misconfigured
+  // environments, so we are going to fix this.
+  if (!$is_https && $request->isSecure()) {
+    $is_https = true;
+  }
 
   // Change path.inc to proxify toward Drupal 8 compatible API.
   // Do not alter it when the function already exists (mostly happend at site
