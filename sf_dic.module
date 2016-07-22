@@ -291,7 +291,8 @@ function _sf_dic_response($response) {
     drupal_exit();
     return;
   }
-  if ($response instanceof RedirectResponse) {
+  $status = $response->getStatusCode();
+  if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400)) {
     $response->send();
     drupal_exit();
     return;
