@@ -28,7 +28,7 @@ class Request extends BaseRequest
             // framework process process, with q= they will fail
             $queryString = $this->server->get('QUERY_STRING');
             $queryString = preg_replace('/q=[^&]*/', '', $queryString);
-            if ('&' === $queryString[0]) {
+            if ($queryString && '&' === $queryString[0]) {
                 if ('&' === $queryString) {
                     $queryString = '';
                 } else {
