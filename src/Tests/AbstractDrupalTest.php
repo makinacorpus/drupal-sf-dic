@@ -4,7 +4,6 @@ namespace MakinaCorpus\Drupal\Sf\Tests;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityManager;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 
@@ -169,7 +168,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function createDrupalUser($permissionList = [])
     {
-        /* @var $storage EntityStorageInterface */
+        /* @var $storage \Drupal\Core\Entity\EntityStorageInterface */
         $storage = $this->getDrupalContainer()->get('entity.manager')->getStorage('user');
 
         $account = $storage->create();
@@ -334,8 +333,10 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        foreach ($this->accounts as $account) {
-            user_delete($account->uid);
+        if ($this->accounts) {
+            foreach ($this->accounts as $account) {
+                user_delete($account->uid);
+            }
         }
 
         unset(
