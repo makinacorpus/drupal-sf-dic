@@ -15,6 +15,11 @@ class UserStorage extends DefaultEntityStorageProxy
         $user = new User();
         $user->setIsNew(true);
 
+        // Sad but true story, this'll work
+        foreach ($values as $key => $value) {
+            $user->{$key} = $value;
+        }
+
         return $user;
     }
 
