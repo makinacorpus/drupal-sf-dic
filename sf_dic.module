@@ -94,6 +94,22 @@ function sf_dic_language_init() {
 }
 
 /**
+ * Does the given bundle exists and is enabled
+ *
+ * @param string $bundle
+ *   The bundle class name, such as VendorSomethingBundle
+ *
+ * @return bool
+ */
+function sf_dic_bundle_exists($bundle) {
+  $container = \Drupal::getContainer();
+  if ($container->hasParameter('kernel.bundles')) {
+    return isset($container->getParameter('kernel.bundles')[$bundle]);
+  }
+  return false;
+}
+
+/**
  * Menu access helper in case you need to do access checks on nodes in menu
  * but still use a node identifier instead of a node object
  */
