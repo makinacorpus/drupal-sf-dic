@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -253,6 +254,52 @@ function sf_dic_flush_caches() {
  */
 function sf_dic_twig_render($view, $parameters) {
   return \Drupal::service('twig')->render($view, $parameters);
+}
+
+/**
+ * Alter-ego of the render() and render_*() twig functions: renders a fragment.
+ *
+ * This method is only usable if you are working with the Symfony full stack
+ * framework bundle enabled.
+ *
+ * @param string|ControllerReference $uri
+ *   A URI as a string or a ControllerReference instance
+ * @param string[] $options
+ *   An array of options
+ *
+ * @see Symfony\Component\HttpKernel\Fragment\FragmentHandler::render()
+ * @see Symfony\Bridge\Twig\Extension\HttpKernelExtension::renderFragment()
+ *
+ * @return string
+ *   The fragment content
+ */
+function sf_dic_http_render($uri, $options = [], $strategy = null) {
+
+  if (null === $strategy) {
+    $strategy = isset($options['strategy']) ? $options['strategy'] : 'inline';
+    unset($options['strategy']);
+  }
+
+  return \Drupal::service('fragment.handler')->render($uri, $strategy, $options);
+}
+
+/**
+ * Alter-ego of the controller() twig function: returns a controller reference.
+ *
+ * This method is only usable if you are working with the Symfony full stack
+ * framework bundle enabled.
+ *
+ * @param string $controller
+ * @param string[] $attributes
+ * @param string[] $query
+ *
+ * @see Symfony\Bridge\Twig\Extension\HttpKernelExtension::controller()
+ *
+ * @return string
+ *   The fragment content
+ */
+function sf_dic_http_controller($controller, $attributes = [], $query = []) {
+  return new ControllerReference($controller, $attributes, $query);
 }
 
 /**
