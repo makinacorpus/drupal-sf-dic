@@ -19,7 +19,28 @@ class DrupalFlashBag extends FlashBag
      */
     public function add($type, $message)
     {
-        $_SESSION['messages'][] = $message;
+        // Convert to Drupal error levels
+        switch ($type) {
+
+            case 'notice':
+            case 'info':
+            case 'status':
+            case 'success':
+                $type = 'status';
+                break;
+
+            case 'danger':
+            case 'error':
+                $type = 'error';
+                break;
+
+            case 'warning':
+            case 'debug':
+                $type = 'warning';
+                break;
+        }
+
+        $_SESSION['messages'][$type][] = $message;
     }
 
     /**
