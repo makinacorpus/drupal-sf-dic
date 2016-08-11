@@ -1,0 +1,6 @@
+name = "Symfony - Entity event"
+description = "Raise generic events on Drupal entity hooks, specialized for user and node entities"
+core = 7.x
+package = Symfony
+php = 5.5
+dependency[] = sf_dic

@@ -1,0 +1,111 @@
+<?php
+/**
+ * This will save your life.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+
+use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityCollectionEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityEvent;
+
+/**
+ * Implements hook_entity_prepare().
+ */
+// function sf_entity_event_entity_prepare($entity, $type) {
+//   sf_entity_event_dispatch(EntityEvent::EVENT_PREPARE, $entity);
+// }
+
+/**
+ * Implements hook_entity_presave().
+ */
+function sf_entity_event_entity_presave($entity, $type) {
+  if ($entity instanceof EntityInterface) {
+    if ($entity->isNew()) {
+      sf_entity_event_dispatch(EntityEvent::EVENT_PREINSERT, $type, $entity);
+    } else {
+      sf_entity_event_dispatch(EntityEvent::EVENT_PREUPDATE, $type, $entity);
+    }
+    sf_entity_event_dispatch(EntityEvent::EVENT_PRESAVE, $type, $entity);
+  }
+}
+
+/**
+ * Implements hook_entity_load().
+ */
+function sf_entity_event_entity_load($entities, $type) {
+  $entity = reset($entities);
+  // @todo Trigger the user load event here causes an infinite loop, for some
+  //   reason I don't have time to debug at this precise moment, so I just
+  //   deactivate the hook for the user entity, sorry.
+  if ($entity instanceof EntityInterface && 'user' !== $type) {
+    sf_entity_collection_event_dispatch(EntityCollectionEvent::EVENT_LOAD, $type, $entities);
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function sf_entity_event_entity_insert($entity, $type) {
+  if ($entity instanceof EntityInterface) {
+    sf_entity_event_dispatch(EntityEvent::EVENT_INSERT, $type, $entity);
+    sf_entity_event_dispatch(EntityEvent::EVENT_SAVE, $type, $entity);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function sf_entity_event_entity_update($entity, $type) {
+  if ($entity instanceof EntityInterface) {
+    sf_entity_event_dispatch(EntityEvent::EVENT_UPDATE, $type, $entity);
+    sf_entity_event_dispatch(EntityEvent::EVENT_SAVE, $type, $entity);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function sf_entity_event_entity_delete($entity, $type) {
+  if ($entity instanceof EntityInterface) {
+    sf_entity_event_dispatch(EntityEvent::EVENT_DELETE, $type, $entity);
+  }
+}
+
+// @todo implement this
+// hook_entity_view($entity, $type, $view_mode, $langcode)
+// hook_entity_prepare_view($entities, $type, $langcode)
+
+/**
+ * Dispatches a node event.
+ *
+ * @param string $name
+ *   The event name. Use constants of the NodeEvent class.
+ * @param EntityInterface $node
+ *   The node concerned by the event.
+ * @param string $type
+ *   Entity type.
+ */
+function sf_entity_event_dispatch($name, $type, EntityInterface $entity) {
+  /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+  $currentUser = \Drupal::service('current_user');
+  $userId = ($currentUser->isAnonymous() ? null : ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  $event = new EntityEvent($name, $type, $entity, $userId);
+  \Drupal::service('event_dispatcher')->dispatch($name, $event);
+}
+
+/**
+ * Dispatches a nodes collection event.
+ *
+ * @param string $name
+ *   The event name. Use constants of the EntityInterface class.
+ * @param EntityInterface[] $nodes
+ *   Nodes concerned by the event.
+ * @param string $type
+ *   Entity type.
+ */
+function sf_entity_collection_event_dispatch($name, $type, array $entities) {
+  /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+  $currentUser = \Drupal::service('current_user');
+  $event = new EntityCollectionEvent($name, $type, $entities, ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  \Drupal::service('event_dispatcher')->dispatch($name, $event);
+}
