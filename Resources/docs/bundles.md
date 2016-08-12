@@ -41,6 +41,17 @@ composer require symfony/symfony
 Which should work gracefully, note that we are *not* using the Symfony full
 stack so most of its code won't be in use.
 
+## Configure this module to load the FrameworkBundle
+
+You must use the ```symfony/symfony``` package as a dependency, then add
+the following variables to your ```settings.php``` file:
+```php
+$conf['kernel.symfony_all_the_way'] = true;
+```
+
+**This is a mandatory step, this module will not autodetect the Framework**
+**Bundle for stability reasons bundle.**
+
 ## Register one or more bundles
 
 Bundle registration must happen before the ```sf_dic``` module ```hook_boot()```
@@ -63,6 +74,25 @@ function MYMODULE_boot() {
 }
 ```
 
+## Use the global Resources folder
+
+The global resource folder is where you will put templates and other various
+overrides for your own application, per default in Symfony it will be the
+``app/Resources`` folder.
+
+### Default one
+
+The default one is ``sites/default/Resources`` which allows multisites
+configurations to use one global Resources folder per site.
+
+### Customize the global Resources folder location
+
+If you need to change the location of the default Resources folder, add the
+following variable to your ``settings.php`` file:
+```php
+$conf['kernel.global_resources_dir'] = '/some/path';
+```
+
 ## Using the router
 
 You can use the Symfony router, and build 100% Symfony compatible code, please see
@@ -70,10 +100,9 @@ You can use the Symfony router, and build 100% Symfony compatible code, please s
 
 ### Register your bundle's services.yml file
 
-First, you must use the ```symfony/symfony``` package as a dependency, then add
-a few variables to your ```settings.php``` file:
+You must first tell this module you will use the Symfony router by adding the
+following variable to your ``settings.php`` file:
 ```php
-$conf['kernel.symfony_all_the_way'] = true;
 $conf['kernel.symfony_router_enable'] = true;
 ```
 

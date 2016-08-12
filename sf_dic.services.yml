@@ -19,11 +19,6 @@ services:
     class: Symfony\Component\HttpKernel\HttpKernel
     arguments: ["@event_dispatcher", "@controller_resolver", "@request_stack"]
 
-  # For symfony compatibility
-  file_locator:
-    class: MakinaCorpus\Drupal\Sf\Config\FileLocator
-    arguments: ["@kernel"]
-
   # Request stack, because we can
   request_stack:
     class: Symfony\Component\HttpFoundation\RequestStack
@@ -117,7 +112,7 @@ services:
   # Logger factory from Drupal 8
   logger.factory:
     class: Drupal\Core\Logger\LoggerChannelFactory
-    calls: 
+    calls:
       - [addLogger, ["@logger.watchdog"]]
 
   # Expose Drupal 8 default logger channels

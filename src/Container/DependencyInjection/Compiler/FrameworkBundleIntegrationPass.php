@@ -2,9 +2,12 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
+use MakinaCorpus\Drupal\Sf\Config\FileLocator as CustomFileLocator;
+
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * A few things don't go as round as we'd expect when enabling the framework
@@ -15,6 +18,31 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
+        // When not working with symfony, we need to provide a file locator
+        // service of our own instead of the symfony's one
+        if (!$container->hasDefinition('file_locator') && !$container->hasAlias('file_locator')) {
+            $container->addDefinitions([
+                'file_locator' => (new Definition())
+                    ->setClass(CustomFileLocator::class)
+                    ->addArgument(new Reference('kernel'))
+            ]);
+        } else {
+            // We are working with fullstack, and our users might have changed
+            // the global resource directory to somewhere safer than Drupal's
+            // sites/SITE folder, case in which we must honnor the user's
+            // configuration
+            $globalResourcesPath = variable_get('kernel.global_resources_dir');
+            if (!$globalResourcesPath) {
+                $globalResourcesPath = DRUPAL_ROOT . '/' . conf_path() . '/Resources';
+            }
+
+            $definition = $container->getDefinition('file_locator');
+            $definition->setArguments([
+                new Reference('kernel'),
+                $globalResourcesPath,
+            ]);
+        }
+
         // By registering the framework bundle, we also inherit from Symfony
         // default URL generator, which will cause us great pain because of
         // Drupal routes will not be known by the framework and throw a few
