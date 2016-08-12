@@ -41,16 +41,13 @@ composer require symfony/symfony
 Which should work gracefully, note that we are *not* using the Symfony full
 stack so most of its code won't be in use.
 
-## Configure this module to load the FrameworkBundle
+## Use the FrameworkBundle
 
 You must use the ```symfony/symfony``` package as a dependency, then add
 the following variables to your ```settings.php``` file:
 ```php
 $conf['kernel.symfony_all_the_way'] = true;
 ```
-
-**This is a mandatory step, this module will not autodetect the Framework**
-**Bundle for stability reasons bundle.**
 
 ## Register one or more bundles
 
