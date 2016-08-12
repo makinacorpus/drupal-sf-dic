@@ -9,14 +9,15 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\user\User;
 
+use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Implements hook_boot().
@@ -145,6 +146,7 @@ function _sf_dic_menu_type(&$item) {
  */
 function sf_dic_menu() {
   $items = [];
+
   // Do not force this behavior, it would be so wrong.
   if (variable_get('kernel.symfony_router_enable')) {
     $container = \Drupal::getContainer();
@@ -185,6 +187,20 @@ function sf_dic_menu() {
       }
     }
   }
+
+  if (variable_get('kernel.symfony_all_the_way', false)) {
+    $items['symfony/access-denied'] = [
+      'page callback'   => 'sf_dic_error_page',
+      'page arguments'  => ['403'],
+      'access callback' => true,
+    ];
+    $items['symfony/not-found'] = [
+      'page callback'   => 'sf_dic_error_page',
+      'page arguments'  => ['404'],
+      'access callback' => true,
+    ];
+  }
+
   return $items;
 }
 
@@ -364,20 +380,66 @@ function _sf_dic_response($response) {
 }
 
 /**
+ * Pass error pages handling to Symfony
+ */
+function sf_dic_error_page($status = 404) {
+
+  $request = Drupal::request();
+  $container = Drupal::getContainer();
+  $exception = sf_dic_exception();
+
+  // This is an error page, and we need an exception.
+  if (!$exception) {
+    switch ((int)$status) {
+      case 403:
+        $exception = new \Symfony\Component\Security\Core\Exception\AccessDeniedException();
+        break;
+      case 404:
+      default:
+        $exception = new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
+        break;
+    }
+  }
+
+  // Now that we got it, attempt to use Symfony to display the error page.
+  /** @var \Symfony\Bundle\TwigBundle\Controller\ExceptionController $controller */
+  $controller = $container->get('twig.controller.exception');
+
+  return _sf_dic_response($controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
+}
+
+/**
+ * Statically (dhu) get and set exceptions, since Drupal cannot handle them
+ * proprely, we are going to need it.
+ */
+function sf_dic_exception($exception = null) {
+  static $stored;
+  if (null !== $exception) {
+    $stored = $exception;
+  }
+  return $stored;
+}
+
+/**
  * Menu callback for using Symfony real router.
  */
 function sf_dic_router() {
   try {
     $request = \Drupal::requestStack()->getCurrentRequest();
+    /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    $ret = _sf_dic_response($kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, false));
+    $ret = _sf_dic_response($kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
   } catch (\Symfony\Component\Security\Core\Exception\AccessDeniedException $e) {
+    sf_dic_exception($e);
     return MENU_ACCESS_DENIED;
   } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+    sf_dic_exception($e);
     return MENU_ACCESS_DENIED;
   } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+    sf_dic_exception($e);
     return MENU_NOT_FOUND;
   } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+    sf_dic_exception($e);
     switch ($e->getStatusCode()) {
       case 403:
         return MENU_ACCESS_DENIED;

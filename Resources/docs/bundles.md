@@ -71,6 +71,19 @@ function MYMODULE_boot() {
 }
 ```
 
+## Using Symfony for 403 and 404 pages
+
+You may use Symfony for your basic error pages, yet Drupal cannot catch
+exceptions without modifying its source code, we still can catch 403 and
+404 errors using the Drupal configuration.
+
+For this, you need to go Symfony all the way as described above, then add
+the following variables into your ``settings.php`` file:
+```php
+$conf['site_403'] = 'symfony/access-denied';
+$conf['site_404'] = 'symfony/not-found';
+```
+
 ## Use the global Resources folder
 
 The global resource folder is where you will put templates and other various
