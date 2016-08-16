@@ -14,12 +14,21 @@ class DrupalFileExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFunction('file_url', [$this, 'createFileUrl'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFunction('human_size', [$this, 'humanFileSize'], ['is_safe' => ['html']]),
         ];
     }
 
     public function createFileUrl($uri)
     {
         return file_create_url($uri);
+    }
+
+    public function humanFileSize($size, $decimals = 2)
+    {
+        $sz = 'KMGTP';
+        $factor = floor((strlen($size) - 1) / 3);
+
+        return sprintf("%.{$decimals}f", $size / pow(1024, $factor)).@$sz[(int)$factor - 1]."o";
     }
 
     /**
