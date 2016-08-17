@@ -349,11 +349,13 @@ function sf_dic_plugin_create($class, $configuration = []) {
 function _sf_dic_response($response) {
   $container = \Drupal::getContainer();
   $isFragmentRoute = false;
+
   // Allow fragment renderers to work.
   if ($container->hasParameter('fragment.path')) {
     $fragmentPath = $container->getParameter('fragment.path');
     $isFragmentRoute = current_path() === trim($fragmentPath, '/');
   }
+
   // @todo Partial support only of symfony http response, headers and others
   //   are ignored, we should probably have a custom delivery callback in order
   //   to fully support this.
@@ -367,15 +369,23 @@ function _sf_dic_response($response) {
     drupal_exit();
     return;
   }
-  $status = $response->getStatusCode();
-  if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400)) {
-    $response->send();
-    drupal_exit();
-    return;
-  }
+
   if ($response instanceof Response) {
+
+    // First attempt to get status code we may have missed
+    $status = $response->getStatusCode();
+    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400)) {
+      $response->send();
+      drupal_exit();
+      return;
+    }
+
+    // If nothing happend, this is probably a valid response just send
+    // it to the browser as normal, we just may need to convert it to
+    // string first so that Drupal delivery callbacks won't fail
     $response = (string)$response->getContent();
   }
+
   return $response;
 }
 
