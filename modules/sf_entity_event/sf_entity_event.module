@@ -25,7 +25,7 @@ function sf_entity_event_node_prepare($node) {
  */
 function sf_entity_event_node_access($node, $op, $account) {
   $event = new NodeAccessEvent($node, $account, $op);
-  \Drupal::service('event_node_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+  \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
   return $event->getResult();
 }
 
@@ -34,7 +34,7 @@ function sf_entity_event_node_access($node, $op, $account) {
  */
 function sf_entity_event_node_access_records($node) {
   $event = new NodeAccessRecordEvent($node);
-  \Drupal::service('event_node_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
+  \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
   return $event->getGrants();
 }
 
