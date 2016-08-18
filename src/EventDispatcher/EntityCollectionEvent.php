@@ -10,7 +10,8 @@ class EntityCollectionEvent extends GenericEvent
 {
     use EntityEventTrait;
 
-    const EVENT_LOAD = 'entity:load';
+    const EVENT_LOAD        = 'entity:load';
+    const EVENT_PREPAREVIEW = 'entity:prepareview';
 
     private $idList;
     private $bundleList;
@@ -36,6 +37,9 @@ class EntityCollectionEvent extends GenericEvent
         parent::__construct($entities, $arguments + ['uid' => $userId]);
     }
 
+    /**
+     * Prepare internal bundle and id list cache
+     */
     private function buildListCache()
     {
         if (null !== $this->idList) {

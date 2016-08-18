@@ -4,16 +4,130 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
 
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityCollectionEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessRecordEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeCollectionEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeEvent;
 
 /**
  * Implements hook_entity_prepare().
  */
-// function sf_entity_event_entity_prepare($entity, $type) {
-//   sf_entity_event_dispatch(EntityEvent::EVENT_PREPARE, $entity);
-// }
+function sf_entity_event_node_prepare($node) {
+  sf_entity_event_node_dispatch(EntityEvent::EVENT_PREPARE, $node);
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function sf_entity_event_node_access($node, $op, $account) {
+  $event = new NodeAccessEvent($node, $account, $op);
+  \Drupal::service('event_node_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+  return $event->getResult();
+}
+
+/**
+ * Implements hook_node_access_records().
+ */
+function sf_entity_event_node_access_records($node) {
+  $event = new NodeAccessRecordEvent($node);
+  \Drupal::service('event_node_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
+  return $event->getGrants();
+}
+
+/**
+ * Implements hook_node_grants().
+ */
+function sf_entity_event_node_grants($account, $op) {
+  // @todo need specific event implementation
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function sf_entity_event_node_view($node, $view_mode, $langcode) {
+  sf_entity_event_node_dispatch(NodeEvent::EVENT_VIEW, $node);
+}
+
+/**
+ * Implements hook_node_prepare_view().
+ */
+function sf_entity_event_node_prepare_view($entities, $langcode) {
+  sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function sf_entity_event_node_presave($node) {
+  if ($node instanceof NodeInterface) {
+    if ($node->isNew()) {
+      sf_entity_event_node_dispatch(NodeEvent::EVENT_PREINSERT, $node);
+    } else {
+      sf_entity_event_node_dispatch(NodeEvent::EVENT_PREUPDATE, $node);
+    }
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_PRESAVE, $node);
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ */
+function sf_entity_event_node_load($entities) {
+  $node = reset($entities);
+  // @todo Trigger the user load event here causes an infinite loop, for some
+  //   reason I don't have time to debug at this precise moment, so I just
+  //   deactivate the hook for the user node, sorry.
+  if ($node instanceof NodeInterface) {
+    sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_LOAD, $entities);
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function sf_entity_event_node_insert($node) {
+  if ($node instanceof NodeInterface) {
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_INSERT, $node);
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_SAVE, $node);
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function sf_entity_event_node_update($node) {
+  if ($node instanceof NodeInterface) {
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_UPDATE, $node);
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_SAVE, $node);
+  }
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function sf_entity_event_node_delete($node) {
+  if ($node instanceof NodeInterface) {
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_DELETE, $node);
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function sf_entity_event_entity_view($entity, $type, $view_mode, $langcode) {
+  sf_entity_event_dispatch(EntityEvent::EVENT_VIEW, $type, $entity);
+}
+
+/**
+ * Implements hook_entity_prepare_view().
+ */
+function sf_entity_event_entity_prepare_view($entities, $type, $langcode) {
+  sf_entity_collection_event_dispatch(EntityCollectionEvent::EVENT_PREPAREVIEW, $type, $entities);
+}
 
 /**
  * Implements hook_entity_presave().
@@ -71,12 +185,44 @@ function sf_entity_event_entity_delete($entity, $type) {
   }
 }
 
-// @todo implement this
-// hook_entity_view($entity, $type, $view_mode, $langcode)
-// hook_entity_prepare_view($entities, $type, $langcode)
-
 /**
  * Dispatches a node event.
+ *
+ * @param string $name
+ *   The event name. Use constants of the NodeEvent class.
+ * @param NodeInterface $node
+ *   The node concerned by the event.
+ * @param ... $arguments
+ */
+function sf_entity_event_node_dispatch($name, NodeInterface $node) {
+  /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+  $currentUser = \Drupal::service('current_user');
+  $userId = ($currentUser->isAnonymous() ? null : ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  // Generic event for all entity types
+  $event = new NodeEvent($name, $node, $userId);
+  \Drupal::service('event_dispatcher')->dispatch($name, $event);
+}
+
+/**
+ * Dispatches a node collection event.
+ *
+ * @param string $name
+ *   The event name. Use constants of the EntityInterface class.
+ * @param NodeInterface[] $nodes
+ *   Nodes concerned by the event.
+ * @param ... $arguments
+ */
+function sf_entity_collection_event_node_dispatch($name, array $nodes) {
+  /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+  $currentUser = \Drupal::service('current_user');
+  $userId = ($currentUser->isAnonymous() ? null : ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  // Generic event for all entity types
+  $event = new NodeCollectionEvent($name, $nodes, $userId);
+  \Drupal::service('event_dispatcher')->dispatch($name, $event);
+}
+
+/**
+ * Dispatches an entity event.
  *
  * @param string $name
  *   The event name. Use constants of the NodeEvent class.
@@ -84,17 +230,19 @@ function sf_entity_event_entity_delete($entity, $type) {
  *   The node concerned by the event.
  * @param string $type
  *   Entity type.
+ * @param ... $arguments
  */
 function sf_entity_event_dispatch($name, $type, EntityInterface $entity) {
   /** @var \Drupal\Core\Session\AccountInterface $currentUser */
   $currentUser = \Drupal::service('current_user');
   $userId = ($currentUser->isAnonymous() ? null : ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  // Generic event for all entity types
   $event = new EntityEvent($name, $type, $entity, $userId);
   \Drupal::service('event_dispatcher')->dispatch($name, $event);
 }
 
 /**
- * Dispatches a nodes collection event.
+ * Dispatches an entity collection event.
  *
  * @param string $name
  *   The event name. Use constants of the EntityInterface class.
@@ -102,10 +250,13 @@ function sf_entity_event_dispatch($name, $type, EntityInterface $entity) {
  *   Nodes concerned by the event.
  * @param string $type
  *   Entity type.
+ * @param ... $arguments
  */
 function sf_entity_collection_event_dispatch($name, $type, array $entities) {
   /** @var \Drupal\Core\Session\AccountInterface $currentUser */
   $currentUser = \Drupal::service('current_user');
-  $event = new EntityCollectionEvent($name, $type, $entities, ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  $userId = ($currentUser->isAnonymous() ? null : ($currentUser->isAnonymous() ? null : $currentUser->id()));
+  // Generic event for all entity types
+  $event = new EntityCollectionEvent($name, $type, $entities, $userId);
   \Drupal::service('event_dispatcher')->dispatch($name, $event);
 }
