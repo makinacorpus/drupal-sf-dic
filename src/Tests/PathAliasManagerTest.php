@@ -10,7 +10,7 @@ use Drupal\Core\Path\AliasStorageInterface;
 
 use MakinaCorpus\Drupal\Sf\Tests\Mockup\ArrayAliasStorage;
 
-class PathAliasManagerTest extends \PHPUnit_Framework_TestCase
+class PathAliasManagerTest extends AbstractDrupalTest
 {
     /**
      * @var AliasStorageInterface
@@ -24,6 +24,11 @@ class PathAliasManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        // We need to bootstrap at least Drupal configuration so that
+        // variable_get() is defined
+        parent::setUp();
+        $this->getDrupalContainer();
+
         if (!defined('LANGUAGE_NONE')) {
             define('LANGUAGE_NONE', 'und');
         }

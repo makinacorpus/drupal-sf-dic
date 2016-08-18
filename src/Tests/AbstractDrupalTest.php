@@ -202,7 +202,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     final protected function getNullModuleHandler()
     {
         if (!$this->nullModuleHandler) {
-            $this->nullModuleHandler = $this->getMock('\Drupal\Core\Extension\ModuleHandlerInterface');
+            $this->nullModuleHandler = $this->createMock('\Drupal\Core\Extension\ModuleHandlerInterface');
         }
 
         return $this->nullModuleHandler;
@@ -214,7 +214,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     final protected function getNullCacheBackend()
     {
         if (!$this->nullCacheBackend) {
-            $this->nullCacheBackend = $this->getMock('\Drupal\Core\Cache\CacheBackendInterface');
+            $this->nullCacheBackend = $this->createMock('\Drupal\Core\Cache\CacheBackendInterface');
         }
 
         return $this->nullCacheBackend;
@@ -226,7 +226,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     final protected function getNullLegacyCache()
     {
         if (!$this->nullLegacyCache) {
-            $this->nullLegacyCache = $this->getMock('\DrupalCacheInterface');
+            $this->nullLegacyCache = $this->createMock('\DrupalCacheInterface');
         }
 
         return $this->nullLegacyCache;
