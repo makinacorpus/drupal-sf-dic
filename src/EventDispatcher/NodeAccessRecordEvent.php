@@ -20,6 +20,7 @@ final class NodeAccessRecordEvent extends Event
     public function __construct(NodeInterface $node, $allowedRealms = null)
     {
         $this->node = $node;
+        $this->matrix = new NodeAccessMatrix();
         $this->allowedRealms = $allowedRealms;
     }
 

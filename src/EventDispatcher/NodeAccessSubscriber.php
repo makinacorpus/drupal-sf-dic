@@ -70,7 +70,7 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         // Now build the node records event and set the allowed realms to ensure
         // that you won't need to recompute everything
         $e3 = new NodeAccessRecordEvent($e->getNode(), array_keys($grants));
-        $this->eventDispatcher->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD);
+        $this->eventDispatcher->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $e3);
 
         if ($e3->getGrantMatrix()->can($grants, $e->getOperation())) {
             return $e->allow();
