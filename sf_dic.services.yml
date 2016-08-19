@@ -177,6 +177,12 @@ services:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]
 
+  # Custom node access helper
+  sf_dic.node_access.subscriber:
+    class: MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessSubscriber
+    arguments: ["@event_dispatcher"]
+    tags: [{name: event_subscriber}]
+
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it
   test_empty_service:

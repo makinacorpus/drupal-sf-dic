@@ -14,17 +14,21 @@ class NodeAccessEvent extends Event
     private $node;
     private $account;
     private $op;
+    private $byVote = false;
 
+    private $ignored = 0;
     private $allowed = 0;
     private $denied = 0;
 
     private $result = NODE_ACCESS_IGNORE;
 
-    public function __construct(NodeInterface $node, AccountInterface $account, $op)
+    public function __construct($node, AccountInterface $account, $op, $byVote = false)
     {
+        // And yes, node can a string...
         $this->node = $node;
         $this->account = $account;
         $this->op = $op;
+        $this->byVote = $byVote;
     }
 
     /**
@@ -58,6 +62,14 @@ class NodeAccessEvent extends Event
     }
 
     /**
+     * You don't care about this node
+     */
+    public function ignore()
+    {
+        ++$this->ignored;
+    }
+
+    /**
      * You say I grant access to this node
      */
     public function allow()
@@ -77,6 +89,11 @@ class NodeAccessEvent extends Event
         ++$this->denied;
 
         $this->result = NODE_ACCESS_DENY;
+
+        // Where the actual magic happens please read the README.md file.
+        if (!$this->byVote) {
+            $this->stopPropagation();
+        }
     }
 
     /**

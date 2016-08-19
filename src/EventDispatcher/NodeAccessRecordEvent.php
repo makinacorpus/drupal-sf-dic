@@ -6,17 +6,43 @@ use Drupal\node\NodeInterface;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class NodeAccessRecordEvent extends Event
+/**
+ * Collect node records event
+ */
+final class NodeAccessRecordEvent extends Event
 {
     const EVENT_NODE_ACCESS_RECORD = 'node:accessrecord';
 
     private $node;
-    private $grants = [];
+    private $matrix;
+    private $allowedRealms;
 
-    public function __construct(NodeInterface $node, array $grants = [])
+    public function __construct(NodeInterface $node, $allowedRealms = null)
     {
         $this->node = $node;
-        $this->grants = $grants;
+        $this->allowedRealms = $allowedRealms;
+    }
+
+    /**
+     * If this hook is running at runtime, this allows users to determine if the
+     * caller needs to check grants for this realm or not; if you, the person
+     * implementing this event, need to do CPU costly computation, or external
+     * backend queries (SQL or cache) for a certain realm, this gives you the
+     * possibility of skipping that.
+     *
+     * @param string $realm
+     *
+     * @return bool
+     */
+    public function isRealmAllowed($realm)
+    {
+        if (null === $this->allowedRealms) {
+            return true;
+        }
+        if (!$this->allowedRealms) {
+            return false;
+        }
+        return in_array($realm, $this->allowedRealms);
     }
 
     /**
@@ -30,33 +56,6 @@ class NodeAccessRecordEvent extends Event
     }
 
     /**
-     * Is there an already existing grant for this realm/gid
-     *
-     * Having duplicates causes Drupal to make PDO exceptions
-     *
-     * @param string $realm
-     * @param int $gid
-     * @param bool $remove
-     *    For internal use mostly, but settings this to true will also delete
-     *    the duplicate grant
-     *
-     * @return array
-     *   The associated grant, if exists
-     */
-    private function doLookup($realm, $gid, $remove = false)
-    {
-        foreach ($this->grants as $index => $grant) {
-            if ($realm === $grant['realm'] && $gid === $grant['gid']) {
-                if ($remove) {
-                    unset($this->grants[$index]);
-                }
-                return $grant;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Lookup for existing grant
      *
      * @param string $realm
@@ -65,9 +64,9 @@ class NodeAccessRecordEvent extends Event
      * @return array
      *   The associated grant, if exists
      */
-    public function lookup($realm, $gid)
+    public function get($realm, $gid)
     {
-        return $this->doLookup($realm, $gid);
+        return $this->matrix->get($realm, $gid);
     }
 
     /**
@@ -78,7 +77,7 @@ class NodeAccessRecordEvent extends Event
      */
     public function remove($realm, $gid)
     {
-        $this->doLookup($realm, $gid, true);
+        return $this->matrix->remove($realm, $gid);
     }
 
     /**
@@ -91,10 +90,9 @@ class NodeAccessRecordEvent extends Event
      * @param bool $delete
      * @param int $priority
      */
-    public function upsert($realm, $gid, $view = null, $update = null, $delete = null, $priority = 0)
+    public function upsert($realm, $gid, $view = true, $update = false, $delete = false, $priority = 0)
     {
-        $this->remove($realm, $gid, true);
-        $this->add($realm, $gid, $view, $update, $delete, $priority);
+        return $this->matrix->upsert($realm, $gid, $view, $update, $delete, $priority);
     }
 
     /**
@@ -107,29 +105,31 @@ class NodeAccessRecordEvent extends Event
      * @param bool $delete
      * @param int $priority
      */
-    public function add($realm, $gid, $view = false, $update = false, $delete = false, $priority = 0)
+    public function add($realm, $gid, $view = true, $update = false, $delete = false, $priority = 0)
     {
-        if ($this->lookup($realm, $gid)) {
-            throw new \InvalidArgumentException(sprintf("a grant for realù %s with gid %d already exists", $realm, $gid));
-        }
+        return $this->matrix->add($realm, $gid, $view, $update, $delete, $priority);
+    }
 
-        $this->grants[] = [
-            'realm'         => $realm,
-            'gid'           => $gid,
-            'grant_view'    => (int)(bool)$view,
-            'grant_update'  => (int)(bool)$view,
-            'grant_delete'  => (int)(bool)$view,
-            'priority'      => (int)$priority,
-        ];
+    /**
+     * Get optimized internal grant matrix
+     *
+     * @return NodeAccessMatrix
+     */
+    public function getGrantMatrix()
+    {
+        return $this->matrix;
     }
 
     /**
      * Get the Drupal grants
      *
+     * This converts the current internal matrix to Drupal grant array, do not
+     * use it outside of the original event dispatcher
+     *
      * @return array
      */
-    public function getGrants()
+    public function toDrupalGrantList()
     {
-        return $this->grants;
+        return $this->matrix->toDrupalGrantList();
     }
 }
