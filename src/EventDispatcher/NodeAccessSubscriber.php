@@ -60,10 +60,12 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         $e2 = new NodeAccessGrantEvent($e->getAccount(), $e->getOperation());
         $this->eventDispatcher->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $e2);
 
-        if ($e2->isEmpty()) {
-            // Nothing to check upon, we cannot possibly determine any right.
-            return $e->ignore();
-        }
+//         // @todo we definitely do want to have a more pragmatic approach that
+//         //   tells us if the node is managed by another module or not!
+//         if ($e2->isEmpty()) {
+//             // Nothing to check upon, we cannot possibly determine any right.
+//             return $e->ignore();
+//         }
 
         $grants = $e2->getResult();
 
@@ -85,11 +87,12 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         // false positive (there isn't all grant lines in the matrix, so it
         // might be empty, so we cannot know if the node is managed or not by
         // a module).
-
         if ($e3->getGrantMatrix()->isEmpty()) {
             return $e->ignore();
         }
 
-        return $e->deny();
+        if (NODE_ACCESS_ALLOW !== $e->getResult()) {
+            return $e->deny();
+        }
     }
 }

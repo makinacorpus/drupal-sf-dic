@@ -39,6 +39,13 @@ function sf_entity_event_node_access_records($node) {
 }
 
 /**
+ * Empty implementation of hook_node_grants().
+ */
+function sf_entity_event_node_grants($account, $op) {
+  return [];
+}
+
+/**
  * Implements hook_node_view().
  */
 function sf_entity_event_node_view($node, $view_mode, $langcode) {
