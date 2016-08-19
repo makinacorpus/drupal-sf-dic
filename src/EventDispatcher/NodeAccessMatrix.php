@@ -92,6 +92,16 @@ final class NodeAccessMatrix
     }
 
     /**
+     * Remove grants for whole realm if exist
+     *
+     * @param string $realm
+     */
+    public function removeWholeRealm($realm)
+    {
+        unset($this->grants[$realm]);
+    }
+
+    /**
      * Upsert a grant
      *
      * @param string $realm

@@ -82,6 +82,16 @@ final class NodeAccessRecordEvent extends Event
     }
 
     /**
+     * Remove grants for whole realm if exist
+     *
+     * @param string $realm
+     */
+    public function removeWholeRealm($realm)
+    {
+        return $this->matrix->removeWholeRealm($realm);
+    }
+
+    /**
      * Upsert a grant
      *
      * @param string $realm

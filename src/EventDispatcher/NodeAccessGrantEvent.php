@@ -57,6 +57,16 @@ final class NodeAccessGrantEvent extends Event
     }
 
     /**
+     * Remove grants for the whole realm if exists
+     *
+     * @param string $realm
+     */
+    public function removeWholeRealm($realm)
+    {
+        unset($this->grants[$realm]);
+    }
+
+    /**
      * Remove grant if exists
      *
      * @param string $realm
