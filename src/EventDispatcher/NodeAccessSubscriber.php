@@ -76,6 +76,20 @@ class NodeAccessSubscriber implements EventSubscriberInterface
             return $e->allow();
         }
 
-        return $e->ignore();
+        // @todo Find a way to be more pragmatic, by doing deny() here, we do
+        // prevent nodes that are not managed by node_access ACLs to use the
+        // normal Drupal workflow, which will cause serious errors for most
+        // Drupal sites.
+        // But, the other way arround, if we do ignore() instead, because we
+        // may have a partial set of grants in the grant matrix, this may cause
+        // false positive (there isn't all grant lines in the matrix, so it
+        // might be empty, so we cannot know if the node is managed or not by
+        // a module).
+
+        if ($e3->getGrantMatrix()->isEmpty()) {
+            return $e->ignore();
+        }
+
+        return $e->deny();
     }
 }

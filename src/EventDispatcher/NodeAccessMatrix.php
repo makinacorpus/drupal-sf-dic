@@ -103,7 +103,7 @@ final class NodeAccessMatrix
      */
     public function upsert($realm, $gid, $view = true, $update = false, $delete = false, $priority = 0)
     {
-        $this->grants[$realm][(string)$gid] = [(bool)$view, (bool)$view, (bool)$view, (int)$priority];
+        $this->grants[$realm][(string)$gid] = [(bool)$view, (bool)$update, (bool)$delete, (int)$priority];
     }
 
     /**
@@ -122,7 +122,7 @@ final class NodeAccessMatrix
             throw new \InvalidArgumentException(sprintf("a grant for realm %s with gid %d already exists", $realm, $gid));
         }
 
-        $this->grants[$realm][(string)$gid] = [(bool)$view, (bool)$view, (bool)$view, (int)$priority];
+        $this->grants[$realm][(string)$gid] = [(bool)$view, (bool)$update, (bool)$delete, (int)$priority];
     }
 
     /**
@@ -140,11 +140,22 @@ final class NodeAccessMatrix
                     'grant_view'    => (int)$grants[0],
                     'grant_update'  => (int)$grants[1],
                     'grant_delete'  => (int)$grants[2],
+                    'priority'      => (int)$grants[3],
                 ];
             }
         }
 
         return $ret;
+    }
+
+    /**
+     * Is grant list empty
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->grants);
     }
 
     /**
