@@ -9,6 +9,7 @@ use Drupal\node\NodeInterface;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityCollectionEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessGrantEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessRecordEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeCollectionEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeEvent;
@@ -42,7 +43,11 @@ function sf_entity_event_node_access_records($node) {
  * Empty implementation of hook_node_grants().
  */
 function sf_entity_event_node_grants($account, $op) {
-  return [];
+  // @todo This is a duplicate with the event throw within NodeAccessSubscriber
+  //   so it needs to go through a cache somehow
+  $event = new NodeAccessGrantEvent($account, $op);
+  \Drupal::service('event_dispatcher')->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
+  return $event->getResult();
 }
 
 /**
