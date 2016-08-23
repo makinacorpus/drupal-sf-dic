@@ -77,6 +77,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         if (null === $this->whitelist) {
             $this->whitelistRebuild();
         }
+        // Drush context should not cache anything
+        if (drupal_is_cli()) {
+            $this->doCache = false;
+        }
+
         if ($this->doCache) {
             $this->cacheKey = 'sf:' . current_path();
         }
@@ -263,7 +268,7 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
             // core, they only store the sources (not the associated aliases)
             // which will allow, on next page hit, to reload all aliases in
             // one SQL query, ensuring we won't have cached aliases anywhere
-            
+
             // RLE: FIXME: Notice: I have array('dts' => array(), 'src' => array('en'=>array('/admin/dashboard'=>false))
             // so $this->data[self::ALIAS] with 'dst' as ALIAS is array()
             // and current of array() is FALSE ==> array_keys of FALSe is a notice
