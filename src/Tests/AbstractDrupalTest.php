@@ -301,6 +301,20 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Is module enabled
+     *
+     * @param unknown $module
+     *
+     * @return bool
+     */
+    final protected function moduleExists($module)
+    {
+        drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE);
+
+        return module_exists($module);
+    }
+
+    /**
      * Get the entity manager
      *
      * @return EntityManager
