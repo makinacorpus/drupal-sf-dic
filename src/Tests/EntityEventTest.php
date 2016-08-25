@@ -18,12 +18,12 @@ class EntityEventTest extends AbstractDrupalTest
     {
         parent::setUp();
 
+        if (!module_exists('sf_entity_event')) {
+            $this->markTestSkipped("You must enable the sf_entity_event module to run this test");
+        }
+
         // forces bootstrap
         $this->getDrupalContainer();
-
-        // I am not really sure why this would not work; don't care.
-        module_enable(['sf_entity_event']);
-        require_once drupal_get_path('module', 'sf_entity_event') . '/sf_entity_event.module';
     }
 
     public function testAllHooks()

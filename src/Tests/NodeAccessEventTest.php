@@ -81,11 +81,11 @@ class NodeAccessEventTest extends \PHPUnit_Framework_TestCase
     {
         $this->dispatcher->addSubscriber(new NodeAccessSubscriber($this->dispatcher));
 
-        $this->dispatcher->addListener(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, function (NodeAccessEvent $e) {
+        $this->dispatcher->addListener(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, function (NodeAccessGrantEvent $e) {
             throw new \Exception("You shall not pass");
         });
 
-        $this->dispatcher->addListener(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, function (NodeAccessEvent $e) {
+        $this->dispatcher->addListener(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, function (NodeAccessRecordEvent $e) {
             throw new \Exception("You shall not pass");
         });
 
