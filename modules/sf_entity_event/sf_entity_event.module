@@ -18,7 +18,7 @@ use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeEvent;
  * Implements hook_entity_prepare().
  */
 function sf_entity_event_node_prepare($node) {
-  sf_entity_event_node_dispatch(EntityEvent::EVENT_PREPARE, $node);
+  sf_entity_event_node_dispatch(NodeEvent::EVENT_PREPARE, $node);
 }
 
 /**

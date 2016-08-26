@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 
 /**
  * Implements hook_boot().
@@ -667,6 +668,12 @@ function sf_dic_forms_proxy($form, &$form_state) {
   array_unshift($args, $form);
 
   $form = call_user_func_array([$form_obj, 'buildForm'], $args);
+
+  $event = new FormEvent($form_obj, $form_state_obj);
+  \Drupal::service('event_dispatcher')->dispatch(FormEvent::EVENT_ALTER, $event);
+
+  $event = new FormEvent($form_obj, $form_state_obj);
+  \Drupal::service('event_dispatcher')->dispatch(FormEvent::EVENT_ALTER_PREFIX . $form_obj->getFormId(), $event);
 
   // We attach process so that it will happen after the form has been set
   // or retrieved from the cache, avoiding Closure serialization attempt.
