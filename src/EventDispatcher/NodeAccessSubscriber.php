@@ -2,6 +2,8 @@
 
 namespace MakinaCorpus\Drupal\Sf\EventDispatcher;
 
+use Drupal\Core\Session\AccountInterface;
+
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -11,6 +13,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class NodeAccessSubscriber implements EventSubscriberInterface
 {
+    const STATIC_CACHE_KEY = 'sf_dic_user_grants';
+
     /**
      * {@inheritdoc}
      */
@@ -23,10 +27,8 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @var EventDispatcherInterface
-     */
     private $eventDispatcher;
+    private $userGrantCache;
 
     /**
      * Default constructor
@@ -36,6 +38,51 @@ class NodeAccessSubscriber implements EventSubscriberInterface
     public function __construct(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
+
+        // Weird, but necessary so that the drupal static cache clear calls
+        // get this erased too; we need to exclude tests and degraded envs.
+        if (function_exists('drupal_static')) {
+            $this->userGrantCache = &drupal_static(self::STATIC_CACHE_KEY, []);
+        } else {
+            $this->userGrantCache = [];
+        }
+    }
+
+    /**
+     * Clear internal caches
+     */
+    public function resetCache()
+    {
+        if (function_exists('drupal_static')) {
+            drupal_static_reset(self::STATIC_CACHE_KEY);
+        }
+
+        $this->userGrantCache = &drupal_static(self::STATIC_CACHE_KEY, []);
+    }
+
+    /**
+     * Collect and cache current user account grant cache
+     *
+     * @param AccountInterface $user
+     * @param string $permission
+     *
+     * @return int[][]
+     */
+    private function collectUserGrants(AccountInterface $user, $permission = 'view')
+    {
+        $userId = $user->id();
+
+        if (isset($this->userGrantCache[$permission][$userId])) {
+            return $this->userGrantCache[$permission][$userId];
+        }
+
+        // User grants event is supposedly faster than node records events
+        // since that in Drupal API and implementation, it is the only hook
+        // to run during ALL HTTP hits, without any exeception
+        $event = new NodeAccessGrantEvent($user, $permission);
+        $this->eventDispatcher->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
+
+        return $this->userGrantCache[$permission][$userId] = $event->getResult();
     }
 
     /**
@@ -60,14 +107,14 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         $e2 = new NodeAccessGrantEvent($e->getAccount(), $e->getOperation());
         $this->eventDispatcher->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $e2);
 
+        $grants = $this->collectUserGrants($e->getAccount(), $e->getOperation());
+
 //         // @todo we definitely do want to have a more pragmatic approach that
 //         //   tells us if the node is managed by another module or not!
-//         if ($e2->isEmpty()) {
+//         if (empty($grants) {
 //             // Nothing to check upon, we cannot possibly determine any right.
 //             return $e->ignore();
 //         }
-
-        $grants = $e2->getResult();
 
         // Now build the node records event and set the allowed realms to ensure
         // that you won't need to recompute everything
