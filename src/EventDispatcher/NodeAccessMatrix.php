@@ -94,11 +94,47 @@ final class NodeAccessMatrix
     /**
      * Remove grants for whole realm if exist
      *
-     * @param string $realm
+     * @param string|string[] $realm
      */
     public function removeWholeRealm($realm)
     {
-        unset($this->grants[$realm]);
+        if (is_array($realm)) {
+            foreach ($realm as $single) {
+                unset($this->grants[$single]);
+            }
+        } else {
+            unset($this->grants[$realm]);
+        }
+    }
+
+    /**
+     * Alter group identifiers of existing grants
+     *
+     * For the given realm(s) change the associated given gid to the new
+     * one instead, without changing anything else.
+     *
+     * @param string|string[] $realmList
+     *   One or more realms to alter
+     * @param int $oldGid
+     *   Group identifier to look for
+     * @param int $newGid
+     *   Group identifier to replace the old one with
+     */
+    public function replaceGroupId($realmList, $oldGid, $newGid)
+    {
+        if (!is_array($realmList)) {
+            $realmList = [$realmList];
+        }
+
+        $oldGid = (string)$oldGid;
+        $newGid = (string)$newGid;
+
+        foreach ($realmList as $altered) {
+            if (isset($this->grants[$altered][$oldGid])) {
+                $this->grants[$altered][$newGid] = $this->grants[$altered][$oldGid];
+                unset($this->grants[$altered][$oldGid]);
+            }
+        }
     }
 
     /**

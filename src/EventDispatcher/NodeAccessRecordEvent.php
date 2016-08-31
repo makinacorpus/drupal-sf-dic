@@ -57,6 +57,17 @@ final class NodeAccessRecordEvent extends Event
     }
 
     /**
+     * Has the current realm/gid
+     *
+     * @param string $realm
+     * @param int $gid
+     */
+    public function exists($realm, $gid)
+    {
+        return $this->matrix->exists($realm, $gid);
+    }
+
+    /**
      * Lookup for existing grant
      *
      * @param string $realm
@@ -84,11 +95,29 @@ final class NodeAccessRecordEvent extends Event
     /**
      * Remove grants for whole realm if exist
      *
-     * @param string $realm
+     * @param string|string[] $realm
      */
     public function removeWholeRealm($realm)
     {
         return $this->matrix->removeWholeRealm($realm);
+    }
+
+    /**
+     * Alter group identifiers of existing grants
+     *
+     * For the given realm(s) change the associated given gid to the new
+     * one instead, without changing anything else.
+     *
+     * @param string|string[] $realmList
+     *   One or more realms to alter
+     * @param int $oldGid
+     *   Group identifier to look for
+     * @param int $newGid
+     *   Group identifier to replace the old one with
+     */
+    public function replaceGroupId($realmList, $oldGid, $newGid)
+    {
+        $this->matrix->replaceGroupId($realmList, $oldGid, $newGid);
     }
 
     /**
