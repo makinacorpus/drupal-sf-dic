@@ -13,8 +13,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class NodeAccessSubscriber implements EventSubscriberInterface
 {
-    const STATIC_CACHE_KEY = 'sf_dic_user_grants';
-
     /**
      * {@inheritdoc}
      */
@@ -38,14 +36,6 @@ class NodeAccessSubscriber implements EventSubscriberInterface
     public function __construct(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
-
-        // Weird, but necessary so that the drupal static cache clear calls
-        // get this erased too; we need to exclude tests and degraded envs.
-        if (function_exists('drupal_static')) {
-            $this->userGrantCache = &drupal_static(self::STATIC_CACHE_KEY, []);
-        } else {
-            $this->userGrantCache = [];
-        }
     }
 
     /**
@@ -53,11 +43,7 @@ class NodeAccessSubscriber implements EventSubscriberInterface
      */
     public function resetCache()
     {
-        if (function_exists('drupal_static')) {
-            drupal_static_reset(self::STATIC_CACHE_KEY);
-        }
-
-        $this->userGrantCache = &drupal_static(self::STATIC_CACHE_KEY, []);
+        $this->userGrantCache = [];
     }
 
     /**
@@ -72,8 +58,8 @@ class NodeAccessSubscriber implements EventSubscriberInterface
     {
         $userId = $user->id();
 
-        if (isset($this->userGrantCache[$permission][$userId])) {
-            return $this->userGrantCache[$permission][$userId];
+        if (isset($this->userGrantCache[$userId])) {
+            return $this->userGrantCache[$userId];
         }
 
         // User grants event is supposedly faster than node records events
@@ -82,7 +68,7 @@ class NodeAccessSubscriber implements EventSubscriberInterface
         $event = new NodeAccessGrantEvent($user, $permission);
         $this->eventDispatcher->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
 
-        return $this->userGrantCache[$permission][$userId] = $event->getResult();
+        return $this->userGrantCache[$userId] = $event->getResult();
     }
 
     /**
@@ -103,10 +89,7 @@ class NodeAccessSubscriber implements EventSubscriberInterface
 
         // User grants event is supposedly faster than node records events
         // since that in Drupal API and implementation, it is the only hook
-        // to run during ALL HTTP hits, without any exeception
-        $e2 = new NodeAccessGrantEvent($e->getAccount(), $e->getOperation());
-        $this->eventDispatcher->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $e2);
-
+        // to run during ALL HTTP hits, without any exeception.
         $grants = $this->collectUserGrants($e->getAccount(), $e->getOperation());
 
 //         // @todo we definitely do want to have a more pragmatic approach that
