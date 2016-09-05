@@ -262,6 +262,19 @@ function sf_dic_flush_caches() {
 }
 
 /**
+ * Generate route
+ *
+ * @param string $name
+ * @param array $parameters
+ * @param int $referenceType
+ *
+ * @return string
+ */
+function sf_dic_route_generate($name, $parameters = [], $referenceType = 0) {
+  return \Drupal::service('router')->generate($name, $parameters, $referenceType);
+}
+
+/**
  * Render with twig
  *
  * @param string $view

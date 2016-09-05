@@ -37,7 +37,10 @@ class DrupalSession extends Session
      */
     public function get($name, $default = null)
     {
-        if (is_array($_SESSION) && array_key_exists($name, $_SESSION)) {
+        // It happens that, if called priori to session_start() call that this
+        // variable is uninitialized, which causes notices to happen, let's
+        // avoid that.
+        if (isset($_SESSION) && is_array($_SESSION) && array_key_exists($name, $_SESSION)) {
             return $_SESSION[$name];
         }
         return $default;
