@@ -97,9 +97,22 @@ class Drupal
     static public function unsetContainer()
     {
         $kernel = self::_getKernel();
+
+        // We need to spawn the kernel (if not already) in order to clear the
+        // cache folder manually, we will then reset it.
         if ($kernel instanceof Kernel) {
             $kernel->dropCache();
         }
+
+        // Fully reset the container, and prey for other modules to find the
+        // right one. In theory, if they didn't referenced their services into
+        // statics, it should be fine, new one will transparently replace the
+        // old one in \Drupal::service() calls.
+
+        // Please note that as a side effect, it will boot() again the bundles
+        // if they are registered bundles, they might mess up with globals or
+        // configuration.
+        self::$kernel = null;
     }
 
     /**
