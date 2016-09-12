@@ -124,14 +124,19 @@ function sf_entity_event_node_delete($node) {
  * Implements hook_entity_view().
  */
 function sf_entity_event_entity_view($entity, $type, $view_mode, $langcode) {
-  sf_entity_event_dispatch(EntityEvent::EVENT_VIEW, $type, $entity);
+  if ($entity instanceof EntityInterface) {
+    sf_entity_event_dispatch(EntityEvent::EVENT_VIEW, $type, $entity);
+  }
 }
 
 /**
  * Implements hook_entity_prepare_view().
  */
 function sf_entity_event_entity_prepare_view($entities, $type, $langcode) {
-  sf_entity_collection_event_dispatch(EntityCollectionEvent::EVENT_PREPAREVIEW, $type, $entities);
+  $entity = reset($entities);
+  if ($entity instanceof EntityInterface) {
+    sf_entity_collection_event_dispatch(EntityCollectionEvent::EVENT_PREPAREVIEW, $type, $entities);
+  }
 }
 
 /**
