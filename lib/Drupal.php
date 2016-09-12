@@ -19,6 +19,11 @@ class Drupal
     static protected $kernel;
 
     /**
+     * @var mixed[]
+     */
+    static protected $bundles = [];
+
+    /**
      * Set kernel
      *
      * @param KernelInterface $kernel
@@ -35,6 +40,11 @@ class Drupal
             $debug  = !isset($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
 
             self::$kernel = new Kernel($env, $debug);
+
+            // @todo serious ugly patch, see registerBundles()
+            if (self::$bundles) {
+                self::$kernel->addExtraBundles(array_values(self::$bundles));
+            }
         }
 
         return self::$kernel;
@@ -52,8 +62,15 @@ class Drupal
      */
     static public function registerBundles($bundles)
     {
-        $kernel = self::_buildKernel();
-        $kernel->addExtraBundles($bundles);
+        // @todo serious ugly patch, because unsetContainer() needs the bundles
+        //   to be set once again. Find a better way to register Drupal modules
+        //   bundles
+        foreach ($bundles as $bundle) {
+            $class = get_class($bundle);
+            if (!isset(self::$bundles[$class])) {
+                self::$bundles[$class] = $bundle;
+            }
+        }
     }
 
     /**
@@ -282,7 +299,7 @@ class Drupal
   //   public static function queue($name, $reliable = FALSE) {
   //     return static::getContainer()->get('queue')->get($name, $reliable);
   //   }
-  
+
     /**
      * Returns the default http client.
      *
