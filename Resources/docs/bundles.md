@@ -1,6 +1,4 @@
-# As a Symfony bundle user
-
-## What can I do ?
+# Bring Symfony 3 fullstack into Drupal
 
 This module can natively use Symfony bundles into the Drupal application, but
 you must ackowledge the fact that you cannot use the whole Symfony API:
@@ -18,11 +16,18 @@ you must ackowledge the fact that you cannot use the whole Symfony API:
     like symfony components, but there return will only be used to fill in the
     page ```content``` Drupal region;
 
+ *  use the router component, as any Symfony application, but you must know that
+    controllers will be executed by a specific Drupal menu router callback instead
+    of being run by the HttpKernel. Router usage is disabled per default;
+
  *  you may use anything you want as long as you set it as composer dependencies
     case in which you might want to see the next chapter. Please note that it
     will only work to the packages you pulled extend.
 
-## Bring the necessary dependencies
+
+# Installation
+
+## Bringing in required dependencies
 
 You must require a few packages for this to work, if you want twig you must:
 ```sh
@@ -41,7 +46,8 @@ composer require symfony/symfony
 Which should work gracefully, note that we are *not* using the Symfony full
 stack so most of its code won't be in use.
 
-## Use the FrameworkBundle
+
+## Enable the fullstack framework usage
 
 You must use the ```symfony/symfony``` package as a dependency, then add
 the following variables to your ```settings.php``` file:
@@ -49,7 +55,58 @@ the following variables to your ```settings.php``` file:
 $conf['kernel.symfony_all_the_way'] = true;
 ```
 
-## Register one or more bundles
+# Configuration
+
+## Configuration directory structure
+
+Symfony will need a kernel root directory for loading its configuration and
+default resources, the commonly seen ``app`` folder in Symfony applications.
+
+Directory structure when using this module is exactly the same, if the ``app``
+directory exists as follows:
+
+```
+/path/to/project/www/index.php # Where Drupal lives
+/path/to/project/app
+```
+
+You will then find the following directory structure:
+
+*   ``app/config/config.yml`` where your configuration is stored;
+*   ``app/config/config_ENVIRONMENT.yml`` in opposition to a common Symfony
+    application, these files are optional and will fallback on the ``config.yml``
+    file, but you may use them;
+*   ``app/config/parameters.yml`` where your parameters are stored;
+*   ``app/routing.yml`` where the routing happens;
+*   ``app/Resources/`` where you may put additional resources, such as Twig
+    template overrides.
+
+In case the ``app`` directory does not exists, the module will fallback onto
+the following structure:
+
+*   ``www/sites/default/config/config.yml``;
+*   ``www/sites/default/config/config_ENVIRONMENT.yml``;
+*   ``www/sites/default/config/parameters.yml``;
+*   ``www/sites/default/routing.yml``;
+*   ``www/sites/default/Resources/``.
+
+Please also note that if you don't provide any ``config.yml`` file, the module
+will automatically fallback on its own implementation, you might find in:
+``drupal-sf-dic/Resources/config/config.yml``.
+
+
+## Overriding configuration
+
+In order to override the configuration and provide your own, you must copy
+the following files into the previously mentionned ``config`` directory:
+
+*   ``drupal-sf-dic/Resources/config/config.yml``;
+*   ``drupal-sf-dic/Resources/config/parameters.yml``.
+
+
+# Working with bundles
+
+## Register bundles within Drupal
 
 Bundle registration must happen before the ```sf_dic``` module ```hook_boot()```
 implementation, this means that you have only one place where you can do it:
@@ -71,6 +128,31 @@ function MYMODULE_boot() {
 }
 ```
 
+## Register bundles by providing your own AppKernel.php
+
+
+You may, as any Symfony application, provider your own kernel implementation,
+for this, copy the [sample/AppKernel.php](sample/AppKernel.php) file and set
+you own bundles.
+
+For it to work, you need the ``AppKernel.php`` file to be automatically
+loaded, for this use composer. Let's consider you placed the file at this
+location: ``app/AppKernel.php``, you may add the following into your
+``composer.json`` file:
+
+```json
+{
+    "autoload" : {
+        "files" : [
+            "app/AppKernel.php"
+        ]
+    }
+}
+```
+
+
+# Other considerations
+
 ## Using Symfony for 403 and 404 pages
 
 You may use Symfony for your basic error pages, yet Drupal cannot catch
@@ -82,25 +164,6 @@ the following variables into your ``settings.php`` file:
 ```php
 $conf['site_403'] = 'symfony/access-denied';
 $conf['site_404'] = 'symfony/not-found';
-```
-
-## Use the global Resources folder
-
-The global resource folder is where you will put templates and other various
-overrides for your own application, per default in Symfony it will be the
-``app/Resources`` folder.
-
-### Default one
-
-The default one is ``sites/default/Resources`` which allows multisites
-configurations to use one global Resources folder per site.
-
-### Customize the global Resources folder location
-
-If you need to change the location of the default Resources folder, add the
-following variable to your ``settings.php`` file:
-```php
-$conf['kernel.global_resources_dir'] = '/some/path';
 ```
 
 ## Using the router

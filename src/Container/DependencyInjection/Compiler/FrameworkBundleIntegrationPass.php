@@ -39,15 +39,10 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
             // the global resource directory to somewhere safer than Drupal's
             // sites/SITE folder, case in which we must honnor the user's
             // configuration
-            $globalResourcesPath = variable_get('kernel.global_resources_dir');
-            if (!$globalResourcesPath) {
-                $globalResourcesPath = DRUPAL_ROOT . '/' . conf_path() . '/Resources';
-            }
-
             $definition = $container->getDefinition('file_locator');
             $definition->setArguments([
                 new Reference('kernel'),
-                $globalResourcesPath,
+                $container->getParameter('kernel.root_dir') . '/Resources',
             ]);
         }
 

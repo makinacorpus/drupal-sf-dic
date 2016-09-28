@@ -1,15 +1,17 @@
 # This file remains a sample, used per default if nothing else found, but
-# if you need to override it, please copy this file into:
-#    sites/MY_SITE/config.yml
-# and change the copied file, after a cache clear, the kernel will find
-# it and load it instead.
+# if you need to override it, please copy this file into the kernel root
+# directorty 'config' directory.
+# Read the documentation in Resources/docs/bundles.md
+
+imports:
+    - { resource: parameters.yml }
 
 framework:
     #esi:             ~
     #translator:      { fallbacks: ["%locale%"] }
     #secret:          "%secret%"
     router:
-        resource: "%kernel.drupal_site_path%/routing.yml"
+        resource: "%kernel.root_dir%/config/routing.yml"
         strict_requirements: ~
     form:            ~
     #csrf_protection: ~

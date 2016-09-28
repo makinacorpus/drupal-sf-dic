@@ -36,10 +36,15 @@ class Drupal
     static private function _buildKernel()
     {
         if (!self::$kernel) {
+
             $env    = empty($GLOBALS['conf']['kernel.environment']) ? 'dev' : $GLOBALS['conf']['kernel.environment'];
             $debug  = !isset($GLOBALS['conf']['kernel.debug']) ? true : $GLOBALS['conf']['kernel.debug'];
 
-            self::$kernel = new Kernel($env, $debug);
+            if (class_exists('AppKernel')) {
+                self::$kernel = new AppKernel($env, $debug);
+            } else {
+                self::$kernel = new Kernel($env, $debug);
+            }
 
             // @todo serious ugly patch, see registerBundles()
             if (self::$bundles) {

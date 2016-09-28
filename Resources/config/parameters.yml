@@ -1,0 +1,5 @@
+# This is a sample empty file, copy it along with the 'config.yml' file
+# if you need to use it into the kernel root dir 'config' directory.
+
+parameters:
+    # Place here your parameters

@@ -18,20 +18,10 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Kernel extends BaseKernel
 {
-    /**
-     * @var BundleInterface[]
-     */
     protected $extraBundles = [];
-
-    /**
-     * @var boolean
-     */
     protected $inDrupal = true;
-
-    /**
-     * @var boolean
-     */
     protected $isFullStack = false;
+    protected $cacheDir = null;
 
     /**
      * Default constructor
@@ -41,10 +31,18 @@ class Kernel extends BaseKernel
      */
     public function __construct($environment = 'prod', $debug = false, $inDrupal = true)
     {
-        if (!empty($GLOBALS['conf']['kernel.root_dir'])) {
-            $this->rootDir = $GLOBALS['conf']['kernel.root_dir'];
+        // Compute the kernel root directory
+        if (empty($GLOBALS['conf']['kernel.root_dir'])) {
+            $rootDir = DRUPAL_ROOT . '/../app';
+            if (is_dir($rootDir)) {
+                $this->rootDir = $rootDir;
+            } else if (function_exists('conf_path')) {
+                $this->rootDir = DRUPAL_ROOT . '/' . conf_path();
+            } else {
+                throw new \LogicException("could not find a valid kernel.root_dir candidate");
+            }
         } else {
-            $this->rootDir = DRUPAL_ROOT . '/../app';
+            $this->rootDir = $GLOBALS['conf']['kernel.root_dir'];
         }
 
         if ($rootDir = realpath($this->rootDir)) {
@@ -60,9 +58,42 @@ class Kernel extends BaseKernel
             }
         }
 
+        // And cache directory
+        if (empty($GLOBALS['conf']['kernel.cache_dir'])) {
+            $this->cacheDir = $this->rootDir . '/cache/' . $environment;
+        } else {
+            $this->cacheDir = $GLOBALS['conf']['kernel.cache_dir'] . '/' . $environment;
+        }
+
+        if ($cacheDir = realpath($this->cacheDir)) {
+            if (!$cacheDir) {
+                // Attempt to automatically create the root directory
+                if (!mkdir($cacheDir, 0750, true)) {
+                    throw new \LogicException(sprintf("%s: unable to create directory", $cacheDir));
+                }
+                if (!$cacheDir = realpath($cacheDir)) {
+                    throw new \LogicException(sprintf("%s: unable to what ??", $cacheDir));
+                }
+                $this->cacheDir = $cacheDir;
+            }
+        }
+
         $this->inDrupal = $inDrupal;
+        if ($inDrupal) {
+            if (!empty($GLOBALS['conf']['kernel.symfony_all_the_way'])) {
+                $this->isFullStack = true;
+            }
+        }
 
         parent::__construct($environment, $debug);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCacheDir()
+    {
+        return $this->cacheDir;
     }
 
     /**
@@ -107,7 +138,7 @@ class Kernel extends BaseKernel
             // But, for the next three, it sounds more complicated, this will
             // bring a lot of things in there they probably won't want, let's
             // just give them a choice to disable it
-            if (variable_get('kernel.symfony_all_the_way', true)) {
+            if ($this->isFullStack) {
                 if (class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
                     $this->extraBundles[] = new \Symfony\Bundle\FrameworkBundle\FrameworkBundle();
                     $this->isFullStack = true;
@@ -132,16 +163,22 @@ class Kernel extends BaseKernel
      */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
-        // @todo This needs to be overridable, and should be controlled by the
-        // site owner instead... Maybe this could be loaded from settings.php
-        // file at some point, or just put into the site/default/config folder
         if ($this->isFullStack) {
-            $custom = DRUPAL_ROOT . '/' . conf_path() . '/config.yml';
-            if (file_exists($custom)) {
-                $loader->load($custom);
-            } else {
-                $loader->load(__DIR__ . '/../Resources/config/config.yml');
+
+            // Reproduce the config_ENV.yml file from Symfony, but keep it
+            // optional instead of forcing its usage
+            $customConfigFile = $this->rootDir . '/config/config_' . $this->getEnvironment() . '.yml';
+            if (!file_exists($customConfigFile)) {
+                // Else attempt with a default one
+                $customConfigFile = $this->rootDir . '/config/config.yml';
             }
+            if (!file_exists($customConfigFile)) {
+                // If no file is provided by the user, just use the default one
+                // that provide sensible defaults for everything to work fine
+                $customConfigFile = __DIR__ . '/../Resources/config/config.yml';
+            }
+
+            $loader->load($customConfigFile);
         }
     }
 
@@ -236,6 +273,8 @@ class Kernel extends BaseKernel
         } else {
             $container = new ContainerBuilder(new ParameterBag($this->getKernelParameters()));
         }
+
+        $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
 
         if (class_exists('ProxyManager\Configuration') && class_exists('Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator')) {
             $container->setProxyInstantiator(new RuntimeInstantiator());
