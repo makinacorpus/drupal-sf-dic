@@ -13,7 +13,7 @@ class ParametersToVariablesPass implements CompilerPassInterface
 
         foreach ($container->getParameterBag()->all() as $key => $value) {
             if (!array_key_exists($key, $conf)) {
-                variable_set($key, $value);
+                $conf[$key] = $value;
             }
         }
     }
