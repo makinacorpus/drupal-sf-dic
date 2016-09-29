@@ -85,6 +85,13 @@ class Kernel extends BaseKernel
             }
         }
 
+        // In case this was set, even if empty, remove it to ensure that
+        // the Drupal parameter bag won't override the kernel driven
+        // parameters with 'NULL' values which would make the container
+        // unhappy and raise exception while resolving path values
+        $GLOBALS['conf']['kernel.root_dir'] = $this->rootDir;
+        $GLOBALS['conf']['kernel.cache_dir'] = $this->cacheDir;
+
         parent::__construct($environment, $debug);
     }
 
