@@ -90,7 +90,11 @@ class Kernel extends BaseKernel
         // parameters with 'NULL' values which would make the container
         // unhappy and raise exception while resolving path values
         $GLOBALS['conf']['kernel.root_dir'] = $this->rootDir;
-        $GLOBALS['conf']['kernel.cache_dir'] = $this->cacheDir;
+        // More specific something for cache_dir, since the environment
+        // name is suffixed, we cannot just store it, else in case of
+        // cache clear/kernel drop, the second kernel will have the env
+        // name appened a second time, and everything will fail.
+        unset($GLOBALS['conf']['kernel.cache_dir']);
 
         parent::__construct($environment, $debug);
     }
