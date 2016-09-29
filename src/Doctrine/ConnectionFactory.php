@@ -45,9 +45,28 @@ class ConnectionFactory extends DoctrineConnectionFactory
                         throw new \InvalidArgumentException(sprintf("%s: cannot map driver to doctrine's", $connection->driver()));
                 }
 
-                if ($connection) {
-                    return parent::createConnection(['driver' => $driver, 'pdo' => $connection], $config, $eventManager, $mappingTypes);
+                $drupalInfo = $connection->getConnectionOptions();
+                if (!empty($drupalInfo['prefix']['default'])) {
+                    throw new \InvalidArgumentException("Drupal to Doctrine DBAL convertion does not supports table name prefix");
                 }
+
+                $map = [
+                    'database' => 'dbname',
+                    'port' => 'port',
+                    'password' => 'password',
+                    'username' => 'user',
+                    'host' => 'host',
+                ];
+
+                $params = ['driver' => $driver];
+                foreach ($map as $key => $target) {
+                    if (!empty($drupalInfo[$key])) {
+                        $params[$target] = $drupalInfo[$key];
+                    }
+                }
+
+                return parent::createConnection($params, $config, $eventManager, $mappingTypes);
+                // return parent::createConnection(['driver' => $driver, 'pdo' => $connection], $config, $eventManager, $mappingTypes);
             }
         }
 
