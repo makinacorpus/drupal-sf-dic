@@ -54,8 +54,8 @@ class Kernel extends BaseKernel
                 if (!$rootDir = realpath($rootDir)) {
                     throw new \LogicException(sprintf("%s: unable to what ??", $rootDir));
                 }
-                $this->rootDir = $rootDir;
             }
+            $this->rootDir = $rootDir;
         }
 
         // And cache directory
@@ -74,8 +74,8 @@ class Kernel extends BaseKernel
                 if (!$cacheDir = realpath($cacheDir)) {
                     throw new \LogicException(sprintf("%s: unable to what ??", $cacheDir));
                 }
-                $this->cacheDir = $cacheDir;
             }
+            $this->cacheDir = $cacheDir;
         }
 
         $this->inDrupal = $inDrupal;
