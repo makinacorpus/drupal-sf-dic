@@ -46,11 +46,6 @@ class Drupal
                 self::$kernel = new Kernel($env, $debug);
             }
 
-            // Keep the Symfony bootstrap optimization, even though we broke it
-            // a little by loading the kernel before; lots of other classes will
-            // still benefit from it.
-            @include_once self::$kernel->getCacheDir() . '/classes.map';
-
             // @todo serious ugly patch, see registerBundles()
             if (self::$bundles) {
                 self::$kernel->addExtraBundles(array_values(self::$bundles));
