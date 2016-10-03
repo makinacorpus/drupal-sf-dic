@@ -106,31 +106,6 @@ the following files into the previously mentionned ``config`` directory:
 
 # Working with bundles
 
-## Register bundles within Drupal
-
-Bundle registration must happen before the ```sf_dic``` module ```hook_boot()```
-implementation, this means that you have only one place where you can do it:
-by implementing your own ```hook_boot()``` implementation and setting the
-weight of your module under the ```sf_dic``` module's weight.
-
-Once you did that, and I know will know how to do it, you may register your
-bundles this way:
-
-```php
-/**
- * Implements hook_boot().
- */
-function MYMODULE_boot() {
-  \Drupal::registerBundles([
-    new MyVendor\SomeBundle\MyVendorSomeBundle(),
-    // [...]
-  ]);
-}
-```
-
-## Register bundles by providing your own AppKernel.php
-
-
 You may, as any Symfony application, provider your own kernel implementation,
 for this, copy the [sample/AppKernel.php](sample/AppKernel.php) file and set
 you own bundles.

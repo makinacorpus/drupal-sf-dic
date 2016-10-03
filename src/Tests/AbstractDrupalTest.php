@@ -242,12 +242,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         return $this->db;
     }
 
-    /**
-     * @return BundleInterface[]
-     */
-    protected function addExtraBundles()
+    protected function createKernelInstance($env, $debug = true)
     {
-        return [];
+        return new Kernel($env, $debug);
     }
 
     /**
@@ -269,11 +266,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
                 self::$bootstrapped = true;
             }
 
-            $this->kernel = new Kernel(uniqid('test_'), true);
-
-            if ($bundles = $this->addExtraBundles()) {
-                $this->kernel->addExtraBundles($bundles);
-            }
+            $this->kernel = $this->createKernelInstance(uniqid('test_'));
 
             $this->kernel->boot();
             $this

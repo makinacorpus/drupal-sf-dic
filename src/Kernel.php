@@ -8,20 +8,16 @@ use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalPara
 
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
-class Kernel extends BaseKernel
+abstract class Kernel extends BaseKernel
 {
-    protected $extraBundles = [];
-    protected $inDrupal = true;
     protected $isFullStack = false;
     protected $cacheDir = null;
+    protected $logDir = null;
 
     /**
      * Default constructor
@@ -29,7 +25,7 @@ class Kernel extends BaseKernel
      * @param string $environment
      * @param boolean $debug
      */
-    public function __construct($environment = 'prod', $debug = false, $inDrupal = true)
+    public function __construct($environment = 'prod', $debug = false)
     {
         // Compute the kernel root directory
         if (empty($GLOBALS['conf']['kernel.root_dir'])) {
@@ -78,11 +74,28 @@ class Kernel extends BaseKernel
             $this->cacheDir = $cacheDir;
         }
 
-        $this->inDrupal = $inDrupal;
-        if ($inDrupal) {
-            if (!empty($GLOBALS['conf']['kernel.symfony_all_the_way'])) {
-                $this->isFullStack = true;
+        // And finally, the logs directory
+        if (empty($GLOBALS['conf']['kernel.logs_dir'])) {
+            $this->logDir = $this->rootDir . '/logs';
+        } else {
+            $this->logDir = $GLOBALS['conf']['kernel.logs_dir'];
+        }
+
+        if ($logDir = realpath($this->logDir)) {
+            if (!$logDir) {
+                // Attempt to automatically create the root directory
+                if (!mkdir($logDir, 0750, true)) {
+                    throw new \LogicException(sprintf("%s: unable to create directory", $logDir));
+                }
+                if (!$logDir = realpath($logDir)) {
+                    throw new \LogicException(sprintf("%s: unable to what ??", $logDir));
+                }
             }
+            $this->logDir = $logDir;
+        }
+
+        if (!empty($GLOBALS['conf']['kernel.symfony_all_the_way'])) {
+            $this->isFullStack = true;
         }
 
         // In case this was set, even if empty, remove it to ensure that
@@ -90,6 +103,7 @@ class Kernel extends BaseKernel
         // parameters with 'NULL' values which would make the container
         // unhappy and raise exception while resolving path values
         $GLOBALS['conf']['kernel.root_dir'] = $this->rootDir;
+
         // More specific something for cache_dir, since the environment
         // name is suffixed, we cannot just store it, else in case of
         // cache clear/kernel drop, the second kernel will have the env
@@ -98,6 +112,9 @@ class Kernel extends BaseKernel
         // written settings.php files, but I should keep this for safety.
         if (empty($GLOBALS['conf']['kernel.cache_dir'])) {
             unset($GLOBALS['conf']['kernel.cache_dir']);
+        }
+        if (empty($GLOBALS['conf']['kernel.logs_dir'])) {
+            unset($GLOBALS['conf']['kernel.logs_dir']);
         }
 
         parent::__construct($environment, $debug);
@@ -112,89 +129,11 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * This container is supposed to be dynamically populated, this function
-     * allows you to register extra bundles
-     *
-     * @param BundleInterface[] $bundles
-     */
-    public function addExtraBundles($bundles)
-    {
-        if ($this->booted) {
-            throw new \LogicException("Kernel is booted, you cannot add extra bundles anymore");
-        }
-
-        if (!is_array($bundles)) {
-            $bundles = [$bundles];
-        }
-
-        foreach ($bundles as $bundle) {
-            if (!$bundle instanceof BundleInterface) {
-                throw new \LogicException(sprintf("Bundle must be an instance of Symfony\Component\HttpKernel\Bundle\BundleInterface"));
-            }
-            $this->extraBundles[] = $bundle;
-        }
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function registerBundles()
+    public function getLogDir()
     {
-        // @todo - I guess this should happen elsewhere...
-        if ($this->inDrupal) {
-
-            // Registering TwigBundle will provide a full Twig environement
-            // for our Drupal site but won't have any major impact on the rest
-            // so we can safely assume that our users will always want it
-            if (class_exists('\Symfony\Bundle\TwigBundle\TwigBundle')) {
-                $this->extraBundles[] = new \Symfony\Bundle\TwigBundle\TwigBundle();
-            }
-
-            // But, for the next three, it sounds more complicated, this will
-            // bring a lot of things in there they probably won't want, let's
-            // just give them a choice to disable it
-            if ($this->isFullStack) {
-                if (class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
-                    $this->extraBundles[] = new \Symfony\Bundle\FrameworkBundle\FrameworkBundle();
-                    $this->isFullStack = true;
-                }
-                if (class_exists('\Symfony\Bundle\MonologBundle\MonologBundle')) {
-                    $this->extraBundles[] = new \Symfony\Bundle\MonologBundle\MonologBundle();
-                }
-                if (class_exists('\Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle')) {
-                    $this->extraBundles[] = new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle();
-                }
-//                 if (class_exists('\Doctrine\Bundle\DoctrineBundle\DoctrineBundle')) {
-//                     $this->extraBundles[] = new Doctrine\Bundle\DoctrineBundle\DoctrineBundle();
-//                 }
-            }
-        }
-
-        return $this->extraBundles;
-    }
-
-    /**
-     * {inheritdoc}
-     */
-    public function registerContainerConfiguration(LoaderInterface $loader)
-    {
-        if ($this->isFullStack) {
-
-            // Reproduce the config_ENV.yml file from Symfony, but keep it
-            // optional instead of forcing its usage
-            $customConfigFile = $this->rootDir . '/config/config_' . $this->getEnvironment() . '.yml';
-            if (!file_exists($customConfigFile)) {
-                // Else attempt with a default one
-                $customConfigFile = $this->rootDir . '/config/config.yml';
-            }
-            if (!file_exists($customConfigFile)) {
-                // If no file is provided by the user, just use the default one
-                // that provide sensible defaults for everything to work fine
-                $customConfigFile = __DIR__ . '/../Resources/config/config.yml';
-            }
-
-            $loader->load($customConfigFile);
-        }
+        return $this->logDir;
     }
 
     /**
@@ -212,7 +151,7 @@ class Kernel extends BaseKernel
      * @return string[]
      *   Values are various found MODULE.services.yml files realpath
      */
-    protected function discoverDrupalServicesDefinitionFiles()
+    private function discoverDrupalServicesDefinitionFiles()
     {
         $ret = [];
 
@@ -248,7 +187,7 @@ class Kernel extends BaseKernel
      * @return ServiceProviderInterface[]
      *   Keys are modules names while values are the service provider instances
      */
-    protected function discoverDrupalServiceProviders()
+    private function discoverDrupalServiceProviders()
     {
         $ret = [];
 
@@ -283,12 +222,7 @@ class Kernel extends BaseKernel
      */
     protected function getContainerBuilder()
     {
-        if ($this->inDrupal) {
-            $container = new ContainerBuilder(new DrupalParameterBag($this->getKernelParameters()));
-        } else {
-            $container = new ContainerBuilder(new ParameterBag($this->getKernelParameters()));
-        }
-
+        $container = new ContainerBuilder(new DrupalParameterBag($this->getKernelParameters()));
         $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
 
         if (class_exists('ProxyManager\Configuration') && class_exists('Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator')) {
@@ -305,16 +239,13 @@ class Kernel extends BaseKernel
     {
         $container = parent::buildContainer();
 
-        if ($this->inDrupal) {
+        foreach ($this->discoverDrupalServicesDefinitionFiles() as $filename) {
+            $loader = new YamlFileLoader($container, new FileLocator(dirname($filename)));
+            $loader->load(basename($filename));
+        }
 
-            foreach ($this->discoverDrupalServicesDefinitionFiles() as $filename) {
-                $loader = new YamlFileLoader($container, new FileLocator(dirname($filename)));
-                $loader->load(basename($filename));
-            }
-
-            foreach ($this->discoverDrupalServiceProviders() as $provider) {
-                $provider->register($container);
-            }
+        foreach ($this->discoverDrupalServiceProviders() as $provider) {
+            $provider->register($container);
         }
 
         return $container;

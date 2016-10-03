@@ -6,6 +6,9 @@ use MakinaCorpus\Drupal\Sf\Tests\Mockup\FooBundle\MockupFooBundle;
 
 use Symfony\Bundle\TwigBundle\TwigBundle;
 
+/**
+ * @todo needs rewrite
+ */
 class TwigBundleTest extends AbstractDrupalTest
 {
     protected function setUp()
@@ -15,6 +18,8 @@ class TwigBundleTest extends AbstractDrupalTest
         if (!$this->getDrupalContainer()->has('twig')) {
             $this->markTestSkipped("Incomplete environment");
         }
+
+        $this->markTestSkipped("This needs rewrite");
     }
 
     protected function addExtraBundles()

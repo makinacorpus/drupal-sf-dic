@@ -2,6 +2,7 @@
 
 use Drupal\Core\Session\AccountInterface;
 
+use MakinaCorpus\Drupal\Sf\DefaultAppKernel;
 use MakinaCorpus\Drupal\Sf\Kernel;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,11 +18,6 @@ class Drupal
      * @var KernelInterface
      */
     static protected $kernel;
-
-    /**
-     * @var mixed[]
-     */
-    static protected $bundles = [];
 
     /**
      * Set kernel
@@ -43,39 +39,11 @@ class Drupal
             if (class_exists('AppKernel')) {
                 self::$kernel = new AppKernel($env, $debug);
             } else {
-                self::$kernel = new Kernel($env, $debug);
-            }
-
-            // @todo serious ugly patch, see registerBundles()
-            if (self::$bundles) {
-                self::$kernel->addExtraBundles(array_values(self::$bundles));
+                self::$kernel = new DefaultAppKernel($env, $debug);
             }
         }
 
         return self::$kernel;
-    }
-
-    /**
-     * Register bundles
-     *
-     * Important note: this must run before sf_dic_boot() which means that you
-     * have only two entry points for this:
-     *  - either hardcode the call into your settings.php file (recommended);
-     *  - or do it in a hook_boot() called before the sf_dic module one.
-     *
-     * @param BundleInterface[] $bundles
-     */
-    static public function registerBundles($bundles)
-    {
-        // @todo serious ugly patch, because unsetContainer() needs the bundles
-        //   to be set once again. Find a better way to register Drupal modules
-        //   bundles
-        foreach ($bundles as $bundle) {
-            $class = get_class($bundle);
-            if (!isset(self::$bundles[$class])) {
-                self::$bundles[$class] = $bundle;
-            }
-        }
     }
 
     /**
