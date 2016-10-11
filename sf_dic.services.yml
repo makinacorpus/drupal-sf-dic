@@ -176,6 +176,11 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalBlockExtension
     tags: [{name: twig.extension}]
+  twig.extension.drupal_http_render:
+    public: true
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\HttpRenderExtension
+    arguments: ['@kernel', '@request_stack']
+    tags: [{name: twig.extension}]
 
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
