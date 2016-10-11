@@ -288,6 +288,75 @@ function sf_dic_twig_render($view, $parameters) {
 }
 
 /**
+ * Directly render a controller without using the fragment handler, bypassing
+ * any cache it would provide, but allowing POST requests to go down the stack
+ * providing a Hierarchical-MVC/PAC like implementation
+ *
+ * @param string $controller
+ *   The controller name (a string like BlogBundle:Post:index)
+ * @param array $path
+ *   An array of path parameters, if none, will inherit from the master request
+ * @param array $query
+ *   An array of query parameters, if none, will inherit from the master request
+ *
+ * @return string
+ *   The rendered controller
+ */
+function sf_dic_controller_render($controller, array $path = [], array $query = null) {
+  //
+  // Degraded version of \Symfony\Bundle\FrameworkBundle\Controller\Controller::forward()
+  // method that just re-execute another controller using the (almost) exact request
+  // duplicate, in order for us to catch POST and data.
+  //
+  // We have three problems to solve at this point:
+  //
+  //  - when building directly the form from here, we cannot use the SaurFormBundle:Form
+  //    controller to handle the submission, and sad story, we don't want to copy/paste
+  //    the controller code;
+  //
+  //  - when using the fragment.handler, the built sub-request cannot be a POST request
+  //    because it'd loose compatiblity with ESI or hinclude, reason why it's hardcoded
+  //    this way, and we cannot submit forms in there;
+  //
+  //  - when we do use the fragment.handler, everything goes fine if we force the form
+  //    action to be the real form route, but this cause another problems: in case of
+  //    erroneous form validation, it forces us to do a redirect request, but this will
+  //    loose the form error context (since redirect will do a GET request without data)
+  //    and the form won't render with the errors within.
+  //
+  // To conclude, we don't have any choice than doing some customish code to render the
+  // controller and let it do its job as it was the master request (even it's not) and
+  // it does work fine.
+  //
+  // There is an interesting thread about this in Symfony's issues:
+  //
+  //    https://github.com/symfony/symfony/issues/2147
+  //
+  // and we are in the exact same context as the original issuer: we actually do some
+  // kind of HMVC variant by displaying forms into nodes into fields into blocks into
+  // regions, and there is no way to get arround that.
+  //
+
+  // Here goes what ties us to Drupal
+  $request = \Drupal::requestStack()->getCurrentRequest();
+  /** @var \Symfony\Component\HttpKernel\KernelInterface $kernel */
+  $kernel = \Drupal::_getKernel();
+
+  $path['_forwarded'] = $request->attributes;
+  $path['_controller'] = $controller;
+  $subRequest = $request->duplicate($query, null, $path);
+
+  $response = $kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST, false);
+
+  // Deliver function
+  if (!$response->isSuccessful()) {
+    throw new \RuntimeException(sprintf('Error when rendering "%s" (Status code is %s).', $request->getUri(), $response->getStatusCode()));
+  }
+
+  return $response->getContent();
+}
+
+/**
  * Alter-ego of the render() and render_*() twig functions: renders a fragment.
  *
  * This method is only usable if you are working with the Symfony full stack
