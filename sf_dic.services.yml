@@ -172,6 +172,10 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
     tags: [{name: twig.extension}]
+  twig.extension.drupal_block:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalBlockExtension
+    tags: [{name: twig.extension}]
 
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
