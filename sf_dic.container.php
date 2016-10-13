@@ -25,7 +25,7 @@ class ServiceProvider implements ServiceProviderInterface
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
 
-        $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
+        $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
 
         if (class_exists('Symfony\\Component\\Console\\Command\\Command')) {
