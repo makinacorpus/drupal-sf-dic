@@ -37,6 +37,12 @@ class DrupalBlockExtension extends \Twig_Extension
         $block->weight = 0;
         $block->theme = $GLOBALS['theme_key'];
 
+        // Those won't serve any purpose but avoid nasty PHP warnings
+        $block->title = '';
+        $block->pages = '';
+        $block->visibility = 0; // BLOCK_VISIBILITY_NOTLISTED (block module could be disabled)
+        $block->custom = null;
+
         $blockList = [$block];
         drupal_alter('block_list', $blockList);
 
