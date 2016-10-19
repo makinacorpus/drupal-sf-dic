@@ -49,6 +49,11 @@ class ServiceProvider implements ServiceProviderInterface
             }
         }
 
+        $bundles = $container->getParameter('kernel.bundles');
+        if (in_array('Symfony\\Bundle\\FrameworkBundle\\FrameworkBundle', $bundles)) {
+            $loader->load('security.yml');
+        }
+
         $container->addCompilerPass(new DoctrinePasstroughPass() /*, PassConfig::TYPE_AFTER_REMOVING */);
     }
 }
