@@ -1,0 +1,47 @@
+services:
+
+  # Default in-memory storage, to be used as an in-memory cache in order to
+  # avoid running the node collect events too many times
+  acl.store.memory:
+    public: false
+    class: MakinaCorpus\ACL\Impl\MemoryEntryStore
+    tags: [{name: acl.entry_store}]
+
+  # acl.profile_collector.drupal:
+  #   public: false
+  #   class: MakinaCorpus\ACL\Impl\Drupal\UserGrantProfileCollector
+  #   tags: [{name: acl.profile_collector}]
+
+  acl.profile_collector.symfony:
+    public: false
+    class: MakinaCorpus\ACL\Impl\Symfony\EventProfileCollector
+    tags: [{name: acl.profile_collector}]
+
+  # acl.entry_collector.symfony:
+  #   public: false
+  #   class: MakinaCorpus\ACL\Impl\Symfony\EventEntryCollector
+  #   tags: [{name: acl.entry_collector}]
+
+  # This service will be manually used within the module hooks to convert
+  # acl as Drupal node access records information
+  # @todo
+
+  # This service will be used manually within the module hooks to convert
+  # module provided legacy node access records from modules to acl
+  # @todo
+
+  # Converts entities to ('entity_type', 'entity_id') resources
+  acl.resource_converter.drupal:
+    public: false
+    class: MakinaCorpus\ACL\Impl\Drupal\EntityResourceConverter
+    tags: [{name: acl.resource_converter}]
+
+  # All arguments for this class will be set using a compilation pass
+  acl.voter.dynamic:
+    public: false
+    class: MakinaCorpus\ACL\Voter\DynamicACLVoter
+    tags: [{name: acl.voter}]
+
+  # All arguments for this class will be set using a compilation pass
+  acl.manager:
+    class: MakinaCorpus\ACL\Manager
