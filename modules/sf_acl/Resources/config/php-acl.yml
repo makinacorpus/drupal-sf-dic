@@ -7,20 +7,22 @@ services:
     class: MakinaCorpus\ACL\Impl\MemoryEntryStore
     tags: [{name: acl.entry_store}]
 
-  # acl.profile_collector.drupal:
-  #   public: false
-  #   class: MakinaCorpus\ACL\Impl\Drupal\UserGrantProfileCollector
-  #   tags: [{name: acl.profile_collector}]
+  acl.profile_collector.drupal:
+    public: false
+    class: MakinaCorpus\ACL\Impl\Drupal\UserGrantProfileCollector
+    tags: [{name: acl.profile_collector}]
 
   acl.profile_collector.symfony:
     public: false
     class: MakinaCorpus\ACL\Impl\Symfony\EventProfileCollector
+    arguments: ['@event_dispatcher']
     tags: [{name: acl.profile_collector}]
 
-  # acl.entry_collector.symfony:
-  #   public: false
-  #   class: MakinaCorpus\ACL\Impl\Symfony\EventEntryCollector
-  #   tags: [{name: acl.entry_collector}]
+  acl.entry_collector.symfony:
+    public: false
+    class: MakinaCorpus\ACL\Impl\Symfony\EventEntryCollector
+    arguments: ['@event_dispatcher']
+    tags: [{name: acl.entry_collector}]
 
   # This service will be manually used within the module hooks to convert
   # acl as Drupal node access records information
@@ -44,4 +46,9 @@ services:
 
   # All arguments for this class will be set using a compilation pass
   acl.manager:
+    public: true
     class: MakinaCorpus\ACL\Manager
+
+  drupal.acl.entry_to_node_access_converter:
+    public: true
+    class: MakinaCorpus\ACL\Impl\Drupal\EntryToNodeAccessConverter

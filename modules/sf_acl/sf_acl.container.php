@@ -22,6 +22,8 @@ class ServiceProvider implements ServiceProviderInterface
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
 
         // Do not register anything if the package does not exist
+        // @todo if symfony bundle is present, load a different configuration files with
+        //   only drupal integration components provided
         if (class_exists('\MakinaCorpus\ACL\Resource')) {
             $loader->load('php-acl.yml');
 

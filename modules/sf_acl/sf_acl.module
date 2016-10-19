@@ -1,35 +1,69 @@
 <?php
 /**
  * @file
- * Simple makinacorpus/php-acl integration
+ * Simple makinacorpus/php-acl integration.
+ *
+ * Making Drupal aware of your own permissions:
+ *
+ *   - ACL manager live its own life without carrying about node_access;
+ *     we don't need it to be aware that it even exists, it handles its
+ *     own set of permissions and business logic;
+ *
+ *   - on node acquire grants, we implement a converter that spits ACE
+ *     into the node_access table by converting profile (type, id) as
+ *     (realm, gid) into Drupal terminology;
+ *
+ *   - on node grants (user grants) we do inject the collected user
+ *     profiles by converting profiles (type, id) as (realm, gid) into
+ *     Drupal terminology.
+ *
+ * This works gracefully and all Drupal-driven access checks are done
+ * transparently using our ACL.
+ *
+ * Now, we have to also provide a bridge the other way around, node access
+ * checks via our API must also be aware of Drupal own node_access system:
+ *
+ *   - a specific voter with a very low priority will run after all the
+ *     others, and use the node_access() function for the only three
+ *     'update', 'view' and 'delete' permissions that core supports;
+ *
+ *   - we do ignore the NODE_ACCESS_DENY feature, because it is a Drupal core
+ *     inconsistency: only a runtime node_access() call can deny, but the
+ *     {node_access} database table lookups don't allow the deny operation,
+ *     our own ACL manager will therefore ignore it too.
+ *
+ * That's it, it should work.
  */
-
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessEvent;
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessGrantEvent;
-use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessRecordEvent;
 
 /**
  * Implements hook_node_access().
  */
 function sf_acl_node_access($node, $op, $account) {
-  $event = new NodeAccessEvent($node, $account, $op);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
-  return $event->getResult();
+//   $event = new NodeAccessEvent($node, $account, $op);
+//   \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+//   return $event->getResult();
 }
 
 /**
  * Implements hook_node_access_records().
  */
 function sf_acl_node_access_records($node) {
-  $event = new NodeAccessRecordEvent($node);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
-  return $event->toDrupalGrantList();
+return;
+  if (false) {
+
+  }
+
+  /** @var \MakinaCorpus\ACL\Impl\Drupal\EntryToNodeAccessConverter $converter */
+  $converter = \Drupal::service('drupal.acl.entry_to_node_access_converter');
+
+  return $converter->convertEntryList($entryList);
 }
 
 /**
  * Empty implementation of hook_node_grants().
  */
 function sf_acl_node_grants($account, $op) {
+  return;
   // @todo This is a duplicate with the event throw within NodeAccessSubscriber
   //   so it needs to go through a cache somehow
   $event = new NodeAccessGrantEvent($account, $op);
