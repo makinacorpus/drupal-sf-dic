@@ -23,7 +23,7 @@ class DrupalPagerExtension extends \Twig_Extension
         return theme('pager', ['element' => $element]);
     }
 
-    public function renderPager($limit, $total, $element = 0)
+    public function renderPager($limit, $total, $page = 1, $element = 0)
     {
         pager_default_initialize($total, $limit, $element);
 

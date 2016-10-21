@@ -172,6 +172,7 @@ function twig_theme($existing, $type, $theme, $path) {
       $theme_paths[] = $theme_hook['theme path'];
       // We're not doing an array_merge or else module templates would override
       // templates from parent themes.
+      // @todo exclude the 'symfony' folder.
       $templates += drupal_find_theme_templates($existing, twig_extension(), $theme_hook['theme path']);
     }
   }
