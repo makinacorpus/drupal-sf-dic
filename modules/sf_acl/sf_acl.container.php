@@ -4,7 +4,6 @@ namespace Drupal\Module\sf_acl;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
-use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\DynamicACLRegisterPass;
 use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerRegisterPass;
 
 use Symfony\Component\Config\FileLocator;
@@ -26,8 +25,6 @@ class ServiceProvider implements ServiceProviderInterface
         //   only drupal integration components provided
         if (class_exists('\MakinaCorpus\ACL\Resource')) {
             $loader->load('php-acl.yml');
-
-            $container->addCompilerPass(new DynamicACLRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ManagerRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
         }
     }

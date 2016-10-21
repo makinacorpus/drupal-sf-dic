@@ -38,11 +38,16 @@ services:
     class: MakinaCorpus\ACL\Impl\Drupal\EntityResourceConverter
     tags: [{name: acl.resource_converter}]
 
-  # All arguments for this class will be set using a compilation pass
-  acl.voter.dynamic:
+  acl.permission_map:
+    alias: acl.permission_map.bitmask
+
+  acl.permission_map.bitmask:
     public: false
-    class: MakinaCorpus\ACL\Voter\DynamicACLVoter
-    tags: [{name: acl.voter}]
+    class: MakinaCorpus\ACL\Impl\BitmaskMap
+
+  acl.permission_map.default:
+    public: false
+    class: MakinaCorpus\ACL\PermissionMap
 
   # All arguments for this class will be set using a compilation pass
   acl.manager:

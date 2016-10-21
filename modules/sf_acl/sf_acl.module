@@ -35,38 +35,52 @@
  * That's it, it should work.
  */
 
+use MakinaCorpus\ACL\Manager;
+
+/**
+ * Internal helper, please do not use it.
+ *
+ * @return Manager
+ */
+function _sf_acl_manager() {
+  return \Drupal::service('acl.manager');
+}
+
 /**
  * Implements hook_node_access().
  */
 function sf_acl_node_access($node, $op, $account) {
-//   $event = new NodeAccessEvent($node, $account, $op);
-//   \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
-//   return $event->getResult();
+  $manager = _sf_acl_manager();
+  if ($manager->supportsResource($node)) {
+    if ($manager->isGranted($node, $account, $op)) {
+      return NODE_ACCESS_ALLOW;
+    } else {
+      return NODE_ACCESS_DENY;
+    }
+  }
+  return NODE_ACCESS_IGNORE;
 }
 
 /**
  * Implements hook_node_access_records().
+ *
+ * Basically converts ACL/ACE to node_access records.
  */
 function sf_acl_node_access_records($node) {
-return;
-  if (false) {
-
-  }
-
   /** @var \MakinaCorpus\ACL\Impl\Drupal\EntryToNodeAccessConverter $converter */
   $converter = \Drupal::service('drupal.acl.entry_to_node_access_converter');
-
-  return $converter->convertEntryList($entryList);
+  return $converter->convertEntryList(_sf_acl_manager()->collectEntryListAll($node));
 }
 
 /**
  * Empty implementation of hook_node_grants().
+ *
+ * Basically converts Profile sets to user grants.
  */
 function sf_acl_node_grants($account, $op) {
-  return;
-  // @todo This is a duplicate with the event throw within NodeAccessSubscriber
-  //   so it needs to go through a cache somehow
-  $event = new NodeAccessGrantEvent($account, $op);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
-  return $event->getResult();
+  $ret = [];
+  foreach (_sf_acl_manager()->collectProfiles($account)->getAll() as $profile) {
+    $ret[$profile->getType()][] = $profile->getId();
+  }
+  return $ret;
 }
