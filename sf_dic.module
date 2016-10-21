@@ -42,6 +42,11 @@ function sf_dic_boot() {
     $request = MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
   );
 
+  // Let Symfony code will run gracefully.
+  // @todo explode menu API parameters in _route_params.
+  $request->attributes->set('_route', $_GET['q']);
+  $request->attributes->set('_route_params', []);
+
   // It may happen that https state is not detected due to misconfigured
   // environments, so we are going to fix this.
   if (!$is_https && $request->isSecure()) {
