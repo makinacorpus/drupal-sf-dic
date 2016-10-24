@@ -24,6 +24,7 @@ class ServiceProvider implements ServiceProviderInterface
     public function register(ContainerBuilder $container)
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
+        $bundles = $container->getParameter('kernel.bundles');
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
@@ -36,9 +37,13 @@ class ServiceProvider implements ServiceProviderInterface
         // @todo
         //   - I guess this should be in an extension file instead...
         if (class_exists('\Symfony\Bundle\TwigBundle\TwigBundle')) {
-            $loader->load('templating.yml');
-
             $container->addCompilerPass(new TwigCompilerPass());
+
+            if (in_array('Symfony\\Bundle\\TwigBundle\\TwigBundle', $bundles)) {
+                $loader->load('templating-fullstack.yml');
+            } else {
+                $loader->load('templating-degraded.yml');
+            }
         }
 
         if (!variable_get('kernel.symfony_all_the_way', false)) {
@@ -49,8 +54,7 @@ class ServiceProvider implements ServiceProviderInterface
             }
         }
 
-        $bundles = $container->getParameter('kernel.bundles');
-        if (in_array('Symfony\\Bundle\\SecurityBundle\\SecuritykBundle', $bundles)) {
+        if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
             $loader->load('security.yml');
         }
 
