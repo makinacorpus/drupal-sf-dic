@@ -50,7 +50,7 @@ class ServiceProvider implements ServiceProviderInterface
         }
 
         $bundles = $container->getParameter('kernel.bundles');
-        if (in_array('Symfony\\Bundle\\FrameworkBundle\\FrameworkBundle', $bundles)) {
+        if (in_array('Symfony\\Bundle\\SecurityBundle\\SecuritykBundle', $bundles)) {
             $loader->load('security.yml');
         }
 
