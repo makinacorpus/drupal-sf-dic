@@ -25,18 +25,26 @@ function sf_entity_event_node_prepare($node) {
  * Implements hook_node_access().
  */
 function sf_entity_event_node_access($node, $op, $account) {
-  $event = new NodeAccessEvent($node, $account, $op);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
-  return $event->getResult();
+  if ($node instanceof NodeInterface) {
+    $event = new NodeAccessEvent($node, $account, $op);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+    return $event->getResult();
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
+  }
 }
 
 /**
  * Implements hook_node_access_records().
  */
 function sf_entity_event_node_access_records($node) {
-  $event = new NodeAccessRecordEvent($node);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
-  return $event->toDrupalGrantList();
+  if ($node instanceof NodeInterface) {
+    $event = new NodeAccessRecordEvent($node);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
+    return $event->toDrupalGrantList();
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
+  }
 }
 
 /**
@@ -54,14 +62,23 @@ function sf_entity_event_node_grants($account, $op) {
  * Implements hook_node_view().
  */
 function sf_entity_event_node_view($node, $view_mode, $langcode) {
-  sf_entity_event_node_dispatch(NodeEvent::EVENT_VIEW, $node);
+  if ($node instanceof NodeInterface) {
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_VIEW, $node);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
+  }
 }
 
 /**
  * Implements hook_node_prepare_view().
  */
 function sf_entity_event_node_prepare_view($entities, $langcode) {
-  sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
+  $entity = reset($entities);
+  if ($entity instanceof NodeInterface) {
+    sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
+  }
 }
 
 /**
@@ -75,6 +92,8 @@ function sf_entity_event_node_presave($node) {
       sf_entity_event_node_dispatch(NodeEvent::EVENT_PREUPDATE, $node);
     }
     sf_entity_event_node_dispatch(NodeEvent::EVENT_PRESAVE, $node);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
   }
 }
 
@@ -88,6 +107,8 @@ function sf_entity_event_node_load($entities) {
   //   deactivate the hook for the user node, sorry.
   if ($node instanceof NodeInterface) {
     sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_LOAD, $entities);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
   }
 }
 
@@ -98,6 +119,8 @@ function sf_entity_event_node_insert($node) {
   if ($node instanceof NodeInterface) {
     sf_entity_event_node_dispatch(NodeEvent::EVENT_INSERT, $node);
     sf_entity_event_node_dispatch(NodeEvent::EVENT_SAVE, $node);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
   }
 }
 
@@ -108,6 +131,8 @@ function sf_entity_event_node_update($node) {
   if ($node instanceof NodeInterface) {
     sf_entity_event_node_dispatch(NodeEvent::EVENT_UPDATE, $node);
     sf_entity_event_node_dispatch(NodeEvent::EVENT_SAVE, $node);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
   }
 }
 
@@ -117,6 +142,8 @@ function sf_entity_event_node_update($node) {
 function sf_entity_event_node_delete($node) {
   if ($node instanceof NodeInterface) {
     sf_entity_event_node_dispatch(NodeEvent::EVENT_DELETE, $node);
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
   }
 }
 
