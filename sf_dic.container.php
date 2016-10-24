@@ -11,8 +11,8 @@ use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundl
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
@@ -24,6 +24,8 @@ class ServiceProvider implements ServiceProviderInterface
     public function register(ContainerBuilder $container)
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
+        $loader->load('translation.yml');
+
         $bundles = $container->getParameter('kernel.bundles');
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
@@ -47,7 +49,7 @@ class ServiceProvider implements ServiceProviderInterface
         }
 
         if (!variable_get('kernel.symfony_all_the_way', false)) {
-            if (!class_exists('\Symfony\Bundle\FrameworkBundle\FrameworkBundle')) {
+            if (!in_array('Symfony\\Bundle\\FrameworkBundle\\FrameworkBundle', $bundles)) {
                 if ($container->getParameter('kernel.debug')) {
                     $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
                 }

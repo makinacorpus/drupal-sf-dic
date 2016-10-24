@@ -1,0 +1,3 @@
+services:
+    translator.drupal:
+        class: MakinaCorpus\Drupal\Sf\Translation\Translator
