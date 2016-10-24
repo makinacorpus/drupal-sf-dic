@@ -458,6 +458,21 @@ function sf_dic_error_page($status = 404) {
 }
 
 /**
+ * Format exception
+ * @param \Exception $e
+ */
+function _sf_dic_format_exception($e) {
+ /** @var \Exception $e */
+ $output = '';
+ do {
+  $output .= $e->getMessage() . ' (' . $e->getCode() . ') in ' . $e->getFile() . ' (' . $e->getLine() . ')';
+  $output .= '<br/><pre>' . $e->getTraceAsString() . '</pre>';
+  $e = $e->getPrevious();
+ } while ($e);
+ return $output;
+}
+
+/**
  * Statically (dhu) get and set exceptions, since Drupal cannot handle them
  * proprely, we are going to need it.
  */
@@ -465,6 +480,8 @@ function sf_dic_exception($exception = null) {
   static $stored;
   if (null !== $exception) {
     $stored = $exception;
+    watchdog_exception(__FUNCTION__, $exception);
+    watchdog('http_exception', _sf_dic_format_exception($exception));
   }
   return $stored;
 }
@@ -495,6 +512,9 @@ function sf_dic_router() {
       case 404:
         return MENU_NOT_FOUND;
     }
+    throw $e;
+  } catch (\Exception $e) {
+    sf_dic_exception($e);
     throw $e;
   }
 
@@ -560,18 +580,25 @@ function sf_dic_page($controller) {
   try {
     $ret = _sf_dic_response(call_user_func_array([$controller, $method], $args));
   } catch (\Symfony\Component\Security\Core\Exception\AccessDeniedException $e) {
+    sf_dic_exception($e);
     return MENU_ACCESS_DENIED;
   } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
+    sf_dic_exception($e);
     return MENU_ACCESS_DENIED;
   } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+    sf_dic_exception($e);
     return MENU_NOT_FOUND;
   } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+    sf_dic_exception($e);
     switch ($e->getStatusCode()) {
       case 403:
         return MENU_ACCESS_DENIED;
       case 404:
         return MENU_NOT_FOUND;
     }
+    throw $e;
+  } catch (\Exception $e) {
+    sf_dic_exception($e);
     throw $e;
   }
 
