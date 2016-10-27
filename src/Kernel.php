@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+use Symfony\Component\Config\ConfigCache;
 
 abstract class Kernel extends BaseKernel
 {
@@ -230,6 +231,40 @@ abstract class Kernel extends BaseKernel
         }
 
         return $container;
+    }
+
+    /**
+     * I am so, so sorry I had to rewrite this, just because once the container
+     * has been require_once'ed, it cannot be a second time during the same PHP
+     * runtime, and container refresh does not work upon Drupal module enable.
+     *
+     * {@inheritdoc}
+     */
+    protected function initializeContainer()
+    {
+        $class = $this->getContainerClass();
+        $cache = new ConfigCache($this->getCacheDir().'/'.$class.'.php', $this->debug);
+        $fresh = true;
+        if (!$cache->isFresh()) {
+            $container = $this->buildContainer();
+            $container->compile();
+            $this->dumpContainer($cache, $container, $class, $this->getContainerBaseClass());
+
+            $fresh = false;
+
+            // Those 2 lines are the actual patch.
+            $this->container = $container;
+            return;
+        }
+
+        require_once $cache->getPath();
+
+        $this->container = new $class();
+        $this->container->set('kernel', $this);
+
+        if (!$fresh && $this->container->has('cache_warmer')) {
+            $this->container->get('cache_warmer')->warmUp($this->container->getParameter('kernel.cache_dir'));
+        }
     }
 
     /**
