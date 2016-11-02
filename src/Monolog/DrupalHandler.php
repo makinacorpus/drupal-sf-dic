@@ -57,7 +57,10 @@ class DrupalHandler extends AbstractProcessingHandler
         // exceptions in there
         $message = empty($record['formatted']) ? $record['message'] : $record['formatted'];
         foreach ($record['context'] as $key => $value) {
-            $record['context'][$key] = (string)$value;
+            // @todo temporary avoir Array to string conversion warnings
+            if (!is_array($value)) {
+                $record['context'][$key] = (string)$value;
+            }
         }
 
         // If you are dblogging stuff, using <br/> tags is advised for readability
