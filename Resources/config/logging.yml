@@ -1,0 +1,3 @@
+services:
+    drupal.monolog_handler:
+        class: MakinaCorpus\Drupal\Sf\Monolog\DrupalHandler

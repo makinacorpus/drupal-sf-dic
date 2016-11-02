@@ -1,0 +1,48 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: services.yml }
+
+framework:
+    # Those next 3 are not supported yet.
+    #esi:             ~
+    #translator:      { fallbacks: ["%locale%"] }
+    #secret:          "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    # Symfony's CSRF protection is not supported yet.
+    #csrf_protection: ~
+    validation:      { enable_annotations: true }
+    # Templating section is fully handled by compilation passes, and must
+    # be not modified from here, else the Drupal bridge would break.
+    default_locale:  "%locale%"
+    fragments:       ~
+    http_method_override: true
+    assets: ~
+
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: false
+    form_themes:
+        # Symfony's core form themes, last one if default one
+        - "bootstrap_3_layout.html.twig"
+        - "bootstrap_3_horizontal_layout.html.twig"
+        # Custom form theme
+        - "Form/bootstrap_custom.html.twig"
+        # Custom form types
+        - "Form/fields.html.twig"
+        # Bundle provided form themes and widgets
+        - "AutocompleteBundle:Form:fields.html.twig"
+        - "IbanBundle:Form:fields.html.twig"
+        - "FilechunkBundle:Form:fields.html.twig"
+
+doctrine:
+    dbal: {}
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        mappings:
+            AppBundle:
+                type: annotation

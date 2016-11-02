@@ -1,0 +1,14 @@
+imports:
+    - { resource: config.yml }
+
+monolog:
+    handlers:
+
+        main:
+            type:   stream
+            path:   "%kernel.logs_dir%/%kernel.environment%.log"
+            level:  error
+
+        syslog:
+            type:   syslog
+            level:  error

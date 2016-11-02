@@ -146,6 +146,7 @@ $conf['site_404'] = 'symfony/not-found';
 You can use the Symfony router, and build 100% Symfony compatible code, please see
 [https://symfony.com/doc/current/book/routing.html](https://symfony.com/doc/current/book/routing.html)
 
+
 ### Register your bundle's services.yml file
 
 You must first tell this module you will use the Symfony router by adding the

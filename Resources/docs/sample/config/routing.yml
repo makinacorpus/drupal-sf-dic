@@ -1,0 +1,8 @@
+
+filechunk:
+    resource: "@FilechunkBundle/Resources/config/routing.yml"
+    prefix: /
+
+autocomplete:
+    resource: "@AutocompleteBundle/Resources/config/routing.yml"
+    prefix: /
