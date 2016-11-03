@@ -62,6 +62,11 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
             ;
         }
 
+        // Also replace the translator with our own
+        if ($container->hasDefinition('translator.drupal')) {
+            $container->setAlias('translator', 'translator.drupal');
+        }
+
         // When NOT in fullstack mode, we need to provide a null implementation
         // for the controller resolver service, else the container will be
         // unable to spawn the http kernel service

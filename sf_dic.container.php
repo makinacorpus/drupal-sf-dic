@@ -25,6 +25,7 @@ class ServiceProvider implements ServiceProviderInterface
         $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
+        $loader->load('translation.yml');
 
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'));
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
