@@ -16,6 +16,16 @@ class DrupalUser implements AdvancedUserInterface
     }
 
     /**
+     * Get associated Drupal account
+     *
+     * @return \Drupal\Core\Session\AccountInterface
+     */
+    public function getDrupalAccount()
+    {
+        return $this->account;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getRoles()

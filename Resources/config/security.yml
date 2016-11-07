@@ -7,6 +7,11 @@ services:
     class: MakinaCorpus\Drupal\Sf\Security\DrupalUserProvider
     arguments: ['@entity.manager']
 
+  drupal.permission_voter:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Security\Voter\DrupalPermissionVoter
+    tags: [{name: security.voter}]
+
 # you can read more about security in the related section of the documentation
 # http://symfony.com/doc/current/book/security.html
 security:
