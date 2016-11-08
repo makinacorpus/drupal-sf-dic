@@ -12,18 +12,6 @@ services:
     class: MakinaCorpus\ACL\Impl\Drupal\UserGrantProfileCollector
     tags: [{name: acl.profile_collector}]
 
-  acl.profile_collector.symfony:
-    public: false
-    class: MakinaCorpus\ACL\Impl\Symfony\EventProfileCollector
-    arguments: ['@event_dispatcher']
-    tags: [{name: acl.profile_collector}]
-
-  acl.entry_collector.symfony:
-    public: false
-    class: MakinaCorpus\ACL\Impl\Symfony\EventEntryCollector
-    arguments: ['@event_dispatcher']
-    tags: [{name: acl.entry_collector}]
-
   # This service will be manually used within the module hooks to convert
   # acl as Drupal node access records information
   # @todo

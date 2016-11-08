@@ -24,8 +24,14 @@ class ServiceProvider implements ServiceProviderInterface
         // @todo if symfony bundle is present, load a different configuration files with
         //   only drupal integration components provided
         if (class_exists('\MakinaCorpus\ACL\Resource')) {
-            $loader->load('php-acl.yml');
+
+            $loader->load('acl.yml');
             $container->addCompilerPass(new ManagerRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
+
+            $bundles = $container->getParameter('kernel.bundles');
+            if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
+                $loader->load('acl-security.yml');
+            }
         }
     }
 }

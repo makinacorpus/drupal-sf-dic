@@ -1,0 +1,7 @@
+services:
+
+  acl.security.voter:
+    public: false
+    class: MakinaCorpus\ACL\Impl\Symfony\ACLVoter
+    arguments: ['@acl.manager']
+    tags: [{name: security.voter}]
