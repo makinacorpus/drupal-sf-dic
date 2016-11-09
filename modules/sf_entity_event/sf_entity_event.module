@@ -8,6 +8,9 @@ use Drupal\node\NodeInterface;
 
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityCollectionEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessGrantEvent;
+use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessRecordEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeCollectionEvent;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeEvent;
 
@@ -16,6 +19,39 @@ use MakinaCorpus\Drupal\Sf\EventDispatcher\NodeEvent;
  */
 function sf_entity_event_node_prepare($node) {
   sf_entity_event_node_dispatch(NodeEvent::EVENT_PREPARE, $node);
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function sf_entity_event_node_access($node, $op, $account) {
+  $event = new NodeAccessEvent($node, $account, $op);
+  \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+  return $event->getResult();
+}
+
+/**
+ * Implements hook_node_access_records().
+ */
+function sf_entity_event_node_access_records($node) {
+  if ($node instanceof NodeInterface) {
+    $event = new NodeAccessRecordEvent($node);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
+    return $event->toDrupalGrantList();
+  } else {
+    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
+  }
+}
+
+/**
+ * Empty implementation of hook_node_grants().
+ */
+function sf_entity_event_node_grants($account, $op) {
+  // @todo This is a duplicate with the event throw within NodeAccessSubscriber
+  //   so it needs to go through a cache somehow
+  $event = new NodeAccessGrantEvent($account, $op);
+  \Drupal::service('event_dispatcher')->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
+  return $event->getResult();
 }
 
 /**
