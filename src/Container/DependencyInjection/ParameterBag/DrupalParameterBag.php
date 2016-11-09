@@ -34,15 +34,13 @@ class DrupalParameterBag extends ParameterBag
             if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
                 return $GLOBALS['conf'][$name];
             }
-
-            throw new \InvalidArgumentException(sprintf("%s: parameter does not exist"));
-        }
-
-        if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
-            return $GLOBALS['conf'][$name];
-        }
-        if (parent::has($name)) {
-            return parent::get($name);
+        } else {
+            if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
+                return $GLOBALS['conf'][$name];
+            }
+            if (parent::has($name)) {
+                return parent::get($name);
+            }
         }
 
         // This should be logged, somehow
