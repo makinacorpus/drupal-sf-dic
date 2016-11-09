@@ -315,6 +315,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      */
     final protected function moduleExists($module)
     {
+        self::findDrupalDatabaseConnection();
         drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE);
 
         return module_exists($module);
