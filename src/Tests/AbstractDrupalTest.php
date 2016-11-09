@@ -163,10 +163,12 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
      *
      * @param string[] $permissionList
      *   Permission string list
+     * @param string $name
+     *   Name for debugging purposes
      *
      * @return AccountInterface
      */
-    protected function createDrupalUser($permissionList = [])
+    protected function createDrupalUser($permissionList = [], $name = null)
     {
         /* @var $storage \Drupal\Core\Entity\EntityStorageInterface */
         $storage = $this->getDrupalContainer()->get('entity.manager')->getStorage('user');
@@ -174,9 +176,15 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         $account = $storage->create();
         $this->accounts[] = $account;
         $stupidHash = uniqid() . mt_rand();
-        $account->name = $stupidHash;
         $account->mail = $stupidHash . '@example.com';
         $account->roles = [];
+
+        if ($name) {
+            $account->name = $name . ' (' . uniqid() . ')';
+        } else {
+            $account->name = $stupidHash;
+        }
+
         $storage->save($account);
 
         // Fake user access cache for testing
@@ -244,7 +252,11 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
 
     protected function createKernelInstance($env, $debug = true)
     {
-        return new DefaultAppKernel($env, $debug);
+        if (class_exists('\AppKernel')) {
+            return new \AppKernel($env, $debug);
+        } else {
+            return new DefaultAppKernel($env, $debug);
+        }
     }
 
     /**
@@ -275,7 +287,8 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
                 ->get('request_stack')
                 ->push(
                     \MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
-                );
+                )
+            ;
 
             \Drupal::_setKernel($this->kernel);
         }
