@@ -180,7 +180,7 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         $account->roles = [];
 
         if ($name) {
-            $account->name = $name . ' (' . uniqid() . ')';
+            $account->name = $name . ' (' . rand(0, 99999) . ')';
         } else {
             $account->name = $stupidHash;
         }
