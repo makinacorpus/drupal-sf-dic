@@ -252,15 +252,13 @@ abstract class Kernel extends BaseKernel
 
             $fresh = false;
 
-            // Those 2 lines are the actual patch.
             $this->container = $container;
-            return;
+        } else {
+            require_once $cache->getPath();
+
+            $this->container = new $class();
+            $this->container->set('kernel', $this);
         }
-
-        require_once $cache->getPath();
-
-        $this->container = new $class();
-        $this->container->set('kernel', $this);
 
         if (!$fresh && $this->container->has('cache_warmer')) {
             $this->container->get('cache_warmer')->warmUp($this->container->getParameter('kernel.cache_dir'));
