@@ -19,12 +19,12 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         // Cache warmer does more harm than good with Drupal.
-//         if ($container->hasDefinition('cache_warmer')) {
-//             $container->removeDefinition('cache_warmer');
-//         }
-//         if ($container->hasAlias('cache_warmer')) {
-//             $container->removeAlias('cache_warmer');
-//         }
+        if ($container->hasDefinition('cache_warmer')) {
+            $container->removeDefinition('cache_warmer');
+        }
+        if ($container->hasAlias('cache_warmer')) {
+            $container->removeAlias('cache_warmer');
+        }
 
         // When not working with symfony, we need to provide a file locator
         // service of our own instead of the symfony's one
