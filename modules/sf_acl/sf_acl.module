@@ -47,6 +47,16 @@ function _sf_acl_manager() {
 }
 
 /**
+ * Procedural proxy to Manager::isGranted() method.
+ */
+function sf_acl_is_granted($resource, $permission, $profile = null) {
+  if (!$profile) {
+    $profile = \Drupal::currentUser();
+  }
+  return _sf_acl_manager()->isGranted($resource, $profile, $permission);
+}
+
+/**
  * Implements hook_node_access().
  */
 function sf_acl_node_access($node, $op, $account) {
