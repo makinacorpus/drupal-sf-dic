@@ -2,7 +2,7 @@ services:
 
   acl.security.acl.voter:
     public: false
-    class: MakinaCorpus\ACL\Impl\Symfony\ACLVoter
+    class: MakinaCorpus\Drupal\Sf\Security\Voter\DrupalAclVoter
     arguments: ['@acl.manager']
     tags: [{name: security.voter}]
 
