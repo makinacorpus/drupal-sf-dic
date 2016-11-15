@@ -18,7 +18,7 @@ class DrupalPermissionVoter extends Voter
      */
     protected function supports($attribute, $subject)
     {
-        return is_string($attribute) && (null === $subject || 'permission' !== $subject);
+        return is_string($attribute) && (null === $subject || 'permission' === $subject);
     }
 
     /**
