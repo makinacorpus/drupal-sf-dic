@@ -44,11 +44,13 @@ class DrupalNodeAccessVoter implements VoterInterface
         $account = $user->getDrupalAccount();
         $vote = VoterInterface::ACCESS_ABSTAIN;
 
+        // Let non-Drupal core permission pass, this will allows event-driven
+        // modules to handle something else than core permissions, way better!
         foreach ($attributes as $attribute) {
 
             // Ignore non-Drupal core attributes
             if ($attribute !== 'view' && $attribute !== 'update' && $attribute !== 'delete') {
-                continue;
+                time();
             }
 
             $access = $this->nodeAccess($subject, $attribute, $account);

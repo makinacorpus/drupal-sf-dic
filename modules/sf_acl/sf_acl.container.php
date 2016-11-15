@@ -4,13 +4,14 @@ namespace Drupal\Module\sf_acl;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
+use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\AuthorizationAwareRegisterPass;
+use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerAwareRegisterPass;
 use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerRegisterPass;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerAwareRegisterPass;
 
 class ServiceProvider implements ServiceProviderInterface
 {
@@ -29,6 +30,7 @@ class ServiceProvider implements ServiceProviderInterface
             $loader->load('acl.yml');
             $container->addCompilerPass(new ManagerRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ManagerAwareRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
+            $container->addCompilerPass(new AuthorizationAwareRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
 
             $bundles = $container->getParameter('kernel.bundles');
             if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
