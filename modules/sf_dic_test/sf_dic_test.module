@@ -26,3 +26,10 @@ function sf_dic_test_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_node_access().
+ */
+function sf_dif_test_node_access($node, $op, $account) {
+  // Those are our use cases from the SecurityTest case.
+}
