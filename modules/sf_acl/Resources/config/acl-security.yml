@@ -13,3 +13,11 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Security\Voter\DrupalNodeAccessVoter
     tags: [{name: security.voter}]
+
+  # Decorate the authorization checker in order to be able to pass a drupal
+  # account as an additional parameter to the isGranted() method
+  acl.security.authorization_checker:
+    public: false
+    decorates: security.authorization_checker
+    class: MakinaCorpus\Drupal\Sf\Security\Authorization\TokenAwareAuthorizationChecker
+    arguments: ['@acl.security.authorization_checker.inner', '@security.access.decision_manager']

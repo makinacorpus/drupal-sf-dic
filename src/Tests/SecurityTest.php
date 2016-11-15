@@ -4,11 +4,19 @@ namespace MakinaCorpus\Drupal\Sf\Tests;
 
 use Drupal\Core\Session\Account;
 use Drupal\node\Node;
+use Drupal\user\User;
 
+use MakinaCorpus\Drupal\Sf\Security\Authorization\TokenAwareAuthorizationChecker;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
+use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
 use MakinaCorpus\Drupal\Sf\Security\Voter\DrupalNodeAccessVoter;
+use MakinaCorpus\Drupal\Sf\Security\Voter\DrupalPermissionVoter;
+use MakinaCorpus\Drupal\Sf\Tests\Mockup\SecurityNullAuthenticationManager;
 use MakinaCorpus\Drupal\Sf\Tests\Mockup\SecurityToken;
 
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 class SecurityTest extends AbstractDrupalTest
@@ -26,6 +34,52 @@ class SecurityTest extends AbstractDrupalTest
 
         // forces bootstrap
         $this->getDrupalContainer();
+    }
+
+    public function testTokenAwareAuthorizationCheckerAndDrupalPermissionVoter()
+    {
+        // We are in Drupal, user with uid 1 can access everything
+        $superUser = new User();
+        $superUser->uid = 1;
+        $superUser->roles = [1 => 1];
+        $superToken = new UserToken();
+        $superToken->setUser(new DrupalUser($superUser));
+
+        // And anonymous pretty much nothing
+        $dumbUser = new User();
+        $dumbUser->uid = 0;
+        $dumbUser->roles = [0 => 0];
+        $dumbToken = new UserToken();
+        $dumbToken->setUser(new DrupalUser($dumbUser));
+
+        // We are working in a fully bootstrapped Drupal, in theory
+        // the permission voter is setup, we can send isGranted() calls
+        // using permission names: sending a non existing permission
+        // will always return false for any user, but always true for
+        // the user with uid 1 (Drupal core default behavior)
+        $permission = 'a drupal permission that does not exists';
+
+        $tokenStorage = new TokenStorage();
+        $authenticationManager = new SecurityNullAuthenticationManager();
+        $accessDecisionManager = new AccessDecisionManager([new DrupalPermissionVoter()]);
+
+        $defaultAuthorizationChecker = new AuthorizationChecker($tokenStorage, $authenticationManager, $accessDecisionManager);
+        $tokenAwareAuthorizationChecker = new TokenAwareAuthorizationChecker($defaultAuthorizationChecker, $accessDecisionManager);
+
+        // First check results for the current user (should not be allowed)
+        // Then the super user (should be allowed)
+        $tokenStorage->setToken($superToken);
+        $this->assertTrue($defaultAuthorizationChecker->isGranted($permission, null));
+        $this->assertTrue($tokenAwareAuthorizationChecker->isGranted($permission, null));
+        $this->assertTrue($tokenAwareAuthorizationChecker->isGranted($permission, null, $superUser));
+        $this->assertFalse($tokenAwareAuthorizationChecker->isGranted($permission, null, $dumbUser));
+
+        // And do the exact opposite
+        $tokenStorage->setToken($dumbToken);
+        $this->assertFalse($defaultAuthorizationChecker->isGranted($permission, null));
+        $this->assertFalse($tokenAwareAuthorizationChecker->isGranted($permission, null));
+        $this->assertTrue($tokenAwareAuthorizationChecker->isGranted($permission, null, $superUser));
+        $this->assertFalse($tokenAwareAuthorizationChecker->isGranted($permission, null, $dumbUser));
     }
 
     public function testDrupalNodeAccessVoter()
@@ -54,7 +108,7 @@ class SecurityTest extends AbstractDrupalTest
 
                 $account = new Account();
                 $account->uid = $userId;
-                $account->roles = [DRUPAL_AUTHENTICATED_RID => DRUPAL_AUTHENTICATED_RID];
+                $account->roles = [1 => 1];
 
                 // This gives more or less 5% chances  that the current user
                 // is the current node owner.
