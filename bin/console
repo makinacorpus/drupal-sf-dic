@@ -12,8 +12,20 @@ set_time_limit(0);
 
 // Bootstrap Drupal, we are going to use its own kernel
 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-// @todo Make this configurable
-define('DRUPAL_ROOT', __DIR__ . '/../www');
+
+// Look for main directory
+$current_folder = __DIR__;
+do {
+  if (file_exists($current_folder . '/index.php') && is_dir($current_folder . '/sites')) {
+    define('DRUPAL_ROOT', $current_folder);
+    break;
+  }
+} while (($current_folder = dirname($current_folder)));
+
+if (!defined('DRUPAL_ROOT')) {
+  throw new Exception("Could not find drupal root directory");
+}
+
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
