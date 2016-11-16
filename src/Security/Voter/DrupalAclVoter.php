@@ -47,7 +47,7 @@ class DrupalAclVoter implements VoterInterface
                 continue;
             }
 
-            $local = $this->manager->vote($subject, $account, $attribute);
+            $local = $this->manager->vote($account, $subject, $attribute);
 
             if (Manager::ALLOW === $local) {
                 return VoterInterface::ACCESS_GRANTED;

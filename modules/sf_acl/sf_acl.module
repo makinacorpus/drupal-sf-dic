@@ -49,20 +49,24 @@ function _sf_acl_manager() {
 /**
  * Procedural proxy to Manager::isGranted() method.
  */
-function sf_acl_is_granted($resource, $permission, $profile = null) {
+function sf_acl_is_granted($permission, $resource, $profile = null) {
   if (!$profile) {
     $profile = \Drupal::currentUser();
   }
-  return _sf_acl_manager()->isGranted($resource, $profile, $permission);
+  $container = \Drupal::getContainer();
+  if ($container->has('security.authorization_checker')) {
+    $container->get('security.authorization_checker')->isGranted($permission, $resource, $profile);
+  } else {
+    return $container->get('acl.manager')->isGranted($permission, $resource, $profile);
+  }
 }
 
 /**
  * Implements hook_node_access().
  */
 function sf_acl_node_access($node, $op, $account) {
-  $manager = _sf_acl_manager();
-  if ($manager->supportsResource($node)) {
-    if ($manager->isGranted($node, $account, $op)) {
+  switch (_sf_acl_manager()->vote($account, $node, $op)) {
+    case Manager::ALLOW:
       return NODE_ACCESS_ALLOW;
     } else {
       return NODE_ACCESS_DENY;
