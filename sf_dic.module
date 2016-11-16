@@ -10,6 +10,8 @@ use Drupal\Core\Language\Language;
 use Drupal\user\User;
 
 use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
+use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
+use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
 
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -82,6 +84,16 @@ function sf_dic_boot() {
   $accountProxy = \Drupal::service('current_user');
   $accountProxy->setOriginalAccount($GLOBALS['user']);
   $GLOBALS['user'] = $accountProxy;
+
+  // Prevent isGranted() and alike methods to crash when the kernel is not
+  // actually handling the incomming request.
+  $container = \Drupal::getContainer();
+  if ($container->has('security.token_storage')) {
+    $token = new UserToken();
+    $token->setAuthenticated(true);
+    $token->setUser(new DrupalUser($GLOBALS['user']));
+    $container->get('security.token_storage')->setToken($token);
+  }
 }
 
 /**
