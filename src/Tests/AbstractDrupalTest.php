@@ -318,7 +318,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
         self::findDrupalDatabaseConnection();
         drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE);
 
-        return module_exists($module);
+        $list = system_list('module_enabled');
+
+        return isset($list[$module]);
     }
 
     /**
@@ -338,15 +340,8 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        try {
-            $this->db = self::findDrupalDatabaseConnection();
-        } catch (\Exception $e) {
-            $this->markTestSkipped("Could not find suitable Drupal instance to bootstrap, please set the DRUPAL_PATH variable within your phpunit.xml file");
-        }
-
-        // @todo
-        //   - create connection on temporary database
-        //   - pseudo a minimal site
+        // Do not catch anything, not finding the connection is an error.
+        $this->db = self::findDrupalDatabaseConnection();
     }
 
     /**

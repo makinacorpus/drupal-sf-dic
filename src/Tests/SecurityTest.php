@@ -25,9 +25,9 @@ class SecurityTest extends AbstractDrupalTest
     {
         parent::setUp();
 
-//         if (!$this->moduleExists('sf_acl')) {
-//             $this->markTestSkipped("You must enable the sf_acl module to run this test");
-//         }
+        if (!$this->moduleExists('sf_acl')) {
+            $this->markTestSkipped("You must enable the sf_acl module to run this test");
+        }
         if (!interface_exists('\\Symfony\\Component\\Security\\Core\\Authorization\\Voter\\VoterInterface')) {
             $this->markTestSkipped("You must have downloaded the symfony/security component to run this test");
         }
@@ -128,9 +128,17 @@ class SecurityTest extends AbstractDrupalTest
                 $canView = $voter->vote($token, $node, ['view']);
                 $canUpdate = $voter->vote($token, $node, ['update']);
                 $canDelete = $voter->vote($token, $node, ['delete']);
-                $canAnything = $voter->vote($token, $node, ['create']);
+                $canAnything = $voter->vote($token, $node, ['non existing permission']);
 
-                $this->assertSame(VoterInterface::ACCESS_ABSTAIN, $canAnything);
+                // Sad Drupal is sad, but UID 1 will always have all rights
+                // node_access() legacy function will filter out anything that's
+                // not 'view', 'update' or 'delete', but we won't: so UID 1 has
+                // always all rights on the non existing permission.
+                if (1 !== (int)$userId) {
+                    $this->assertSame(VoterInterface::ACCESS_ABSTAIN, $canAnything);
+                } else {
+                    $this->assertSame(VoterInterface::ACCESS_GRANTED, $canAnything);
+                }
 
                 if ($drupalAccessView) {
                     $this->assertSame(VoterInterface::ACCESS_GRANTED, $canView);
