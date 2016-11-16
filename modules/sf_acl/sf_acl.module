@@ -27,11 +27,6 @@
  *     others, and use the node_access() function for the only three
  *     'update', 'view' and 'delete' permissions that core supports;
  *
- *   - we do ignore the NODE_ACCESS_DENY feature, because it is a Drupal core
- *     inconsistency: only a runtime node_access() call can deny, but the
- *     {node_access} database table lookups don't allow the deny operation,
- *     our own ACL manager will therefore ignore it too.
- *
  * That's it, it should work.
  */
 
@@ -70,8 +65,9 @@ function sf_acl_node_access($node, $op, $account) {
       return NODE_ACCESS_ALLOW;
     case Manager::DENY:
       return NODE_ACCESS_DENY;
+    default:
+      return NODE_ACCESS_IGNORE;
   }
-  return NODE_ACCESS_IGNORE;
 }
 
 /**
