@@ -18,6 +18,8 @@ class EntityEventTest extends AbstractDrupalTest
     {
         parent::setUp();
 
+        $this->markTestSkipped("This needs rewrite");
+
         if (!module_exists('sf_entity_event')) {
             $this->markTestSkipped("You must enable the sf_entity_event module to run this test");
         }
