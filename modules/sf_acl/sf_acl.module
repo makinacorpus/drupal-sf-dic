@@ -68,9 +68,8 @@ function sf_acl_node_access($node, $op, $account) {
   switch (_sf_acl_manager()->vote($account, $node, $op)) {
     case Manager::ALLOW:
       return NODE_ACCESS_ALLOW;
-    } else {
+    case Manager::DENY:
       return NODE_ACCESS_DENY;
-    }
   }
   return NODE_ACCESS_IGNORE;
 }
