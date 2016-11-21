@@ -4,6 +4,7 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 
 use MakinaCorpus\Drupal\Sf\EventDispatcher\EntityCollectionEvent;
@@ -25,7 +26,7 @@ function sf_entity_event_node_prepare($node) {
  * Implements hook_node_access().
  */
 function sf_entity_event_node_access($node, $op, $account) {
-  if ($node instanceof NodeInterface) {
+  if ($node instanceof NodeInterface && $account instanceof AccountInterface) {
     $event = new NodeAccessEvent($node, $account, $op);
     \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
     return $event->getResult();
@@ -45,11 +46,13 @@ function sf_entity_event_node_access_records($node) {
  * Empty implementation of hook_node_grants().
  */
 function sf_entity_event_node_grants($account, $op) {
-  // @todo This is a duplicate with the event throw within NodeAccessSubscriber
-  //   so it needs to go through a cache somehow
-  $event = new NodeAccessGrantEvent($account, $op);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
-  return $event->getResult();
+  if ($account instanceof AccountInterface) {
+    // @todo This is a duplicate with the event throw within NodeAccessSubscriber
+    //   so it needs to go through a cache somehow
+    $event = new NodeAccessGrantEvent($account, $op);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessGrantEvent::EVENT_NODE_ACCESS_GRANT, $event);
+    return $event->getResult();
+  }
 }
 
 /**
