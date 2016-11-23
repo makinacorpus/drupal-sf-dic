@@ -4,7 +4,6 @@ namespace MakinaCorpus\Drupal\Sf;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
-use MakinaCorpus\Drupal\Sf\Container\Container as DrupalContainer;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
 
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
@@ -120,14 +119,6 @@ abstract class Kernel extends BaseKernel
         }
 
         parent::__construct($environment, $debug);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getContainerBaseClass()
-    {
-        return DrupalContainer::class;
     }
 
     /**
