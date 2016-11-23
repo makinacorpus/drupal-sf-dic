@@ -2,14 +2,28 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag;
 
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 class DrupalParameterBag extends ParameterBag
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function get($name)
+    {
+        try {
+            return parent::get($name);
+        } catch (ParameterNotFoundException $e) {
+            // In drupal, non existing parameters are allowed.
+            return null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDrupalOverride($name, $default)
     {
         if ('kernel.' === substr($name, 0, 7)) {
             // Kernel variables must be driven by the kernel only: here is the
@@ -28,32 +42,31 @@ class DrupalParameterBag extends ParameterBag
             //  - this will use the $conf value, which has not the environment
             //    name prepended, and won't look for the right file at the right
             //    place.
-            if (parent::has($name)) {
-                return parent::get($name);
-            }
-            if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
-                return $GLOBALS['conf'][$name];
-            }
-        } else {
-            if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
-                return $GLOBALS['conf'][$name];
-            }
-            if (parent::has($name)) {
-                return parent::get($name);
-            }
+            return $default;
         }
 
-        // This should be logged, somehow
-        // trigger_error(sprintf("%s: container parameter or drupal variable is undefined", $name), E_USER_DEPRECATED);
+        if (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) {
+            return $GLOBALS['conf'][$name];
+        }
 
-        return null;
+        return $default;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function has($name)
+    public function set($name, $value)
     {
-        return (isset($GLOBALS['conf']) && array_key_exists($name, $GLOBALS['conf'])) || parent::has($name);
+        $this->parameters[strtolower($name)] = $this->getDrupalOverride($name, $value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function add(array $parameters)
+    {
+        foreach ($parameters as $key => $value) {
+            $this->parameters[strtolower($key)] = $this->getDrupalOverride($key, $value);
+        }
     }
 }
