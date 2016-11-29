@@ -164,7 +164,7 @@ function twig_theme($existing, $type, $theme, $path) {
       // Do not prevent pre-bootstrap exceptions to be hidden with this error,
     // if Drupal is not fully bootstrapped, the theme will be presented as
     // disabled since it has noot been enabled yet.
-    if (DRUPAL_BOOTSTRAP_FULL === drupal_bootstrap()) {
+    if (!drupal_is_cli() && DRUPAL_BOOTSTRAP_FULL === drupal_bootstrap()) {
       throw new Exception("Trying to render something with a disabled theme.");
     }
   }
