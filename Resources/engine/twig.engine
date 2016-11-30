@@ -161,11 +161,17 @@ function twig_theme($existing, $type, $theme, $path) {
   $themes = list_themes();
 
   if (!$themes[$theme]->status) {
-      // Do not prevent pre-bootstrap exceptions to be hidden with this error,
+    // Do not prevent pre-bootstrap exceptions to be hidden with this error,
     // if Drupal is not fully bootstrapped, the theme will be presented as
     // disabled since it has noot been enabled yet.
     if (!drupal_is_cli() && DRUPAL_BOOTSTRAP_FULL === drupal_bootstrap()) {
-      throw new Exception("Trying to render something with a disabled theme.");
+      if (variable_get('theme_default', 'bartik') === $theme) {
+        throw new Exception(sprintf("%s is the default theme and is disabled", $theme));
+      } else if (variable_get('admin_theme', 'seven') === $theme) {
+        throw new Exception(sprintf("%s is the admin theme and is disabled", $theme));
+      } else {
+        throw new Exception(sprintf("%s is disabled", $theme));
+      }
     }
   }
 
