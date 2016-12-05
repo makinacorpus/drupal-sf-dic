@@ -37,6 +37,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
     protected $whitelist;
 
     /**
+     * @var string[]
+     */
+    protected $blackList = [];
+
+    /**
      * @var boolean
      */
     protected $excludeAdminPath = true;
@@ -73,6 +78,7 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         $this->doCache = $doCache;
 
         $this->whitelist = $this->whitelistInit();
+        $this->blackList = $this->blacklistInit();
 
         if (null === $this->whitelist) {
             $this->whitelistRebuild();
@@ -94,6 +100,17 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
         $this->doCache = false;
         $this->cacheKillSwitch = true;
         $this->data = [];
+    }
+
+    protected function blacklistInit()
+    {
+        $blacklist = variable_get('path_alias_blacklist', '');
+
+        if (is_array($blacklist)) {
+            return implode("\n", $blacklist);
+        }
+
+        return $blacklist;
     }
 
     public function whitelistInit()
@@ -135,6 +152,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
 
             // Exclude all admin paths
             if ($this->excludeAdminPath && path_is_admin($lookup)) {
+                return $lookup;
+            }
+
+            // Excluded blacklisted items
+            if ($this->blackList && drupal_match_path($lookup, $this->blackList)) {
                 return $lookup;
             }
 

@@ -14,3 +14,4 @@ Then you may read the documentation:
  *  [Use Drupal 8 forms in Drupal 7](Resources/docs/forms.md)
  *  [Provide Symfony full stack bundles in Drupal](Resources/docs/bundles.md)
  *  [Use Twig for Drupal 7](Resources/docs/twig.md)
+ *  [Path alias manager and path.inc](Resources/docs/aliasmanager.md)
