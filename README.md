@@ -15,3 +15,4 @@ Then you may read the documentation:
  *  [Provide Symfony full stack and bundles in Drupal](Resources/docs/bundles.md)
  *  [Use Twig for Drupal 7](Resources/docs/twig.md)
  *  [Use Monolog and the MonologBundle](Resources/docs/monolog.md)
+ *  [Path alias manager and path.inc](Resources/docs/aliasmanager.md)
