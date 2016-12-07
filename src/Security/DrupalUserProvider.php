@@ -3,7 +3,6 @@
 namespace MakinaCorpus\Drupal\Sf\Security;
 
 use Drupal\Core\Entity\EntityManager as DrupalEntityManager;
-
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -27,15 +26,15 @@ class DrupalUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        $user = $this->entityManager->getStorage('user')->loadByProperties([
+        $users = $this->entityManager->getStorage('user')->loadByProperties([
             'name' => $username,
         ]);
 
-        if (!$user) {
+        if (!$users) {
             throw new UsernameNotFoundException();
         }
 
-        return new DrupalUser($user);
+        return new DrupalUser(reset($users));
     }
 
     /**
