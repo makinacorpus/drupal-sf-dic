@@ -4,6 +4,7 @@ namespace MakinaCorpus\Drupal\Sf\Session;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionBagInterface;
+use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
 
 /**
  * Very basic session replacement that directly reads and write through the
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\Session\SessionBagInterface;
  */
 class DrupalSession extends Session
 {
+    private $metadataBag;
+
     public function __construct()
     {
     }
@@ -95,7 +98,7 @@ class DrupalSession extends Session
      */
     public function isStarted()
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        return drupal_session_started();
     }
 
     /**
@@ -139,7 +142,7 @@ class DrupalSession extends Session
      */
     public function save()
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        // Do nothing, Drupal will handle it.
     }
 
     /**
@@ -179,7 +182,11 @@ class DrupalSession extends Session
      */
     public function getMetadataBag()
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        if (!$this->metadataBag) {
+            $this->metadataBag = new MetadataBag();
+        }
+
+        return $this->metadataBag;
     }
 
     /**
@@ -201,7 +208,7 @@ class DrupalSession extends Session
     /**
      * Gets the flashbag interface.
      *
-     * @return FlashBagInterface
+     * @return \Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface
      */
     public function getFlashBag()
     {
