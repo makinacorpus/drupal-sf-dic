@@ -18,10 +18,10 @@ class Node implements NodeInterface
     public $language = LanguageInterface::LANGCODE_NOT_SPECIFIED;
     public $title = '';
     public $uid = 0;
-    public $status = 0;
+    public $status = null;
     public $created = 0;
     public $changed = 0;
-    public $promote = 0;
+    public $promote = null;
     public $sticky = 0;
 
     /**
