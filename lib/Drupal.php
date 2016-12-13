@@ -71,8 +71,8 @@ class Drupal
         $kernel->boot();
 
         // We certainly lost the current request during unsetContainer, re-set it.
-        if (Drupal::$currentRequest) {
-            $kernel->getContainer()->get('request_stack')->push(Drupal::$currentRequest);
+        if (self::$currentRequest) {
+            $kernel->getContainer()->get('request_stack')->push(self::$currentRequest);
         }
 
         return $kernel->getContainer();
@@ -93,11 +93,14 @@ class Drupal
      */
     static public function unsetContainer()
     {
-        $kernel = self::_getKernel();
+        $kernel     = self::_getKernel();
+        $container  = $kernel->getContainer();
 
         // Store the current request.
         // @see getContainer()
-        Drupal::$currentRequest = $kernel->getContainer()->get('request_stack')->getCurrentRequest();
+        if ($container) {
+            self::$currentRequest = $container->get('request_stack');
+        }
 
         // We need to spawn the kernel (if not already) in order to clear the
         // cache folder manually, we will then reset it.
