@@ -1,11 +1,8 @@
 <?php
 
 use Drupal\Core\Session\AccountInterface;
-
 use MakinaCorpus\Drupal\Sf\DefaultAppKernel;
 use MakinaCorpus\Drupal\Sf\Kernel;
-
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -18,6 +15,11 @@ class Drupal
      * @var KernelInterface
      */
     static protected $kernel;
+
+    /**
+     * @var Request
+     */
+    static protected $currentRequest;
 
     /**
      * Set kernel

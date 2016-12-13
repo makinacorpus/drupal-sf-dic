@@ -56,7 +56,11 @@ class DrupalFlashBag extends FlashBag
      */
     public function peekAll()
     {
-        return $_SESSION['messages'];
+        if (isset($_SESSION['messages'])) {
+            return $_SESSION['messages'];
+        }
+
+        return [];
     }
 
     /**
