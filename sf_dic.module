@@ -828,3 +828,11 @@ function sf_dic_forms_proxy($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Shortcut for performance critical code paths
+ * You should not rely upon it except maybe for url_outbound_alter() hooks.
+ */
+function path_alias_is_blacklisted($path) {
+  $whitelist = $GLOBALS['conf']['path_alias_whitelist'];
+  return false !== $whitelist && !isset($whitelist[strtok($path, '/')]);
+}

@@ -1,8 +1,10 @@
 <?php
 
 use Drupal\Core\Session\AccountInterface;
+
 use MakinaCorpus\Drupal\Sf\DefaultAppKernel;
 use MakinaCorpus\Drupal\Sf\Kernel;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -11,15 +13,9 @@ use Symfony\Component\HttpKernel\KernelInterface;
  */
 class Drupal
 {
-    /**
-     * @var KernelInterface
-     */
-    static protected $kernel;
-
-    /**
-     * @var Request
-     */
-    static protected $currentRequest;
+    static private $kernel;
+    static private $currentRequest;
+    static private $container;
 
     /**
      * Set kernel
@@ -65,6 +61,14 @@ class Drupal
      */
     static public function getContainer()
     {
+        // This method can sometime be called thousands times on the same page
+        // we ensure it costs the minimal amount of effort. We do have code
+        // path where this function is actually consuming a third of the page
+        // runtime.
+        if (self::$container) {
+            return self::$container;
+        }
+
         $kernel = self::_getKernel();
 
         // We consider that once this called you cannot register bundles anymore
@@ -75,7 +79,7 @@ class Drupal
             $kernel->getContainer()->get('request_stack')->push(self::$currentRequest);
         }
 
-        return $kernel->getContainer();
+        return self::$container = $kernel->getContainer();
     }
 
     /**
@@ -117,6 +121,7 @@ class Drupal
         // if they are registered bundles, they might mess up with globals or
         // configuration.
         self::$kernel = null;
+        self::$container = null;
     }
 
     /**
@@ -134,6 +139,14 @@ class Drupal
      */
     static public function service($id)
     {
+        // This method can sometime be called thousands times on the same page
+        // we ensure it costs the minimal amount of effort. We do have code
+        // path where this function is actually consuming half of the page
+        // runtime.
+        if (self::$container) {
+            return self::$container->get($id);
+        }
+
         return self::getContainer()->get($id);
     }
 

@@ -56,6 +56,9 @@ function drupal_get_path_alias($path = NULL, $path_language = NULL) {
   if ($path == NULL) {
     $path = $_GET['q'];
   }
+  if (path_alias_is_blacklisted($path)) {
+    return $path;
+  }
   return \Drupal::service('path.alias_manager')->getAliasByPath($path, $path_language);
 }
 
