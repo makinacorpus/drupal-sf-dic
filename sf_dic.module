@@ -95,6 +95,19 @@ function sf_dic_boot() {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function sf_dic_module_implements_alter(&$implementations, $hook) {
+  switch ($hook) {
+
+    case 'node_load':
+      // @see \Drupal\node\CompatNodeController
+      unset($implementations['user']);
+      break;
+  }
+}
+
+/**
  * Implements hook_language_init().
  */
 function sf_dic_language_init() {
