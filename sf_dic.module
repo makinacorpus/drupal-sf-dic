@@ -676,9 +676,11 @@ function sf_dic_page_form($formClass) {
  * Implements hook_exit().
  */
 function sf_dic_exit() {
-  $event = new PostResponseEvent(\Drupal::_getKernel(), \Drupal::request(), new Response());
-  \Drupal::service('event_dispatcher')
-         ->dispatch(KernelEvents::TERMINATE, $event);
+  if (\Drupal::hasRequest()) {
+    $event = new PostResponseEvent(\Drupal::_getKernel(), \Drupal::request(), new Response());
+    \Drupal::service('event_dispatcher')
+           ->dispatch(KernelEvents::TERMINATE, $event);
+  }
 }
 
 /**
