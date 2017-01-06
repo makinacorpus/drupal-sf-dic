@@ -215,8 +215,8 @@ class Drupal
         // Check hasContainer() first in order to always return a Boolean.
         return
             static::hasContainer() &&
-            static::getContainer()->has('request_stack') /* &&
-            static::getContainer()->get('request_stack')->getCurrentRequest() !== null */
+            static::getContainer()->has('request_stack') &&
+            static::getContainer()->get('request_stack')->getCurrentRequest() !== null
         ;
     }
 
