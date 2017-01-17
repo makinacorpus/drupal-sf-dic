@@ -122,7 +122,7 @@ function _twig_map_names(&$templates) {
     // twig engine. When this patch is not set, this is a noop, and the module
     // discovery will still work because the theme() function will use the
     // current theme rendering engine, so ours, so it'll work.
-    if (null === $info['engine']) {
+    if (!isset($info['engine'])) {
       $info['engine'] = 'twig';
     }
 
