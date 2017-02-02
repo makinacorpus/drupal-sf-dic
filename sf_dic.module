@@ -851,3 +851,11 @@ function path_alias_is_blacklisted($path) {
   $whitelist = $GLOBALS['conf']['path_alias_whitelist'];
   return false !== $whitelist && !isset($whitelist[strtok($path, '/')]);
 }
+
+/**
+ * Implements hook_system_theme_engine_info().
+ */
+function sf_dic_system_theme_engine_info() {
+  $theme_engines['twig'] = drupal_get_path('module','sf_dic') . '/Resources/engine/twig.engine';
+  return $theme_engines;
+}
