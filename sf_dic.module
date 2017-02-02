@@ -819,3 +819,10 @@ function sf_dic_forms_proxy($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Implements hook_system_theme_engine_info().
+ */
+function sf_dic_system_theme_engine_info() {
+  $theme_engines['twig'] = drupal_get_path('module','sf_dic') . '/Resources/engine/twig.engine';
+  return $theme_engines;
+}
