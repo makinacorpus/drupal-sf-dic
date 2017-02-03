@@ -36,16 +36,9 @@ class ServiceProvider implements ServiceProviderInterface
         }
 
         // TwigBundle will automatically be registered in the kernel.
-        // @todo
-        //   - I guess this should be in an extension file instead...
         if (class_exists('Symfony\\Bundle\\TwigBundle\\TwigBundle')) {
             $container->addCompilerPass(new TwigCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
-            if (in_array('Symfony\\Bundle\\TwigBundle\\TwigBundle', $bundles)) {
-                $loader->load('templating-fullstack.yml');
-                $loader->load('error.yml');
-	    } else {
-                $loader->load('templating-degraded.yml');
-            }
+            $loader->load('templating.yml');
         }
 
         if (!variable_get('kernel.symfony_all_the_way', false)) {
