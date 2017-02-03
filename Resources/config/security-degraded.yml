@@ -2,5 +2,6 @@
 # not enabled, in order to have functions such as Twig is_granted() function.
 services:
   drupal.security_twig_extension:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\SecurityDowngradeExtension
     tags: [{name: twig.extension}]

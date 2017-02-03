@@ -1,0 +1,5 @@
+# When fullstack is not present, we need to register the translator service
+# so that Twig will see it and correctly load the translation extension
+services:
+  translator:
+    alias: translator.drupal

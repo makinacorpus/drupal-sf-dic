@@ -5,7 +5,7 @@ namespace MakinaCorpus\Drupal\Sf\Twig\Extension;
 use MakinaCorpus\Drupal\Sf\Routing\Router;
 
 /**
- * Drupal various rendering functions
+ * Drupal path extension WITH Symfony router
  */
 class DrupalPathExtension extends \Twig_Extension
 {
@@ -21,7 +21,27 @@ class DrupalPathExtension extends \Twig_Extension
 
     public function createUrl($route, array $parameters = [])
     {
-        return Router::generateDrupalUrl($route, $parameters);
+        $options = [];
+
+        if ($parameters) {
+            $tokens = [];
+
+            foreach ($parameters as $key => $value) {
+                $token = '%' . $key;
+
+                if (false === strpos($route, $token)) {
+                    // We must, as per twig path() function signature, add unused
+                    // parameters as GET parameters
+                    $options['query'][$key] = $value;
+                } else {
+                    $tokens[$token] = $value;
+                }
+            }
+
+            $route = strtr($route, $tokens);
+        }
+
+        return url($route, $options);
     }
 
     /**
