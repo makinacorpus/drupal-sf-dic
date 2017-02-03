@@ -58,6 +58,8 @@ class ServiceProvider implements ServiceProviderInterface
 
         if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
             $loader->load('security.yml');
+        } else{
+            $loader->load('security-degraded.yml');
         }
         if (in_array('Symfony\\Bundle\\MonologBundle\\MonologBundle', $bundles)) {
             $loader->load('logging.yml');
