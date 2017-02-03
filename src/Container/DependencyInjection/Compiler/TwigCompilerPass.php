@@ -2,7 +2,8 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
-use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use MakinaCorpus\Drupal\Sf\Twig\Extension\TranslationExtension;
+
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -34,14 +35,15 @@ class TwigCompilerPass implements CompilerPassInterface
         // which aims to extend support to Twig 2.x, the translator extension
         // is not loaded by name anymore, but by class, which makes it not
         // possible to override, we need to use the same class name.
-        if (class_exists('\Symfony\Bridge\Twig\Extension\TranslationExtension')) {
-            if ($container->hasDefinition('twig.extension.trans')) {
-                $container
-                    ->getDefinition('twig.extension.trans')
-                    ->setClass(TranslationExtension::class)
-                    ->setArguments([new Reference('translator')])
-                ;
-            }
+        if (class_exists('\Symfony\Bridge\Twig\Extension\TranslationExtension') &&
+            $container->hasDefinition('twig.extension.trans') &&
+            $container->hasDefinition('translator')
+        ) {
+            $container
+                ->getDefinition('twig.extension.trans')
+                ->setClass('Symfony\Bridge\Twig\Extension\TranslationExtension')
+                ->setArguments([new Reference('translator')])
+            ;
         }
     }
 }
