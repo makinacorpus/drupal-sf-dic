@@ -42,7 +42,8 @@ class ServiceProvider implements ServiceProviderInterface
             $container->addCompilerPass(new TwigCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
             if (in_array('Symfony\\Bundle\\TwigBundle\\TwigBundle', $bundles)) {
                 $loader->load('templating-fullstack.yml');
-            } else {
+                $loader->load('error.yml');
+	    } else {
                 $loader->load('templating-degraded.yml');
             }
         }
