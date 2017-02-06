@@ -103,7 +103,7 @@ class Drupal
         // Store the current request.
         // @see getContainer()
         if ($container) {
-            self::$currentRequest = $container->get('request_stack');
+            self::$currentRequest = $container->get('request_stack')->getCurrentRequest();
         }
 
         // We need to spawn the kernel (if not already) in order to clear the
