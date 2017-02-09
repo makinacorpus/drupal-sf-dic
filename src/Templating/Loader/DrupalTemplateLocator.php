@@ -74,10 +74,11 @@ class DrupalTemplateLocator implements FileLocatorInterface
             }
         }
 
+        $extensionPath = drupal_get_path($type, $extension);
+
         // The "views" sub-folder does not applies to theme, it's an helper
         // for organizing modules code only, let's skip this useless check.
         if ('theme' !== $type) {
-            $extensionPath = drupal_get_path($type, $extension);
             $inViewsPath = $extensionPath . '/views/' . $restOfPath;
             if (file_exists($inViewsPath)) {
                 return new FileStorage($inViewsPath);
