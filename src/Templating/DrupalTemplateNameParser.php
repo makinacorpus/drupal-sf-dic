@@ -99,7 +99,7 @@ class DrupalTemplateNameParser extends BaseTemplateNameParser
                 throw new \InvalidArgumentException();
             }
 
-            $template = new DrupalTemplateReference($matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
+            $template = new DrupalTemplateReference($realname, $matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
 
             return $this->cache[$realname] = $template;
 
