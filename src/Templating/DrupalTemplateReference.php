@@ -15,9 +15,10 @@ use Symfony\Component\Templating\TemplateReference as BaseTemplateReference;
 
 class DrupalTemplateReference extends BaseTemplateReference
 {
-    public function __construct($type, $name, $path, $format, $engine)
+    public function __construct($origin, $type, $name, $path, $format, $engine)
     {
         $this->parameters = array(
+            'origin'  => $origin,
             'type'    => $type,
             'name'    => $name,
             'path'    => $path,
@@ -28,13 +29,12 @@ class DrupalTemplateReference extends BaseTemplateReference
 
     public function getPath()
     {
-        return
-            DRUPAL_ROOT
-                . '/' . drupal_get_path($this->parameters['type'], $this->parameters['name'])
-                . '/' . $this->parameters['path']
-                . '.' . $this->parameters['format']
-                . '.' . $this->parameters['engine']
-        ;
+        return $this->parameters['origin'];
+    }
+
+    public function getRestOfPath()
+    {
+        return $this->parameters['path'] . '.' . $this->parameters['format'] . '.' . $this->parameters['engine'];
     }
 
     /**

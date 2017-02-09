@@ -16,7 +16,9 @@ services:
 
   templating.loader.drupal:
     public: false
-    class: MakinaCorpus\Drupal\Sf\Templating\Loader\DrupalLoader
+    class: MakinaCorpus\Drupal\Sf\Templating\Loader\DrupalTemplateLocator
+    decorates: templating.locator
+    arguments: ['@templating.loader.drupal.inner']
 
   templating.name_parser:
     class: MakinaCorpus\Drupal\Sf\Templating\DrupalTemplateNameParser
@@ -35,3 +37,7 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalDateExtension
     tags: [{name: twig.extension}]
+
+  templating.cache_warmer.template_paths.drupal:
+    class: MakinaCorpus\Drupal\Sf\CacheWarmer\DrupalTemplatePathsCacheWarmer
+    tags: [{name: kernel.cache_warmer, priority: 20}]
