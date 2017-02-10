@@ -18,11 +18,11 @@ class Node implements NodeInterface
     public $language = LanguageInterface::LANGCODE_NOT_SPECIFIED;
     public $title = '';
     public $uid = 0;
-    public $status = null;
+    public $status = null;  // Must be null: see node_object_prepare().
     public $created = 0;
     public $changed = 0;
-    public $promote = null;
-    public $sticky = 0;
+    public $promote = null; // Must be null: see node_object_prepare().
+    public $sticky = null;  // Must be null: see node_object_prepare().
 
     /**
      * {@inheritdoc}
