@@ -159,8 +159,9 @@ function _twig_map_names(&$templates) {
  */
 function twig_theme($existing, $type, $theme, $path) {
   $themes = list_themes();
+  $theme_info = $themes[$theme];
 
-  if (!$themes[$theme]->status) {
+  if (!$theme_info->status) {
     // Do not prevent pre-bootstrap exceptions to be hidden with this error,
     // if Drupal is not fully bootstrapped, the theme will be presented as
     // disabled since it has noot been enabled yet.
@@ -175,19 +176,52 @@ function twig_theme($existing, $type, $theme, $path) {
     }
   }
 
+  // Find current theme functions.
   $templates = drupal_find_theme_functions($existing, [$theme]);
+
   // Allow modules to provide templates, this will trick Drupal into believing
   // they belong to the current theme instead, and use the correct engine.
   $theme_paths = [];
   foreach ($existing as $theme_hook) {
-    if (!in_array($theme_hook['theme path'], $theme_paths)) {
-      $theme_paths[] = $theme_hook['theme path'];
+
+    // Exclude directly theme hook without any template: we are indeed working
+    // with function driven theme hooks, and function theme hooks will inherit
+    // from the base module folder as 'path' key if any (or 'theme path' will
+    // fallback on module folder) this will trigger yet again the bug explained
+    // just below.
+    if (empty($theme_hook['template'])) {
+      continue;
+    }
+
+    // We need to be restrictive in the path lookup, for example, let's consider
+    // that you have the 'mysite' profile, containing a 'theme/mytheme' folder
+    // with a Drupal theme: if your 'mysite_theme()' hook provides templates,
+    // the following lookup will also find templates in the theme subfolder,
+    // and mix up templates from another theme into the one being processed by
+    // this function.
+    // Doing this check does NOT actually fixes the bug, but it reduces the
+    // chances it happens: if the 'mysite' profile did put all of its templates
+    // inside, for example, a 'templates' subfolder, this will not contain the
+    // 'mytheme' theme, and lookup will not find the 'mytheme' templates, and
+    // avoid a potential confusion.
+    $lookup_path = isset($theme_hook['path']) ? $theme_hook['path'] : $theme_hook['theme path'];
+
+    // Do not process the same path twice, we would find duplicate templates.
+    if (!in_array($lookup_path, $theme_paths)) {
+      $theme_paths[] = $lookup_path;
       // We're not doing an array_merge or else module templates would override
       // templates from parent themes.
-      // @todo exclude the 'symfony' folder.
-      $templates += drupal_find_theme_templates($existing, twig_extension(), $theme_hook['theme path']);
+      $module_templates = drupal_find_theme_templates($existing, twig_extension(), $lookup_path);
+      // Avoid overriding templates from the base theme if they exist.
+      foreach ($module_templates as $hook => $info) {
+        if ('module' !== $existing[$hook]['type']) {
+          unset($module_templates[$hook]);
+        }
+      }
+      $templates += $module_templates;
     }
   }
+
   // Here we do an array_merge() because theme templates _should_ override
   // those from parent themes and modules.
   $templates = array_merge($templates, drupal_find_theme_templates($existing, twig_extension(), $path));
