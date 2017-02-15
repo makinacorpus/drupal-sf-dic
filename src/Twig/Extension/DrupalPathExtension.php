@@ -19,7 +19,7 @@ class DrupalPathExtension extends \Twig_Extension
         ];
     }
 
-    public function createUrl($route, array $parameters = [])
+    public function createUrl($route, $parameters = [])
     {
         $options = [];
 
