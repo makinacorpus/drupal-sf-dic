@@ -15,19 +15,51 @@ class DrupalNodeExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
+            new \Twig_SimpleFunction('entity_bundle', [$this, 'entityBunde']),
+            new \Twig_SimpleFunction('field_name', [$this, 'fieldName']),
             new \Twig_SimpleFunction('node_view', [$this, 'nodeView'], ['is_safe' => ['html']]),
             new \Twig_SimpleFunction('node_field', [$this, 'fieldView'], ['is_safe' => ['html']]),
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * Get human readable bundle name
+     *
+     * @param string $entityType
+     * @param string $bundle
+     *
+     * @return string
      */
-    public function getFilters()
+    public function entityBunde($entityType, $bundle)
     {
-        return [
+        if ($info = entity_get_info($entityType)) {
+            if (isset($info['bundles'][$bundle])) {
+                return $info['bundles'][$bundle]['label'];
+            }
+        }
+    }
 
-        ];
+    /**
+     * Get human readable field name
+     *
+     * @param string $fieldName
+     * @param string $entityType
+     * @param string $bundle
+     *
+     * @return string
+     */
+    public function fieldName($fieldName, $entityType = null, $bundle = null)
+    {
+        if ($entityType && $bundle) {
+            if ($instance = field_info_instance($entityType, $fieldName, $bundle)) {
+                return $instance['label'];
+            }
+        }
+        if ($field = field_info_field($fieldName)) {
+            if (isset($field['instance_settings']['label'])) {
+                return $field['instance_settings']['label'];
+            }
+        }
     }
 
     public function fieldView($node, $field, $view_mode = 'default')
