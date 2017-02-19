@@ -5,7 +5,8 @@ use MakinaCorpus\Drupal\Sf\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
 /**
- * Sample kernel file.
+ * Sample kernel file that should work out of the box if you added the whole
+ * Symfony distribution and the monolog bundle as dependencies of this project.
  */
 class AppKernel extends Kernel
 {
@@ -13,6 +14,7 @@ class AppKernel extends Kernel
     {
         return [
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \Symfony\Bundle\TwigBundle\TwigBundle(),
             new \Symfony\Bundle\MonologBundle\MonologBundle(),
             new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
