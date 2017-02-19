@@ -33,14 +33,14 @@
     ],
 	"require" : {
 		"psr/log" : "1.*",
-		"symfony/config" : "~3.0 <3.2",
-		"symfony/dependency-injection" : "~3.0 <3.2",
-		"symfony/event-dispatcher" : "~3.0 <3.2",
-		"symfony/expression-language" : "~3.0 <3.2",
-		"symfony/http-foundation" : "~3.0 <3.2",
-		"symfony/http-kernel" : "~3.0 <3.2",
-		"symfony/translation" : "~3.0 <3.2",
-		"symfony/yaml" : "~2.8|~3.0 <3.2"
+		"symfony/config" : "~3.0 <3.3",
+		"symfony/dependency-injection" : "~3.0 <3.3",
+		"symfony/event-dispatcher" : "~3.0 <3.3",
+		"symfony/expression-language" : "~3.0 <3.3",
+		"symfony/http-foundation" : "~3.0 <3.3",
+		"symfony/http-kernel" : "~3.0 <3.3",
+		"symfony/translation" : "~3.0 <3.3",
+		"symfony/yaml" : "~2.8|~3.0 <3.3"
 	},
 	"suggests" : {
         "makinacorpus/php-acl" : "Integrates with PHP ACL and send node access collect events",
