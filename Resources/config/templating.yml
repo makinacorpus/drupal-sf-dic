@@ -21,10 +21,12 @@ services:
     arguments: ['@templating.loader.drupal.inner']
 
   templating.name_parser:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Templating\DrupalTemplateNameParser
     arguments: ['@kernel', '@templating.name_parser.legacy']
 
   templating.name_parser.legacy:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Templating\TemplateNameParser
     arguments: ['@kernel']
 
@@ -37,7 +39,3 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalDateExtension
     tags: [{name: twig.extension}]
-
-  templating.cache_warmer.template_paths.drupal:
-    class: MakinaCorpus\Drupal\Sf\CacheWarmer\DrupalTemplatePathsCacheWarmer
-    tags: [{name: kernel.cache_warmer, priority: 20}]
