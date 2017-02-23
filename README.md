@@ -13,6 +13,7 @@ Then you may read the documentation:
  *  [Default services](Resources/docs/services.md)
  *  [Use Drupal 8 forms in Drupal 7](Resources/docs/forms.md)
  *  [Provide Symfony full stack and bundles in Drupal](Resources/docs/bundles.md)
+ *  [Use the Web Debug Toolbar](Resources/docs/toolbar.md)
  *  [Use Twig for Drupal 7](Resources/docs/twig.md)
  *  [Use Monolog and the MonologBundle](Resources/docs/monolog.md)
  *  [Path alias manager and path.inc](Resources/docs/aliasmanager.md)
