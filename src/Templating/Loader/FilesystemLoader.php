@@ -1,4 +1,5 @@
 <?php
+// @todo it seems that I can actually drop this file.
 
 /*
  * This file is part of the Symfony package.
