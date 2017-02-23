@@ -1,0 +1,64 @@
+{% extends 'module:sf_dic:Profiler/layout.html.twig' %}
+
+{% block panel %}
+    <h2>{{ "Queries"|trans }}</h2>
+
+    {% set data = collector.data %}
+
+    <table class="alt">
+        <thead>
+        <tr>
+            <th>#<span>&#9650;</span></th>
+            <th>Time&nbsp;(ms)<span></span></th>
+            <th style="width: 100%;">Info</th>
+        </tr>
+        </thead>
+        <tbody id="queries" >
+            {% for i, query in data %}
+                <tr id="queryNo-{{ i }}">
+                    <td>{{ i }}</td>
+                    <td>{{ '%0.2f'|format(query.time * 1000) }}&nbsp;ms</td>
+                    <td id="queryNo-{{ i }}">
+                        <div class="query-section">
+                            <span id="smallcode-{{ i }}">
+                                {{ query.query|replace({"\n\n": "\n"})|nl2br }}
+                            </span>
+                        </div>
+                        <code id="code-{{ i }}" style="font-size: 14px;">
+                            {{ query.query|raw }}
+                        </code>
+                        <small>
+                            <strong>Parameters</strong>: {{ query.args|yaml_dump }}
+                            {# | <strong>Results</strong>: {{ query.result_count }} #}
+                        </small>
+                        <br/><br/>
+                        <span>
+                            Called by <strong>{% if query.caller.class %}{{ query.caller.class }}::{% endif %}{{ query.caller.function }}</strong>
+                            <br/><em>{{ query.caller.file|e }}</em>, line <em>{{ query.caller.line }}</em>
+                        </span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">
+                       No queries
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <style>
+        #collector-content table tr.error td{
+            background-color: #f66;
+        }
+        code {
+            display: none;
+        }
+        code pre {
+            padding: 5px;
+        }
+        code.explain{
+            display: block;
+        }
+    </style>
+{% endblock %}

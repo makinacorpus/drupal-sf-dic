@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\user\User;
+use MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector;
 use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
@@ -37,12 +38,21 @@ function sf_dic_boot() {
   // there is absolutly no way to allow cache backends services to be in
   // the service container, sad, but true story.
   \Drupal::_getKernel();
+  $container = \Drupal::getContainer();
+
   \Drupal::requestStack()->push(
     // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
     // pragmatically find it, since we do need Drupal alias replacement to
     // have been done.
     $request = MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
   );
+
+  // Register the database collector as soon as possible.
+  if ($container->has('makinacorpus.drupal_database_collector')) {
+    $logger = new \DatabaseLog();
+    $logger->start(DrupalDatabaseDataCollector::LOGGER_KEY);
+    \Database::getConnection()->setLogger($logger);
+  }
 
   // Let Symfony code will run gracefully.
   // @todo explode menu API parameters in _route_params.
@@ -87,7 +97,6 @@ function sf_dic_boot() {
 
   // Prevent isGranted() and alike methods to crash when the kernel is not
   // actually handling the incomming request.
-  $container = \Drupal::getContainer();
   if ($container->has('security.token_storage')) {
     $token = new UserToken();
     $token->setAuthenticated(true);

@@ -60,6 +60,9 @@ class ServiceProvider implements ServiceProviderInterface
         if (in_array('Symfony\\Bundle\\MonologBundle\\MonologBundle', $bundles)) {
             $loader->load('logging.yml');
         }
+        if (in_array('Symfony\\Bundle\\WebProfilerBundle\\WebProfilerBundle', $bundles)) {
+            $loader->load('profiler.yml');
+        }
 
         $container->addCompilerPass(new DoctrinePasstroughPass() /*, PassConfig::TYPE_AFTER_REMOVING */);
     }
