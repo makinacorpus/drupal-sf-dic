@@ -18,10 +18,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * Implements hook_boot().
@@ -488,10 +488,11 @@ function sf_dic_error_page($status = 404) {
 
 /**
  * Format exception
- * @param \Exception $e
+ *
+ * @param \Throwable $exception
  */
 function _sf_dic_format_exception($e) {
- /** @var \Exception $e */
+ /** @var \Throwable $e */
  $output = '';
  do {
   $output .= $e->getMessage() . ' (' . $e->getCode() . ') in ' . $e->getFile() . ' (' . $e->getLine() . ')';
@@ -499,6 +500,37 @@ function _sf_dic_format_exception($e) {
   $e = $e->getPrevious();
  } while ($e);
  return $output;
+}
+
+/**
+ * Handle router or kernel exception.
+ *
+ * @param \Throwable $exception
+ */
+function _sf_dic_handle_exception($exception) {
+  /** @var \Throwable $e */
+  if ($exception instanceof \Symfony\Component\Security\Core\Exception\AccessDeniedException) {
+    sf_dic_exception($exception);
+    return MENU_ACCESS_DENIED;
+  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
+    sf_dic_exception($exception);
+    return MENU_ACCESS_DENIED;
+  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+    sf_dic_exception($exception);
+    return MENU_NOT_FOUND;
+  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+    sf_dic_exception($exception);
+    switch ($exception->getStatusCode()) {
+      case 403:
+        return MENU_ACCESS_DENIED;
+      case 404:
+        return MENU_NOT_FOUND;
+    }
+    throw $exception;
+  } else {
+    sf_dic_exception($exception);
+    throw $exception;
+  }
 }
 
 /**
@@ -520,34 +552,12 @@ function sf_dic_exception($exception = null) {
  */
 function sf_dic_router() {
   try {
-    $request = \Drupal::requestStack()->getCurrentRequest();
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    $ret = _sf_dic_response($kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
-  } catch (\Symfony\Component\Security\Core\Exception\AccessDeniedException $e) {
-    sf_dic_exception($e);
-    return MENU_ACCESS_DENIED;
-  } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
-    sf_dic_exception($e);
-    return MENU_ACCESS_DENIED;
-  } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
-    sf_dic_exception($e);
-    return MENU_NOT_FOUND;
-  } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-    sf_dic_exception($e);
-    switch ($e->getStatusCode()) {
-      case 403:
-        return MENU_ACCESS_DENIED;
-      case 404:
-        return MENU_NOT_FOUND;
-    }
-    throw $e;
+    return _sf_dic_response($kernel->handle(\Drupal::request(), HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
   } catch (\Exception $e) {
-    sf_dic_exception($e);
-    throw $e;
+    return _sf_dic_handle_exception($e);
   }
-
-  return $ret;
 }
 
 /**
@@ -607,31 +617,10 @@ function sf_dic_page($controller) {
   }
 
   try {
-    $ret = _sf_dic_response(call_user_func_array([$controller, $method], $args));
-  } catch (\Symfony\Component\Security\Core\Exception\AccessDeniedException $e) {
-    sf_dic_exception($e);
-    return MENU_ACCESS_DENIED;
-  } catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e) {
-    sf_dic_exception($e);
-    return MENU_ACCESS_DENIED;
-  } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
-    sf_dic_exception($e);
-    return MENU_NOT_FOUND;
-  } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-    sf_dic_exception($e);
-    switch ($e->getStatusCode()) {
-      case 403:
-        return MENU_ACCESS_DENIED;
-      case 404:
-        return MENU_NOT_FOUND;
-    }
-    throw $e;
+    return _sf_dic_response(call_user_func_array([$controller, $method], $args));
   } catch (\Exception $e) {
-    sf_dic_exception($e);
-    throw $e;
+    return _sf_dic_handle_exception($e);
   }
-
-  return $ret;
 }
 
 /**
@@ -708,8 +697,7 @@ function sf_dic_page_form($formClass) {
 function sf_dic_exit() {
   if (\Drupal::hasRequest()) {
     $event = new PostResponseEvent(\Drupal::_getKernel(), \Drupal::request(), new Response());
-    \Drupal::service('event_dispatcher')
-           ->dispatch(KernelEvents::TERMINATE, $event);
+    \Drupal::service('event_dispatcher')->dispatch(KernelEvents::TERMINATE, $event);
   }
 }
 
