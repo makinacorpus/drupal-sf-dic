@@ -15,7 +15,9 @@ class DrupalPageResponse extends Response
     final public function setContent($content)
     {
         // Render directly the page since we are already at the end of the request.
-        if (is_array($content) || !strripos($content, '</html>', 100)) {
+        if (is_array($content) ||
+            (($buffer = substr($content, -100)) && false === stripos($buffer, '</html>'))
+        ) {
             $content = drupal_render_page($content);
         }
 

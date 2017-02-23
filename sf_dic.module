@@ -430,8 +430,10 @@ function _sf_dic_response($response) {
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
       $isFragmentRoute ||
       // Ignoring the XmlHttpRequest should always be the right method, but
-      // sorry, I have to do otherwise as of now.
-      strrpos($response->getContent(), 'START of Symfony Web Debug Toolbar')
+      // sorry, I have to do otherwise as of now. As a side note, stripos()
+      // is very fast, and substr() is much much faster, so this should not
+      // be noticeable in any way in term of performances.
+      (($buffer = substr($response->getContent(), 0, 100)) && false !== stripos($buffer, 'Symfony Web Debug Toolbar'))
   ){
     $response->send();
     drupal_exit();
@@ -442,7 +444,10 @@ function _sf_dic_response($response) {
 
     // First attempt to get status code we may have missed
     $status = $response->getStatusCode();
-    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) || strripos($response->getContent(), '</html>', 100)) {
+    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) ||
+        // Same note as above, substr() and stripos() are really fast.
+        (($buffer = substr($response->getContent(), -100)) && false !== stripos($response->getContent(), '</html>'))
+    ){
       $response->send();
       drupal_exit();
       return;
