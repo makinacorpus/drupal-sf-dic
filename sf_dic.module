@@ -857,7 +857,6 @@ function sf_dic_page_delivery_html($page_callback_result) {
   }
 
   $response = new DrupalPageResponse($page_callback_result);
-
   $kernel   = \Drupal::_getKernel();
   $request  = \Drupal::request();
   $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
@@ -880,6 +879,5 @@ function path_alias_is_blacklisted($path) {
  * Implements hook_system_theme_engine_info().
  */
 function sf_dic_system_theme_engine_info() {
-  $theme_engines['twig'] = drupal_get_path('module','sf_dic') . '/Resources/engine/twig.engine';
-  return $theme_engines;
+  return ['twig' => drupal_get_path('module','sf_dic') . '/Resources/engine/twig.engine'];
 }
