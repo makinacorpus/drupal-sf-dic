@@ -9,8 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class DrupalResponse extends Response
 {
-    private $drupalContent;
-    private $renderedContent;
+    protected $drupalContent;
+    protected $renderedContent;
+    private $headerMerged = false;
 
     /**
      * Constructor.
@@ -24,6 +25,59 @@ class DrupalResponse extends Response
     public function __construct($content = '', $status = 200, $headers = array())
     {
         parent::__construct($content, $status, $headers);
+    }
+
+    /**
+     * This is basically a copy/paste of drupal_send_headers() that return the
+     * headers instead of sending it
+     *
+     * @return string[]
+     */
+    private function getAndNormalizeDrupalHeaders()
+    {
+        $ret      = [];
+        $headers  = drupal_get_http_header();
+        $names    = _drupal_set_preferred_header_name();
+
+        foreach ($headers as $loweredName => $value) {
+            if (false !== $value) {
+                $ret[$names[$loweredName]] = $value;
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Merge headers from Drupal
+     */
+    private function mergeDrupalHeaders()
+    {
+        if (headers_sent() || $this->headerMerged) {
+            return;
+        }
+
+        $this->headerMerged = true;
+
+        // Drupal headers have already been sent.
+        // $this->headers->add($this->getAndNormalizeDrupalHeaders());
+
+        // Drupal default return Content-Type if none already set
+        if (null !== $this->drupalContent) {
+            if (!$this->headers->has('Content-Type')) {
+                $this->headers->set('Content-Type', 'text/html; charset=utf-8');
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function sendHeaders()
+    {
+        $this->mergeDrupalHeaders();
+
+        return parent::sendHeaders();
     }
 
     /**
@@ -41,7 +95,7 @@ class DrupalResponse extends Response
     public function getContent()
     {
         if (null === $this->renderedContent) {
-            $this->renderedContent = drupal_render($this->drupalContent);
+            $this->renderedContent = render($this->drupalContent);
         }
 
         return $this->renderedContent;
@@ -50,7 +104,7 @@ class DrupalResponse extends Response
     /**
      * {@inheritdoc}
      */
-    public function sendContent()
+    final public function sendContent()
     {
         echo $this->getContent();
 

@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\user\User;
+use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
 use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * Implements hook_boot().
@@ -421,7 +423,8 @@ function _sf_dic_response($response) {
   // @todo Partial support only of symfony http response, headers and others
   //   are ignored, we should probably have a custom delivery callback in order
   //   to fully support this.
-  if ($response instanceof JsonResponse ||
+  if (/* \Drupal::request()->isXmlHttpRequest() || */
+      $response instanceof JsonResponse ||
       $response instanceof StreamedResponse ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/xml')) ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
@@ -436,7 +439,7 @@ function _sf_dic_response($response) {
 
     // First attempt to get status code we may have missed
     $status = $response->getStatusCode();
-    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400)) {
+    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) || strripos($response->getContent(), '</html>', -100)) {
       $response->send();
       drupal_exit();
       return;
@@ -841,6 +844,39 @@ function sf_dic_forms_proxy($form, &$form_state) {
   }
 
   return $form;
+}
+
+/**
+ * Implements hook_delivery_callback_alter().
+ */
+function sf_dic_page_delivery_callback_alter(&$delivery_callback) {
+  // We want the web debug toolbar, and other nice stuff that looks like it,
+  // allow them by running the 'kernel.response' event in a custom delivery
+  // callback that'll alter the generated page.
+  if (variable_get('kernel.symfony_reponse_conversion', false) && 'drupal_deliver_html_page' === $delivery_callback) {
+    $delivery_callback = 'sf_dic_page_delivery_html';
+  }
+}
+
+/**
+ * Specific page delivery callback that will allow our Drupal page to be seen
+ * as a Symfony Response instead.
+ */
+function sf_dic_page_delivery_html($page_callback_result) {
+  if (!$page_callback_result || is_int($page_callback_result)) {
+    drupal_deliver_html_page($page_callback_result);
+    return;
+  }
+
+  $response = new DrupalPageResponse($page_callback_result);
+
+  $kernel   = \Drupal::_getKernel();
+  $request  = \Drupal::request();
+  $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+
+  \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
+
+  $response->send();
 }
 
 /**
