@@ -841,7 +841,7 @@ function sf_dic_page_delivery_callback_alter(&$delivery_callback) {
   // We want the web debug toolbar, and other nice stuff that looks like it,
   // allow them by running the 'kernel.response' event in a custom delivery
   // callback that'll alter the generated page.
-  if (variable_get('kernel.symfony_reponse_conversion', false) && 'drupal_deliver_html_page' === $delivery_callback) {
+  if ('drupal_deliver_html_page' === $delivery_callback) {
     $delivery_callback = 'sf_dic_page_delivery_html';
   }
 }
