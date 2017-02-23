@@ -12,13 +12,20 @@ class AppKernel extends Kernel
 {
     public function registerBundles()
     {
-        return [
+        $bundles = [
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \Symfony\Bundle\TwigBundle\TwigBundle(),
             new \Symfony\Bundle\MonologBundle\MonologBundle(),
             new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
         ];
+
+        if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
+            $bundles[] = new \Symfony\Bundle\DebugBundle\DebugBundle();
+            $bundles[] = new \Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
+        }
+
+        return $bundles;
     }
 
     public function getRootDir()

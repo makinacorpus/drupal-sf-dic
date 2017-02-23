@@ -428,7 +428,10 @@ function _sf_dic_response($response) {
       $response instanceof StreamedResponse ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/xml')) ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
-      $isFragmentRoute
+      $isFragmentRoute ||
+      // Ignoring the XmlHttpRequest should always be the right method, but
+      // sorry, I have to do otherwise as of now.
+      strrpos($response->getContent(), 'START of Symfony Web Debug Toolbar')
   ){
     $response->send();
     drupal_exit();
@@ -439,7 +442,7 @@ function _sf_dic_response($response) {
 
     // First attempt to get status code we may have missed
     $status = $response->getStatusCode();
-    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) || strripos($response->getContent(), '</html>', -100)) {
+    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) || strripos($response->getContent(), '</html>', 100)) {
       $response->send();
       drupal_exit();
       return;
