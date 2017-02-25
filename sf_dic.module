@@ -23,6 +23,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use MakinaCorpus\Drupal\Sf\DrupalResponse;
 
 /**
  * Implements hook_boot().
@@ -638,7 +639,13 @@ function sf_dic_page($controller) {
   }
 
   try {
-    return _sf_dic_response(call_user_func_array([$controller, $method], $args));
+    $response = call_user_func_array([$controller, $method], $args);
+    if (!$response instanceof Response) {
+      $response = new DrupalResponse($response);
+    }
+
+    return _sf_dic_response($response);
+
   } catch (\Exception $e) {
     return _sf_dic_handle_exception($e);
   }
