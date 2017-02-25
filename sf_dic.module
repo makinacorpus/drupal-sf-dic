@@ -122,6 +122,7 @@ function sf_dic_module_implements_alter(&$implementations, $hook) {
  * Implements hook_language_init().
  */
 function sf_dic_language_init() {
+
   // Replaces the global language by an instance of LanguageInterface.
   $legacy = $GLOBALS['language'];
   if ($legacy instanceof \stdClass) {
@@ -131,6 +132,12 @@ function sf_dic_language_init() {
     }
     $GLOBALS['language'] = $language;
   }
+
+  // Modify the request internals so that $_GET['q'] actually
+  // matches what Drupal found.
+  $request = \Drupal::request();
+  $request->query->set('q', $_GET['q']);
+  $request->attributes->set('_route', $_GET['q']);
 }
 
 /**
