@@ -236,5 +236,9 @@ function twig_theme($existing, $type, $theme, $path) {
  * Implements ENGINE_render_template().
  */
 function twig_render_template($template, $variables = []) {
-  return \Drupal::service('twig')->render($template, $variables);
+  $twig = &drupal_static(__FUNCTION__);
+  if (!$twig) {
+    $twig = \Drupal::service('twig');
+  }
+  return $twig->render($template, $variables);
 }

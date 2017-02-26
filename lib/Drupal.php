@@ -122,6 +122,9 @@ class Drupal
         // configuration.
         self::$kernel = null;
         self::$container = null;
+
+        // Drop Drupal static cache, it may contain services references.
+        drupal_static_reset();
     }
 
     /**
