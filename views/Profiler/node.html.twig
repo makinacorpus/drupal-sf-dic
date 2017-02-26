@@ -59,9 +59,21 @@
 
     <p>
         This table presents all the node load operations.
-        <strong><em>loadMultiple()</em> operations will tell you if caller asked for
-        duplicates</strong> within the parameters: in many cases this might reveal
-        algorithmic errors in the calling code.
+    </p>
+    <p>
+        <em>loadMultiple()</em> operations will tell you many things:
+        <ul>
+            <li>
+                <strong>if caller asked for duplicates</strong> within the
+                parameters: in many cases this might reveal algorithmic errors
+                in the calling code.
+            </li>
+            <li>
+                <strong>if called asked for nothing</strong> which means it
+                will trigger an SQL query for loading nothing, this could be
+                be short-cut.
+            </li>
+        </ul>
     </p>
 
     {% set data = collector.loadData %}
@@ -88,12 +100,19 @@
                                 {% endif %}
                                 <br/>
                             {% else %}
-                                <strong>Single load</strong>
+                                <strong>Single load</strong><br/>
                             {% endif %}
-                            Asked: <strong>{{ query.asked }}</strong><br/>
-                            <small><em>{{ query.ids|join(', ') }}</em></small><br/>
+                            {% if query.asked %}
+                                Asked: <strong>{{ query.asked }}</strong><br/>
+                                <small><em>{{ query.ids|join(', ') }}</em></small><br/>
+                            {% else %}
+                                Asked: <strong>{{ query.asked }}</strong>
+                                - <strong>Nothing was asked, write a shortcut!</strong><br/>
+                            {% endif %}
                             Returned:</strong> {{ query.found }}</strong> out of {{ query.asked }}<br/>
-                            <small><em>{{ query.ret|join(', ') }}</em></small><br/>
+                            {% if query.ret %}
+                                <small><em>{{ query.ret|join(', ') }}</em></small><br/>
+                            {% endif %}
                         </span>
                         <br/>
                         <span>
