@@ -4,3 +4,14 @@ services:
         class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector
         arguments: ["@database", '@?debug.stopwatch']
         tags: [{ name: data_collector, template: "module:sf_dic:Profiler/database.html.twig", id: drupal_database}]
+
+    makinacorpus.entity.manager_proxy:
+        public: false
+        class: MakinaCorpus\Drupal\Sf\DataCollector\EntityManagerProxy
+        decorates: entity.manager
+        arguments: ['@makinacorpus.entity.manager_proxy.inner']
+
+    makinacorpus.drupal_node_collector:
+        class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalNodeDataCollector
+        arguments: ["@makinacorpus.entity.manager_proxy", '@?debug.stopwatch']
+        tags: [{ name: data_collector, template: "module:sf_dic:Profiler/node.html.twig", id: drupal_node}]

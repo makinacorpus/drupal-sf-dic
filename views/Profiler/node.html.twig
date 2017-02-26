@@ -1,0 +1,128 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar%}
+    {% set loadCount = collector.loadCount %}
+    {% set loadTotalTime = collector.loadTotalTime %}
+
+    {% set icon %}
+        <span>
+            <img alt="Drupal node entity storage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QIaCiYUgDtUkwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABM0lEQVRo3u3Ysa5FQBAG4NkTWr2Cl6BSieJEqaWQqJUqL+A9FF5CttaplGIbb6CWzO1ud0OOdXePzF8v5svurAWAQrkl7MygpmkwiiIwDOPSw3zfZ3dBDisLggDf77f2M/I6GmBZ1lcsrddTekQZJI5jLMsSHzEjRVGALIzypSULo0WPyMBo0+xXMVrtWlcw2m2/n2K0fI98glEGQUSpGGUQIYRUjKEKMs8zq+sawzAE0zT/HOe6Lnieh+M4Mm0gjuPguq6/BXHOGef8+44oSZI849CY5zmkaYp33PtflxZjDKqqgizLcFkW2Pf91HXTNEHbtky7ZrdtG2zbpg8rghCEIAQhCEEIQhCCEIQgBCEIQQhCEP0g27YpL/JMDYeQYRhY3/enf6bJjhACuq4DCkVRfgAtJ2hkQmRZ7gAAAABJRU5ErkJggg==" />
+            <span class="sf-toolbar-status {% if 80 < loadCount %} sf-toolbar-status-red{% elseif 40 < loadCount %} sf-toolbar-status-yellow{% endif %}">
+                {{ loadCount }}
+            </span>
+            {% if loadCount > 0 %}
+                <span class="sf-toolbar-label">:</span>
+                <span class="sf-toolbar-value">{{ loadTotalTime }}</span>
+                <span class="sf-toolbar-label">ms</span>
+            {% endif %}
+        </span>
+    {% endset %}
+
+    {% set text %}
+        {#
+        {% for query in collector.findTenBiggest() %}
+            <div class="sf-toolbar-info-piece">
+                <b>{{ query.query|truncate(40) }}</b>
+                <span>{{ (query.time * 1000)|round }} ms</span>
+            </div>
+        {% endfor %}
+         #}
+        {% if loadCount > 10 %}
+            <div class="sf-toolbar-info-piece">
+                <em>
+                    {{ "And " ~ (loadCount - 10) ~ " more..." }}
+                </em>
+            </div>
+        {% endif %}
+    {% endset %}
+
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+{% endblock %}
+
+{% block menu %}
+    {% set loadCount = collector.loadCount %}
+    {% set loadTotalTime = collector.loadTotalTime %}
+
+    <span class="label">
+        <span class="icon"><img alt="Drupal node entity storage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QIaCiYUgDtUkwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABM0lEQVRo3u3Ysa5FQBAG4NkTWr2Cl6BSieJEqaWQqJUqL+A9FF5CttaplGIbb6CWzO1ud0OOdXePzF8v5svurAWAQrkl7MygpmkwiiIwDOPSw3zfZ3dBDisLggDf77f2M/I6GmBZ1lcsrddTekQZJI5jLMsSHzEjRVGALIzypSULo0WPyMBo0+xXMVrtWlcw2m2/n2K0fI98glEGQUSpGGUQIYRUjKEKMs8zq+sawzAE0zT/HOe6Lnieh+M4Mm0gjuPguq6/BXHOGef8+44oSZI849CY5zmkaYp33PtflxZjDKqqgizLcFkW2Pf91HXTNEHbtky7ZrdtG2zbpg8rghCEIAQhCEEIQhCCEIQgBCEIQQhCEP0g27YpL/JMDYeQYRhY3/enf6bJjhACuq4DCkVRfgAtJ2hkQmRZ7gAAAABJRU5ErkJggg==" /></span>
+        <strong>Node</strong>
+        <span class="count">
+            <span class="sf-toolbar-value">{{ loadCount }}</span>
+            <span class="sf-toolbar-label">{{ loadTotalTime }}
+            <span class="sf-toolbar-value">ms</span>
+        </span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>{{ "Load operations"|trans }}</h2>
+
+    <p>
+        This table presents all the node load operations.
+        <strong><em>loadMultiple()</em> operations will tell you if caller asked for
+        duplicates</strong> within the parameters: in many cases this might reveal
+        algorithmic errors in the calling code.
+    </p>
+
+    {% set data = collector.loadData %}
+
+    <table class="alt">
+        <thead>
+        <tr>
+            <th>#<span>&#9650;</span></th>
+            <th>Time&nbsp;(ms)<span></span></th>
+            <th style="width: 100%;">Info</th>
+        </tr>
+        </thead>
+        <tbody id="queries" >
+            {% for i, query in data %}
+                <tr id="queryNo-{{ i }}">
+                    <td>{{ i }}</td>
+                    <td>{{ '%0.2f'|format(query.time * 1000) }}&nbsp;ms</td>
+                    <td id="queryNo-{{ i }}">
+                        <span id="smallcode-{{ i }}">
+                            {% if query.multiple %}
+                                <strong>Multiple load</strong>
+                                {% if query.dups %}
+                                    - <strong>Parameters contain duplicates!</strong>
+                                {% endif %}
+                                <br/>
+                            {% else %}
+                                <strong>Single load</strong>
+                            {% endif %}
+                            Asked: <strong>{{ query.asked }}</strong><br/>
+                            <small><em>{{ query.ids|join(', ') }}</em></small><br/>
+                            Returned:</strong> {{ query.found }}</strong> out of {{ query.asked }}<br/>
+                            <small><em>{{ query.ret|join(', ') }}</em></small><br/>
+                        </span>
+                        <br/>
+                        <span>
+                            Called by <strong>{% if query.caller.class %}{{ query.caller.class }}::{% endif %}{{ query.caller.function }}</strong>
+                            <br/><em>{{ query.caller.file|e }}</em>, line <em>{{ query.caller.line }}</em>
+                        </span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">
+                       No queries
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <style>
+        #collector-content table tr.error td{
+            background-color: #f66;
+        }
+        code {
+            display: none;
+        }
+        code pre {
+            padding: 5px;
+        }
+        code.explain{
+            display: block;
+        }
+    </style>
+{% endblock %}

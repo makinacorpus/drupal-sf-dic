@@ -5,29 +5,41 @@ namespace MakinaCorpus\Drupal\Sf\DataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 
 /**
- * Drupal database data collector, as of now it will only support the
- * default.default database connection.
+ * Drupal node storage operations data collector
  */
-class DrupalDatabaseDataCollector extends DataCollector implements LateDataCollectorInterface
+class DrupalNodeDataCollector extends DataCollector
 {
-    const LOGGER_KEY = 'makinacorpus.drupal_database';
-
     /**
-     * @var \DatabaseLog
+     * @var EntityManagerProxy
      */
-    private $logger;
+    private $entityManager;
 
     /**
      * Default constructor
      *
-     * @param \DatabaseConnection $connection
+     * @param EntityManagerProxy $entityManager
      */
-    public function __construct(\DatabaseConnection $database)
+    public function __construct(EntityManagerProxy $entityManager)
     {
-        $this->logger = $database->getLogger();
+        $this->entityManager = $entityManager;
+    }
+
+    /**
+     * Get node storage
+     *
+     * @return EntityStorageProxy
+     */
+    private function getStorage()
+    {
+        $storage = $this->entityManager->getStorage('node');
+
+        if (!$storage instanceof EntityStorageProxy) {
+            return new EntityStorageProxy($storage);
+        }
+
+        return $storage;
     }
 
     /**
@@ -59,15 +71,9 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
-        $this->data = array_map([$this, 'cleanQuery'], $this->logger->get(self::LOGGER_KEY));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function lateCollect()
-    {
-        $this->data = array_map([$this, 'cleanQuery'], $this->logger->get(self::LOGGER_KEY));
+        $this->data = [
+            'load' => array_map([$this, 'cleanQuery'], $this->getStorage()->getLoadCalls()),
+        ];
     }
 
     /**
@@ -75,24 +81,9 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
      *
      * @return array
      */
-    public function getData()
+    public function getLoadData()
     {
-        return $this->data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function findTenBiggest()
-    {
-        // Work on a copy
-        $ret = $this->data;
-
-        usort($ret, function ($a, $b) {
-            return $a['time'] < $b['time'] ? 1 : 0;
-        });
-
-        return array_slice($ret, 0, 10);
+        return $this->data['load'];
     }
 
     /**
@@ -100,11 +91,11 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
      *
      * @return int
      */
-    public function getTotalTime()
+    public function getLoadTotalTime()
     {
         $time = 0;
 
-        foreach ($this->data as $query) {
+        foreach ($this->data['load'] as $query) {
             $time += $query['time'];
         }
 
@@ -116,9 +107,9 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
      *
      * @return int
      */
-    public function getQueryCount()
+    public function getLoadCount()
     {
-        return count($this->data);
+        return count($this->data['load']);
     }
 
     /**
@@ -126,6 +117,6 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
      */
     public function getName()
     {
-        return 'drupal_database';
+        return 'drupal_node';
     }
 }
