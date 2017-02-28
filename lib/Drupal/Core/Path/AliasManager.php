@@ -92,7 +92,11 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface
             // If this service is being waked up during Symfony cache warming
             // the 'current_path' function does not already exists, avoid WSOD
             // in these conditions.
-            $this->cacheKey = 'sf:' . function_exists('current_path') ? current_path() : $_GET['q'];
+            if (function_exists('current_path')) {
+                $this->cacheKey = 'sf:' .  current_path();
+            } else {
+                $this->cacheKey = 'sf:' . ($_GET['q'] ?: '<front>' );
+            }
         }
 
         $this->data += [self::ALIAS => [], self::SOURCE => []];
