@@ -1,0 +1,67 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set entries = collector.data %}
+    {% set entryCount = entries|length %}
+
+    {% set icon %}
+        <span>
+            <img alt="Drupal node entity storage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QIaCiYUgDtUkwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABM0lEQVRo3u3Ysa5FQBAG4NkTWr2Cl6BSieJEqaWQqJUqL+A9FF5CttaplGIbb6CWzO1ud0OOdXePzF8v5svurAWAQrkl7MygpmkwiiIwDOPSw3zfZ3dBDisLggDf77f2M/I6GmBZ1lcsrddTekQZJI5jLMsSHzEjRVGALIzypSULo0WPyMBo0+xXMVrtWlcw2m2/n2K0fI98glEGQUSpGGUQIYRUjKEKMs8zq+sawzAE0zT/HOe6Lnieh+M4Mm0gjuPguq6/BXHOGef8+44oSZI849CY5zmkaYp33PtflxZjDKqqgizLcFkW2Pf91HXTNEHbtky7ZrdtG2zbpg8rghCEIAQhCEEIQhCCEIQgBCEIQQhCEP0g27YpL/JMDYeQYRhY3/enf6bJjhACuq4DCkVRfgAtJ2hkQmRZ7gAAAABJRU5ErkJggg==" />
+            <span class="sf-toolbar-status {% if 0 < entryCount %} sf-toolbar-status-red{% endif %}">
+                {{ entryCount }}
+            </span>
+        </span>
+    {% endset %}
+
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+{% endblock %}
+
+{% block menu %}
+    {% set entries = collector.data %}
+    {% set entryCount = entries|length %}
+
+    <span class="label">
+        <span class="icon"><img alt="Drupal node entity storage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QIaCiYUgDtUkwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABM0lEQVRo3u3Ysa5FQBAG4NkTWr2Cl6BSieJEqaWQqJUqL+A9FF5CttaplGIbb6CWzO1ud0OOdXePzF8v5svurAWAQrkl7MygpmkwiiIwDOPSw3zfZ3dBDisLggDf77f2M/I6GmBZ1lcsrddTekQZJI5jLMsSHzEjRVGALIzypSULo0WPyMBo0+xXMVrtWlcw2m2/n2K0fI98glEGQUSpGGUQIYRUjKEKMs8zq+sawzAE0zT/HOe6Lnieh+M4Mm0gjuPguq6/BXHOGef8+44oSZI849CY5zmkaYp33PtflxZjDKqqgizLcFkW2Pf91HXTNEHbtky7ZrdtG2zbpg8rghCEIAQhCEEIQhCCEIQgBCEIQQhCEP0g27YpL/JMDYeQYRhY3/enf6bJjhACuq4DCkVRfgAtJ2hkQmRZ7gAAAABJRU5ErkJggg==" /></span>
+        <strong>Watchdog</strong>
+        <span class="count">
+            <span class="sf-toolbar-value">{{ entryCount }}</span>
+        </span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>{{ "Watchdog entries"|trans }}</h2>
+
+    {% set data = collector.data %}
+
+    <table class="alt">
+        <thead>
+        <tr>
+            <th>Type</th>
+            <th>Level</th>
+            <th style="width: 100%;">Message</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for i, entry in data %}
+                <tr>
+                    <td>{{ entry.type }}</td>
+                    <td>{{ entry.severity }}</td>
+                    <td>
+                        {% if entry.variables is defined and entry.variables|length %}
+                            {{ entry.message|replace(entry.variables) }}
+                        {% else %}
+                            {{ entry.message }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">
+                       No watchdog entries
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

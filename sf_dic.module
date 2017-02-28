@@ -10,6 +10,7 @@ use Drupal\Core\Language\Language;
 use Drupal\user\User;
 use MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector;
 use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
+use MakinaCorpus\Drupal\Sf\DrupalResponse;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
 use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
@@ -23,7 +24,6 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use MakinaCorpus\Drupal\Sf\DrupalResponse;
 
 /**
  * Implements hook_boot().
@@ -892,6 +892,24 @@ function sf_dic_page_delivery_html($page_callback_result) {
   \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
 
   $response->send();
+}
+
+/**
+ * Implements hook_watchdog().
+ */
+function sf_dic_watchdog(array $log_entry) {
+  $dataCollectorEnabled = &drupal_static(__FUNCTION__);
+
+  if (null === $dataCollectorEnabled) {
+    $dataCollectorEnabled = \Drupal::getContainer()->has('makinacorpus.drupal_watchdog_collector');
+  }
+  if (!$dataCollectorEnabled) {
+    return;
+  }
+
+  /** @var \MakinaCorpus\Drupal\Sf\DataCollector\DrupalWatchdogDataCollector $watchdogDataCollector */
+  $watchdogDataCollector = \Drupal::service('makinacorpus.drupal_watchdog_collector');
+  $watchdogDataCollector->logEntry($log_entry);
 }
 
 /**

@@ -1,6 +1,6 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
-{% block toolbar%}
+{% block toolbar %}
     {% set loadCount = collector.loadCount %}
     {% set loadTotalTime = collector.loadTotalTime %}
 
@@ -16,24 +16,6 @@
                 <span class="sf-toolbar-label">ms</span>
             {% endif %}
         </span>
-    {% endset %}
-
-    {% set text %}
-        {#
-        {% for query in collector.findTenBiggest() %}
-            <div class="sf-toolbar-info-piece">
-                <b>{{ query.query|truncate(40) }}</b>
-                <span>{{ (query.time * 1000)|round }} ms</span>
-            </div>
-        {% endfor %}
-         #}
-        {% if loadCount > 10 %}
-            <div class="sf-toolbar-info-piece">
-                <em>
-                    {{ "And " ~ (loadCount - 10) ~ " more..." }}
-                </em>
-            </div>
-        {% endif %}
     {% endset %}
 
     {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
