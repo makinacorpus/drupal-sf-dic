@@ -2,6 +2,7 @@
 
 namespace MakinaCorpus\Drupal\Sf\Twig\Extension;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -112,6 +113,16 @@ class HttpRenderExtension extends \Twig_Extension
      */
     protected function deliverResponse(Request $request, Response $response)
     {
+        if ($response instanceof RedirectResponse) {
+            $url = $response->getTargetUrl();
+
+            if (false === strpos('://', $url)) { // URL is not absolute
+                $url = $GLOBALS['base_url'] . $url;
+            }
+
+            drupal_goto($url);
+        }
+
         if (!$response->isSuccessful()) {
             throw new \RuntimeException(sprintf('Error when rendering "%s" (Status code is %s).', $request->getUri(), $response->getStatusCode()));
         }
