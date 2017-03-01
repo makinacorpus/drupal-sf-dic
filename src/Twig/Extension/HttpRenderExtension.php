@@ -120,6 +120,10 @@ class HttpRenderExtension extends \Twig_Extension
                 $url = $GLOBALS['base_url'] . $url;
             }
 
+            foreach ($response->headers->getCookies() as $cookie) {
+                header('Set-Cookie: ' . $cookie, false);
+            }
+
             drupal_goto($url);
         }
 
