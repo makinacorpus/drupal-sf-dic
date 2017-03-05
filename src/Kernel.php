@@ -3,9 +3,7 @@
 namespace MakinaCorpus\Drupal\Sf;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
-
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
-
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -266,11 +264,15 @@ abstract class Kernel extends BaseKernel
     }
 
     /**
+     * Work on prepareContainer() instead of buildContainer() ensuring the
+     * right loading order for parameters: custom kernel parameters will
+     * override the module defaults this way.
+     *
      * {@inheritdoc}
      */
-    protected function buildContainer()
+    protected function prepareContainer(ContainerBuilder $container)
     {
-        $container = parent::buildContainer();
+        parent::prepareContainer($container);
 
         foreach ($this->discoverDrupalServicesDefinitionFiles() as $filename) {
             $loader = new YamlFileLoader($container, new FileLocator(dirname($filename)));
@@ -280,7 +282,5 @@ abstract class Kernel extends BaseKernel
         foreach ($this->discoverDrupalServiceProviders() as $provider) {
             $provider->register($container);
         }
-
-        return $container;
     }
 }
