@@ -29,6 +29,8 @@ class DrupalWatchdogDataCollector extends DataCollector implements LateDataColle
      */
     public function logEntry(array $logEntry)
     {
+        unset($logEntry['user']);
+
         $this->data[] = $logEntry;
     }
 
