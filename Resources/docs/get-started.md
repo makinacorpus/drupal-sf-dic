@@ -16,6 +16,14 @@ should use it as a dependency.
 Pease refer to [Composer template for Drupal projects](https://github.com/drupal-composer/drupal-project/tree/7.x)
 to have a nice exemple for doing this.
 
+Once Composer is installed and autoload dumped, you may add these lines to your `settings.php`:
+
+```php
+include_once DRUPAL_ROOT . '/../lib/vendor/autoload.php';
+$conf['kernel.cache_dir'] = DRUPAL_ROOT . '/../cache/';
+$conf['kernel.logs_dir'] = DRUPAL_ROOT . '/../logs/';
+```
+
 ## Hard way, if not
 
 You may use the ```Composer Manager``` module although it's untested, or you
