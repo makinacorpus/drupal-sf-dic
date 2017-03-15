@@ -2,42 +2,16 @@
 
 ## Installation
 
-You may use [TFD7](http://tfd7.rocks/) for theming, but if you use this module,
-you should not use their provided Drupal engine.
+[TFD7](http://tfd7.rocks/) is pretty nice for theming, and sf_dic relies on it to provide its own Drupal engine.
 
-First, add the tfd7 dependency into your composer.json file, add the custom
-repository toward their git, this way:
-
-```json
-{
-    ...
-    "repositories": [
-        {
-            "type" : "vcs",
-            "url" : "git@github.com:tfd7/tfd7.git"
-        }
-    ],
-    "require" : {
-        ....
-        "symfony/dependency-injection" : "~3.0",
-        "symfony/templating" : "~3.0",
-        "symfony/twig-bridge" : "~3.0",
-        "symfony/twig-bundle" : "~3.0",
-        "tfd7/tfd7": "dev-master",
-        "twig/extensions": "~1.3",
-        "twig/twig": "~1.20|~2.0"
-    }
-}
-```
+To the twig engine, first install the dependencies with `composer install tfd7/tfd7 "symfony/twig-bundle:3.1.*"`
 
 Please note that if you want to use Twig, all the dependencies written above
-are mandatory, and you must use them in the specified versions. Once you
-upgraded your composer installation, copy the
-```Resources/engine/twig.engine``` file (within this module) into either one
-of the ```profiles/MYPROFILE/themes/engines/twig/twig.engine``` or
-```themes/engines/twig/twig.engine``` locations.
+are mandatory, and you must use them in the specified versions.
 
-Rebuild your cache, and that's it.
+Add `engine = twig` to your theme info file, rebuild your cache, and that's it.
+
+__NB__: If you plan to inherit from a non twig-theme, you may need the latest patch from <https://www.drupal.org/node/1545964>
 
 ## Usage
 
