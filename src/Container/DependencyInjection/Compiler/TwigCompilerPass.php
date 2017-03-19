@@ -34,6 +34,11 @@ class TwigCompilerPass implements CompilerPassInterface
             }
         }
 
+        // Very specific fix for TwigBundle ^3
+        if (!$container->has('fragment.handler') && !$container->hasAlias('fragment.handler')) {
+            $container->removeDefinition('twig.runtime.httpkernel');
+        }
+
         // If Symfony is present, do not override Symfony's services with our
         // and use the original ones instead, thus leaving untouched their
         // original class in definition, and allow side components, such as
