@@ -17,7 +17,10 @@ class Router extends BaseRouter
             foreach ($parameters as $key => $value) {
                 $token = '%' . $key;
 
-                if (false === strpos($name, $token)) {
+                if ($key === '_fragment') {
+                    // Handle symfony 3.2 _fragment parameter
+                    $options['fragment'] = $value;
+                } elseif (false === strpos($name, $token)) {
                     // We must, as per twig path() function signature, add unused
                     // parameters as GET parameters
                     $options['query'][$key] = $value;
