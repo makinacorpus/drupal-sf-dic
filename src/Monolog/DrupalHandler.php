@@ -41,6 +41,32 @@ class DrupalHandler extends AbstractProcessingHandler
     }
 
     /**
+     * Recursive map a set of arrays
+     *
+     * @param ...$arrays
+     *
+     * @return string[]
+     */
+    private function recursiveMap()
+    {
+        $ret = [];
+
+        $arrays = func_get_args();
+
+        foreach ($arrays as $array) {
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    $ret = array_merge($ret, $this->recursiveMap($value));
+                } else if (is_string($value)) {
+                    $ret['{' . $key . '}'] = (string)$value;
+                }
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
      * {@inheritDoc}
      */
     protected function write(array $record)
@@ -63,14 +89,11 @@ class DrupalHandler extends AbstractProcessingHandler
             }
         }
 
-        // If you are dblogging stuff, using <br/> tags is advised for readability
-        $message = nl2br($message);
-
         $entry = [
             'severity'    => self::monologToDrupal($record['level']),
-            'type'        => 'monolog',
+            'type'        => $record['channel'],
             'message'     => $message,
-            'variables'   => $record['context'],
+            'variables'   => $this->recursiveMap($record),
             'link'        => '',
             'user'        => null,
             'uid'         => \Drupal::currentUser()->id(),
@@ -90,9 +113,6 @@ class DrupalHandler extends AbstractProcessingHandler
      */
     protected function getDefaultFormatter()
     {
-        $formatter = new DrupalFormatter();
-        $formatter->allowInlineLineBreaks();
-
-        return $formatter;
+        return new DrupalFormatter();
     }
 }
