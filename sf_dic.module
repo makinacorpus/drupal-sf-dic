@@ -15,6 +15,7 @@ use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
 use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
 use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -442,6 +443,7 @@ function _sf_dic_response($response) {
   //   to fully support this.
   if (/* \Drupal::request()->isXmlHttpRequest() || */
       $response instanceof JsonResponse ||
+      $response instanceof BinaryFileResponse ||
       $response instanceof StreamedResponse ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/xml')) ||
       ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
