@@ -620,27 +620,37 @@ function sf_dic_page($controller) {
     }
   }
 
-  // Little bit of magic.
-  $r = new ReflectionClass(get_class($controller));
-  $rm = $r->getMethod($method);
-  $request = \Drupal::request();
-  foreach (array_values($rm->getParameters()) as $index => $rp) {
-    /* @var $rp \ReflectionParameter */
-    if ($rc = $rp->getClass()) {
-      if ('Symfony\Component\HttpFoundation\Request' === $rc->getName()) {
-        array_splice($args, $index, 0, [$request]);
+  try {
+    // Little bit of magic.
+    $r = new ReflectionClass(get_class($controller));
+    $rm = $r->getMethod($method);
+    $request = \Drupal::request();
+
+    foreach (array_values($rm->getParameters()) as $index => $rp) {
+      /* @var $rp \ReflectionParameter */
+      if ($rc = $rp->getClass()) {
+        if ('Symfony\Component\HttpFoundation\Request' === $rc->getName()) {
+          array_splice($args, $index, 0, [$request]);
+        }
+      } else if (count($args) <= $index) {
+        // Parameter is missing, attempt to fetch from GET
+        $name = $rp->getName();
+        if (isset($_GET[$name])) {
+          $args[$index] = $_GET[$name];
+        } else if (!$rp->isOptional()) {
+          // Missing parameter
+          throw new \InvalidArgumentException(sprintf("parameter '%s' is missing", $name));
+        }
       }
     }
-  }
 
-  // We cannot use the ContainerAwareInterface since in SF3 the recommended way
-  // is to use the ContainerAwareTrait which won't give any meta information on
-  // the object about weither or not we should inject the container.
-  if (method_exists($controller, 'setContainer')) {
-    $controller->setContainer(\Drupal::getContainer());
-  }
+    // We cannot use the ContainerAwareInterface since in SF3 the recommended way
+    // is to use the ContainerAwareTrait which won't give any meta information on
+    // the object about weither or not we should inject the container.
+    if (method_exists($controller, 'setContainer')) {
+      $controller->setContainer(\Drupal::getContainer());
+    }
 
-  try {
     $response = call_user_func_array([$controller, $method], $args);
     if (!$response instanceof Response) {
       $response = new DrupalResponse($response);
