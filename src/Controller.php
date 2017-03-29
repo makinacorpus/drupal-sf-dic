@@ -295,6 +295,16 @@ abstract class Controller implements ContainerAwareInterface
     }
 
     /**
+     * Generates a CSRF token
+     *
+     * @param string $id
+     */
+    protected function generateCsrfToken($id = null)
+    {
+        return drupal_get_token($id);
+    }
+
+    /**
      * Checks the validity of a CSRF token.
      *
      * @param string $id    The id used when generating the token
