@@ -552,7 +552,10 @@ function sf_dic_page($controller) {
   if (!method_exists($controller, $method)) {
     $method = $method . 'Action';
     if (!method_exists($controller, $method)) {
-      throw new InvalidArgumentException(sprintf("%s::%s(), %s::%sAction(), %s::render(): method does not exists", $controller, $method, $controller, $method, $controller));
+      throw new InvalidArgumentException(sprintf(
+          "%s::%s(), %s::%sAction(), %s::render(): method does not exists",
+          get_class($controller), $method, get_class($controller), $method, get_class($controller)
+      ));
     }
   }
 
