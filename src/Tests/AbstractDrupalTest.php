@@ -185,11 +185,28 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
             $account->name = $stupidHash;
         }
 
-        $storage->save($account);
-
         // Fake user access cache for testing
-        $data = &drupal_static('user_access');
-        $data[$account->uid] = array_combine($permissionList, $permissionList);
+        if ($permissionList) {
+            $data = &drupal_static('user_access');
+            $data[$account->uid] = array_combine($permissionList, $permissionList);
+
+            // Also, find the first role for each permission and set them
+            // to the user
+            $database = $this->getDatabaseConnection();
+            $roleIdList = $database->query(
+                "
+                    SELECT DISTINCT MIN(rid)
+                    FROM {role_permission}
+                    WHERE permission IN (:perm)
+                    GROUP BY permission
+                ",
+                [':perm' => $permissionList]
+            )->fetchCol();
+
+            $account->roles = array_combine($roleIdList, $roleIdList);
+        }
+
+        $storage->save($account);
 
         return $account;
     }
