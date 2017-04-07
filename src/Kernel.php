@@ -235,34 +235,6 @@ abstract class Kernel extends BaseKernel
     }
 
     /**
-     * Overrided to add the build() method call and be future proof.
-     *
-     * {@inheritdoc}
-     */
-    protected function prepareContainer(ContainerBuilder $container)
-    {
-        $extensions = array();
-        foreach ($this->bundles as $bundle) {
-            if ($extension = $bundle->getContainerExtension()) {
-                $container->registerExtension($extension);
-                $extensions[] = $extension->getAlias();
-            }
-
-            if ($this->debug) {
-                $container->addObjectResource($bundle);
-            }
-        }
-        foreach ($this->bundles as $bundle) {
-            $bundle->build($container);
-        }
-
-        $this->build($container);
-
-        // ensure these extensions are implicitly loaded
-        $container->getCompilerPassConfig()->setMergePass(new MergeExtensionConfigurationPass($extensions));
-    }
-
-    /**
      * {@inheritdoc}
      */
     protected function getContainerBuilder()
@@ -318,7 +290,25 @@ abstract class Kernel extends BaseKernel
      */
     protected function prepareContainer(ContainerBuilder $container)
     {
-        parent::prepareContainer($container);
+        $extensions = array();
+        foreach ($this->bundles as $bundle) {
+            if ($extension = $bundle->getContainerExtension()) {
+                $container->registerExtension($extension);
+                $extensions[] = $extension->getAlias();
+            }
+
+            if ($this->debug) {
+                $container->addObjectResource($bundle);
+            }
+        }
+        foreach ($this->bundles as $bundle) {
+            $bundle->build($container);
+        }
+
+        $this->build($container);
+
+        // ensure these extensions are implicitly loaded
+        $container->getCompilerPassConfig()->setMergePass(new MergeExtensionConfigurationPass($extensions));
 
         foreach ($this->discoverDrupalServicesDefinitionFiles() as $filename) {
             $loader = new YamlFileLoader($container, new FileLocator(dirname($filename)));
