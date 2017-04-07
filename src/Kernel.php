@@ -5,13 +5,17 @@ namespace MakinaCorpus\Drupal\Sf;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
+use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Config\ConfigCache;
 
+/**
+ * Derivation of Symfony's kernel allowing us to register Drupal services.
+ */
 abstract class Kernel extends BaseKernel
 {
     protected $isFullStack = false;
@@ -214,6 +218,48 @@ abstract class Kernel extends BaseKernel
         }
 
         return $ret;
+    }
+
+    /**
+     * This exists in Symfony 3.3 and not in 3.2 and previous.
+     *
+     * The extension point similar to the Bundle::build() method.
+     *
+     * Use this method to register compiler passes and manipulate the
+     * container during the building process.
+     *
+     * @param ContainerBuilder $container
+     */
+    protected function build(ContainerBuilder $container)
+    {
+    }
+
+    /**
+     * Overrided to add the build() method call and be future proof.
+     *
+     * {@inheritdoc}
+     */
+    protected function prepareContainer(ContainerBuilder $container)
+    {
+        $extensions = array();
+        foreach ($this->bundles as $bundle) {
+            if ($extension = $bundle->getContainerExtension()) {
+                $container->registerExtension($extension);
+                $extensions[] = $extension->getAlias();
+            }
+
+            if ($this->debug) {
+                $container->addObjectResource($bundle);
+            }
+        }
+        foreach ($this->bundles as $bundle) {
+            $bundle->build($container);
+        }
+
+        $this->build($container);
+
+        // ensure these extensions are implicitly loaded
+        $container->getCompilerPassConfig()->setMergePass(new MergeExtensionConfigurationPass($extensions));
     }
 
     /**
