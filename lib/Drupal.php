@@ -26,11 +26,16 @@ class Drupal
     /**
      * Set kernel
      *
+     * This is supposed to happen only pending unit tests, we also need to reset
+     * the container as well to ensure the environment matches test's one.
+     *
      * @param KernelInterface $kernel
      */
     static public function _setKernel(KernelInterface $kernel)
     {
         self::$kernel = $kernel;
+        self::$container = $kernel->getContainer();
+        self::$currentRequest = null;
     }
 
     static private function _buildKernel()
