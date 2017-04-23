@@ -43,7 +43,7 @@
 		"symfony/yaml" : "~2.8|~3.0 <3.3"
 	},
 	"suggests" : {
-        "makinacorpus/php-acl" : "Integrates with PHP ACL and send node access collect events",
+        "makinacorpus/php-acl" : "Integrates with PHP ACL and send node access collect events, requires ^1.1.0",
 		"monolog/monolog" : "Integrates the Drupal 8 logger to monolog",
 		"symfony/symfony" : "Replaces Symfony components with the full stack framework and brings everything into Drupal"
 	}

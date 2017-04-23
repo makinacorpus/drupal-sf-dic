@@ -88,8 +88,10 @@ function sf_acl_node_access_records($node) {
  */
 function sf_acl_node_grants($account, $op) {
   $ret = [];
-  foreach (_sf_acl_manager()->collectProfiles($account)->getAll() as $profile) {
-    $ret[$profile->getType()][] = $profile->getId();
+  foreach (_sf_acl_manager()->collectProfiles($account)->toArray() as $type => $ids) {
+    foreach ($ids as $id) {
+      $ret[$type][] = $id;
+    }
   }
   return $ret;
 }
