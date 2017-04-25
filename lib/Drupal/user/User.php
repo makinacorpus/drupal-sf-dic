@@ -15,7 +15,7 @@ use Drupal\Core\Session\AccountInterface;
  */
 class User extends Account implements UserInterface
 {
-    protected $isNew = false;
+    public $isNew = false;
 
     /**
      * {@inheritdoc}
