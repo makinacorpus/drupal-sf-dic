@@ -3,7 +3,6 @@
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
 use MakinaCorpus\Drupal\Sf\Config\FileLocator as CustomFileLocator;
-
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -63,16 +62,6 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
                 'controller_resolver' => (new Definition())
                     ->setClass(NullControllerResolver::class)
             ]);
-        }
-
-        // When in fullstack mode, with the framework bundle enabled, since
-        // we have our own 'http_kernel' service definition, we must reenable
-        // the 'argument_resolver' service if exists
-        if ($container->hasDefinition('argument_resolver') || $container->hasAlias('argument_resolver')) {
-            $kernelDefinition = $container->getDefinition('http_kernel');
-            $kernelArguments = $kernelDefinition->getArguments();
-            $kernelArguments[3] = new Reference('argument_resolver');
-            $kernelDefinition->setArguments($kernelArguments);
         }
     }
 }
