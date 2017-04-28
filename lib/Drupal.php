@@ -1,10 +1,8 @@
 <?php
 
 use Drupal\Core\Session\AccountInterface;
-
 use MakinaCorpus\Drupal\Sf\DefaultAppKernel;
 use MakinaCorpus\Drupal\Sf\Kernel;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -94,7 +92,7 @@ class Drupal
      */
     static public function hasContainer()
     {
-        return true;
+        return isset(self::$container);
     }
 
     /**
