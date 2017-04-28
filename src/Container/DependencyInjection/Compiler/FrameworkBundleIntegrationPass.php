@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use MakinaCorpus\Drupal\Sf\Http\NullControllerResolver;
 
 /**
  * A few things don't go as round as we'd expect when enabling the framework
@@ -60,8 +61,18 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
         if (!$container->has('controller_resolver')) {
             $container->addDefinitions([
                 'controller_resolver' => (new Definition())
-                    ->setClass('controller_resolver')
+                    ->setClass(NullControllerResolver::class)
             ]);
+        }
+
+        // When in fullstack mode, with the framework bundle enabled, since
+        // we have our own 'http_kernel' service definition, we must reenable
+        // the 'argument_resolver' service if exists
+        if ($container->hasDefinition('argument_resolver') || $container->hasAlias('argument_resolver')) {
+            $kernelDefinition = $container->getDefinition('http_kernel');
+            $kernelArguments = $kernelDefinition->getArguments();
+            $kernelArguments[3] = new Reference('argument_resolver');
+            $kernelDefinition->setArguments($kernelArguments);
         }
     }
 }
