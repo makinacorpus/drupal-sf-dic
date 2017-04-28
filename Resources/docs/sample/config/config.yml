@@ -38,7 +38,12 @@ twig:
         - "FilechunkBundle:Form:fields.html.twig"
 
 doctrine:
-    dbal: {}
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                logging: "%kernel.debug%"
+                profiling: "%kernel.debug%"
     orm:
         # @todo cannot disable this until the cache warmer isn't full restored
         auto_generate_proxy_classes: true
