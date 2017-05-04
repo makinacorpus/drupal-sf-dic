@@ -69,11 +69,23 @@
             {% for i, query in data %}
                 <tr id="queryNo-{{ i }}">
                     <td>{{ i }}</td>
-                    <td>{{ '%0.2f'|format(query.time * 1000) }}&nbsp;ms</td>
-                    <td id="queryNo-{{ i }}">
+                    <td>
+                        {{ '%0.2f'|format(query.time * 1000) }}&nbsp;ms
+                        <br/>
+                        <div style="position: relative; display: none;">{# Fixme later, provide a simple toggle script #}
+                            <a class="toggle-button closed" data-toggle-target-id="{{ expand_id }}" href="#">
+                                <span class="toggle-icon"></span>
+                            </a>
+                        </div>
+                    </td>
+                    <td id="queryNo-{{ i }}" class="query">
                         <div class="query-section">
-                            <span id="smallcode-{{ i }}">
-                                {{ query.query|replace({"\n\n": "\n"})|nl2br }}
+                            <span id="smallcode">
+                                {{ sql_compress(query.query) }}
+                            </span>
+                            {% set expand_id = 'smallcode-' ~ i ~ '-formatted' %}
+                            <span id="{{ expand_id }}" style="display: none;">
+                                {{ sql_format(query.query) }}
                             </span>
                         </div>
                         <code id="code-{{ i }}" style="font-size: 14px;">
@@ -103,6 +115,14 @@
         #collector-content table tr.error td{
             background-color: #f66;
         }
+        table td.query {
+            max-width: 1px;
+        }
+        table td.query pre {
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         code {
             display: none;
         }
@@ -111,6 +131,30 @@
         }
         code.explain{
             display: block;
+        }
+
+        /* This is from Symfony core */
+        .toggle-icon {
+            display: inline-block;
+            background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgBAMAAADpp+X/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QweDgwx4LcKwAAAABVQTFRFAAAA////////////////ZmZm////bvjBwAAAAAV0Uk5TABZwsuCVEUjgAAAAAWJLR0QF+G/pxwAAAE1JREFUGNNjSHMSYGBgUEljSGYAAzMGBwiDhUEBwmBiEIAwGBmwgTQgQGWgA7h2uIFwK+CWwp1BpHvYEqDuATEYkBlY3IOmBq6dCPcAAIT5Eg2IksjQAAAAAElFTkSuQmCC") no-repeat top left #5eb5e0;
+        }
+        .closed .toggle-icon, .closed.toggle-icon {
+            background-position: bottom left;
+        }
+        .toggle-icon.empty {
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAZgBmAGYHukptAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QweDhIf6CA40AAAAFRJREFUOMvtk7ENACEMA61vfx767MROWfO+AdGBHlNyTZrYUZRYDBII4NWE1pNdpFarfgLUbpDaBEgBYRiEVjsvDLa1l6O4Z3wkFWN+OfLKdpisOH/TlICzukmUJwAAAABJRU5ErkJggg==");
+        }
+        .toggle-button {
+            width: 16px;
+            height: 16px;
+            margin-left: -18px;
+        }
+        .toggle-icon {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 16px;
+            height: 16px;
         }
     </style>
 {% endblock %}

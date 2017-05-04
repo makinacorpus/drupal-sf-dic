@@ -1,50 +1,53 @@
 {
-	"name" : "makinacorpus/drupal-sf-dic",
-	"type" : "drupal-module",
-	"description" : "Brings the vanilla Symfony 3 depency inject container component to Drupal 7 seamlessly along with a limited compatibility layer with Drupal 8 API",
-	"homepage" : "http://github.com/makinacorpus/drupal-sf-dic",
-	"license" : "GPL-2",
-	"authors" : [{
-			"name" : "Pierre Rineau",
-			"email" : "pierre.rineau@makina-corpus.com"
-		}, {
-			"name" : "Makina Corpus",
-			"homepage" : "http://makina-corpus.com"
-		}
-	],
-	"autoload" : {
-		"psr-4" : {
-			"MakinaCorpus\\Drupal\\Sf\\" : "src/"
-		},
-		"psr-0" : {
-			"Drupal\\" : "lib/"
-		},
-		"files" : [
-			"lib/Drupal.php"
-		]
-	},
-	"minimum-stability" : "dev",
-	"prefer-stable" : true,
-	"require-dev" : {
-		"phpunit/phpunit" : "^5.1"
-	},
-    "bin" : [
+    "name": "makinacorpus/drupal-sf-dic",
+    "type": "drupal-module",
+    "description": "Brings the vanilla Symfony 3 depency inject container component to Drupal 7 seamlessly along with a limited compatibility layer with Drupal 8 API",
+    "homepage": "http://github.com/makinacorpus/drupal-sf-dic",
+    "license": "GPL-2",
+    "authors": [
+        {
+            "name": "Pierre Rineau",
+            "email": "pierre.rineau@makina-corpus.com"
+        },
+        {
+            "name": "Makina Corpus",
+            "homepage": "http://makina-corpus.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MakinaCorpus\\Drupal\\Sf\\" : "src/"
+        },
+        "psr-0": {
+            "Drupal\\" : "lib/"
+        },
+        "files": [
+            "lib/Drupal.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "^5.1"
+    },
+    "bin": [
         "bin/console"
     ],
-	"require" : {
-		"psr/log" : "1.*",
-		"symfony/config" : "~3.0 <3.3",
-		"symfony/dependency-injection" : "~3.0 <3.3",
-		"symfony/event-dispatcher" : "~3.0 <3.3",
-		"symfony/expression-language" : "~3.0 <3.3",
-		"symfony/http-foundation" : "~3.0 <3.3",
-		"symfony/http-kernel" : "~3.0 <3.3",
-		"symfony/translation" : "~3.0 <3.3",
-		"symfony/yaml" : "~2.8|~3.0 <3.3"
-	},
-	"suggests" : {
-        "makinacorpus/php-acl" : "Integrates with PHP ACL and send node access collect events, requires ^1.1.0",
-		"monolog/monolog" : "Integrates the Drupal 8 logger to monolog",
-		"symfony/symfony" : "Replaces Symfony components with the full stack framework and brings everything into Drupal"
-	}
+    "require": {
+        "psr/log": "1.*",
+        "symfony/config": "~3.0 <3.3",
+        "symfony/dependency-injection": "~3.0 <3.3",
+        "symfony/event-dispatcher": "~3.0 <3.3",
+        "symfony/expression-language": "~3.0 <3.3",
+        "symfony/http-foundation": "~3.0 <3.3",
+        "symfony/http-kernel": "~3.0 <3.3",
+        "symfony/translation": "~3.0 <3.3",
+        "symfony/yaml": "~2.8|~3.0 <3.3"
+    },
+    "suggests": {
+        "jdorn/sql-formatter": "Prettifies SQL queries in the WebProfiler debug pane",
+        "makinacorpus/php-acl": "Integrates with PHP ACL and send node access collect events, requires ^1.1.0",
+        "monolog/monolog": "Integrates the Drupal 8 logger to monolog",
+        "symfony/symfony": "Replaces Symfony components with the full stack framework and brings everything into Drupal"
+    }
 }
