@@ -7,6 +7,7 @@
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\user\User;
 use MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector;
 use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
@@ -113,6 +114,13 @@ function sf_dic_boot() {
 function sf_dic_module_implements_alter(&$implementations, $hook) {
   switch ($hook) {
 
+    case 'menu_breadcrumb_alter':
+      // We do need to be the first
+      $group = $implementations['sf_dic'];
+      unset($implementations['sf_dic']);
+      $implementations = ['sf_dic' => $group] + $implementations;
+      break;
+
     case 'node_load':
       // @see \Drupal\node\CompatNodeController
       unset($implementations['user']);
@@ -140,6 +148,49 @@ function sf_dic_language_init() {
   $request = \Drupal::request();
   $request->query->set('q', $_GET['q']);
   $request->attributes->set('_route', $_GET['q']);
+}
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ */
+function sf_dic_menu_breadcrumb_alter(&$active_trail, $item) {
+  $container = \Drupal::getContainer();
+
+  if ($container->has('breadcrumb')) {
+    /** @var \Drupal\Core\Breadcrumb\BreadcrumbManager $manager */
+    $manager = $container->get('breadcrumb');
+    /** @var \Symfony\Component\Routing\RouterInterface $router */
+    $router = \Drupal::service('router');
+
+    $routeMatch = new RouteMatch(\Drupal::request());
+    $breadcrumb = $manager->build($routeMatch);
+
+    // Build a new breadcrumb using the one given by implementations
+    if (!$breadcrumb->isEmpty()) {
+      $active_trail = [];
+      foreach ($breadcrumb->getLinks() as $link) {
+        $url = $link->getUrl();
+
+        if (!$url->isExternal()) {
+          // We use the router independently of the link is a Drupal path or not
+          // which allows us to transparently build Symfony URL's from routes,
+          // on the other hand, because our custom router also handles Drupal
+          // paths via url(), it will work gracefully.
+          // @todo is missing absolute URL generation important here?
+          $href = $router->generate($url->getRouteName(), $url->getRouteParameters());
+        } else {
+          $href = $url->getUri();
+        }
+
+        $active_trail[] = [
+          'href'              => $href,
+          'title'             => $link->getText(),
+          'localized_options' => $url->getOptions(),
+          'type'              => MENU_CALLBACK,
+        ];
+      }
+    }
+  }
 }
 
 /**

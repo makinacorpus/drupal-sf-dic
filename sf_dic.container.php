@@ -4,6 +4,7 @@ namespace Drupal\Module\sf_dic;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\BreadcumbBuilderRegisterPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\DoctrinePasstroughPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationEarlyPass;
@@ -27,6 +28,7 @@ class ServiceProvider implements ServiceProviderInterface
 
         $bundles = $container->getParameter('kernel.bundles');
 
+        $container->addCompilerPass(new BreadcumbBuilderRegisterPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new FrameworkBundleIntegrationEarlyPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
