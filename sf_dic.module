@@ -43,12 +43,14 @@ function sf_dic_boot() {
   \Drupal::_getKernel();
   $container = \Drupal::getContainer();
 
-  \Drupal::requestStack()->push(
-    // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
-    // pragmatically find it, since we do need Drupal alias replacement to
-    // have been done.
-    $request = MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals()
-  );
+  $request = MakinaCorpus\Drupal\Sf\Http\Request::createFromGlobals();
+  /** @var \Symfony\Component\HttpFoundation\Session\SessionInterface $session */
+  $session = $container->get('session');
+  $request->setSession($session);
+  // Inherits from $_GET['q'] as pathInfo instead of letting Symfony
+  // pragmatically find it, since we do need Drupal alias replacement to
+  // have been done.
+  \Drupal::requestStack()->push($request);
 
   // Register the database collector as soon as possible.
   if ($container->has('makinacorpus.drupal_database_collector')) {
