@@ -12,7 +12,8 @@ framework:
         strict_requirements: ~
     form:            ~
     # Symfony's CSRF protection is not supported yet.
-    #csrf_protection: ~
+    csrf_protection: ~
+    session:         ~
     validation:      { enable_annotations: true }
     # Templating section is fully handled by compilation passes, and must
     # be not modified from here, else the Drupal bridge would break.
