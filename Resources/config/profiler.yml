@@ -19,4 +19,4 @@ services:
     makinacorpus.drupal_node_collector:
         class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalNodeDataCollector
         arguments: ["@makinacorpus.entity.manager_proxy", '@?debug.stopwatch']
-        tags: [{ name: data_collector, template: "module:sf_dic:Profiler/node.html.twig", id: drupal_node}]
+        tags: [{ name: data_collector, template: "module:sf_dic:Profiler/node-load.html.twig", id: drupal_node}]
