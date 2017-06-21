@@ -1,0 +1,13 @@
+services:
+  property_info:
+    class: Symfony\Component\PropertyInfo\PropertyInfoExtractor
+    public: true
+    arguments: [[], [], [], []]
+  Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface:
+    alias: property_info
+  property_info.reflection_extractor:
+    class: Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor
+    tags:
+      - {name: property_info.list_extractor, priority: -1000}
+      - {name: property_info.type_extractor, priority: -1002}
+      - {name: property_info.access_extractor, priority: -1000}

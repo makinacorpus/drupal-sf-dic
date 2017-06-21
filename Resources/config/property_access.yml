@@ -1,0 +1,5 @@
+services:
+  property_accessor:
+    class: Symfony\Component\PropertyAccess\PropertyAccessor
+  Symfony\Component\PropertyAccess\PropertyAccessorInterface:
+    alias: property_accessor

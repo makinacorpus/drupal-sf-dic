@@ -49,6 +49,13 @@ class ServiceProvider implements ServiceProviderInterface
                     $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
                 }
 
+                if (class_exists('Symfony\\Component\\PropertyAccess\\PropertyAccessor')) {
+                    $loader->load('property_access.yml');
+                }
+                if (class_exists('Symfony\\Component\\PropertyInfo\\PropertyInfoExtractor')) {
+                    $loader->load('property_info.yml');
+                }
+
                 // We do need to force a few symfony compoenents to be loaded
                 $loader->load('translation-degraded.yml');
             }
