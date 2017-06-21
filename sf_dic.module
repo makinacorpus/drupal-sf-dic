@@ -161,8 +161,13 @@ function sf_dic_menu_breadcrumb_alter(&$active_trail, $item) {
   if ($container->has('breadcrumb')) {
     /** @var \Drupal\Core\Breadcrumb\BreadcrumbManager $manager */
     $manager = $container->get('breadcrumb');
-    /** @var \Symfony\Component\Routing\RouterInterface $router */
-    $router = \Drupal::service('router');
+
+    // When not using fullstack, we have no router.
+    $router = null;
+    if (\Drupal::hasService('router')) {
+      /** @var \Symfony\Component\Routing\RouterInterface $router */
+      $router = \Drupal::service('router');
+    }
 
     $routeMatch = new RouteMatch(\Drupal::request());
     $breadcrumb = $manager->build($routeMatch);
@@ -179,7 +184,11 @@ function sf_dic_menu_breadcrumb_alter(&$active_trail, $item) {
           // on the other hand, because our custom router also handles Drupal
           // paths via url(), it will work gracefully.
           // @todo is missing absolute URL generation important here?
-          $href = $router->generate($url->getRouteName(), $url->getRouteParameters());
+          if ($router) {
+            $href = $router->generate($url->getRouteName(), $url->getRouteParameters());
+          } else {
+            $href = url($url->getRouteName(), ['query' => $url->getRouteParameters()]);
+          }
         } else {
           $href = $url->getUri();
         }
