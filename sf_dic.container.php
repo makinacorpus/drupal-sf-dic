@@ -9,6 +9,7 @@ use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ContainerBuild
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\DoctrinePasstroughPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationEarlyPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\PropertyInfoPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -54,6 +55,7 @@ class ServiceProvider implements ServiceProviderInterface
                 }
                 if (class_exists('Symfony\\Component\\PropertyInfo\\PropertyInfoExtractor')) {
                     $loader->load('property_info.yml');
+                    $container->addCompilerPass(new PropertyInfoPass());
                 }
 
                 // We do need to force a few symfony compoenents to be loaded
