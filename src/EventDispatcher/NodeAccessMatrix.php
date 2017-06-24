@@ -13,7 +13,7 @@ final class NodeAccessMatrix
 
     /**
      * Build matrix from Drupal grants
-     * 
+     *
      * @param array $grants
      */
     public function __construct(array $grants = [])
@@ -225,7 +225,7 @@ final class NodeAccessMatrix
                 $index = 2;
                 break;
             default:
-                trigger_error(sprintf("allowed operations are 'view', 'update' and 'delete': '%s' given", $op), E_USER_ERROR);
+                //trigger_error(sprintf("allowed operations are 'view', 'update' and 'delete': '%s' given", $op), E_USER_ERROR);
                 return false;
         }
 
