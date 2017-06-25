@@ -37,7 +37,7 @@ class User extends Account implements UserInterface
      */
     public function language()
     {
-        return LANGUAGE_NONE;
+        return $this->language;
     }
 
     /**
