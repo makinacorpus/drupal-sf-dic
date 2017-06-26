@@ -60,6 +60,11 @@ class ServiceProvider implements ServiceProviderInterface
 
                 // We do need to force a few symfony compoenents to be loaded
                 $loader->load('translation-degraded.yml');
+
+                // Also load annotations if available
+                if (class_exists('Doctrine\\Common\\Annotations\\AnnotationReader')) {
+                    $loader->load('annotations-degraded.yml');
+                }
             }
         }
 

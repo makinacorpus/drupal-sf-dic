@@ -1,0 +1,19 @@
+services:
+
+    annotations.reader:
+        public: false
+        class: Doctrine\Common\Annotations\AnnotationReader
+
+    annotations.cached_reader:
+        public: false
+        alias: annotations.reader
+        class: Doctrine\Common\Annotations\CachedReader
+        arguments: ['@annotations.reader', '@annotations.filesystem_cache']
+
+    annotations.filesystem_cache:
+        public: false
+        class: Doctrine\Common\Cache\FilesystemCache
+        arguments: ['%kernel.cache_dir%/annotations']
+
+    annotation_reader:
+        alias: annotations.reader
