@@ -41,6 +41,19 @@ class DrupalHandler extends AbstractProcessingHandler
     }
 
     /**
+     * Override default constructor.
+     *
+     * Default log level is debug, but it seems that the monolog bundle does
+     * not sets it right on custom services (no setLevel() calls, no constructor
+     * arguments).
+     */
+    public function __construct($level = Logger::ERROR, $bubble = true)
+    {
+        $this->setLevel($level);
+        $this->bubble = $bubble;
+    }
+
+    /**
      * Recursive map a set of arrays
      *
      * @param ...$arrays
