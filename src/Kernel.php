@@ -290,6 +290,17 @@ abstract class Kernel extends BaseKernel
      */
     protected function prepareContainer(ContainerBuilder $container)
     {
+        // Allow providers to automatically provide bundles
+        $providers = $this->discoverDrupalServiceProviders();
+        foreach ($providers as $provider) {
+            if (method_exists($provider, 'registerBundles')) {
+                $providerBundles = $provider->registerBundles();
+                if (is_array($providerBundles)) {
+                    $this->bundles = array_merge($this->bundles, $providerBundles);
+                }
+            }
+        }
+
         $extensions = array();
         foreach ($this->bundles as $bundle) {
             if ($extension = $bundle->getContainerExtension()) {
@@ -315,7 +326,7 @@ abstract class Kernel extends BaseKernel
             $loader->load(basename($filename));
         }
 
-        foreach ($this->discoverDrupalServiceProviders() as $provider) {
+        foreach ($providers as $provider) {
             $provider->register($container);
         }
     }
