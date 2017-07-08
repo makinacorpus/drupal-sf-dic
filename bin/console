@@ -10,8 +10,12 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 set_time_limit(0);
 
-// Bootstrap Drupal, we are going to use its own kernel
+// Avoids lots of PHP warnings
 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+// Avoid Drupal returning "400 Bad Request" in drupal_environment_initialize()
+$_SERVER['HTTP_HOST'] = '127.0.0.1';
+// In some cases, this helps
+$_SERVER['SCRIPT_NAME'] = '/index.php';
 
 // Look for main directory
 $current_folder = __DIR__;
@@ -26,9 +30,22 @@ if (!defined('DRUPAL_ROOT')) {
   throw new Exception("Could not find drupal root directory");
 }
 
+// Very low level bootstrap, so that autoloaders are fully loaded
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+require_once DRUPAL_ROOT . '/includes/database/database.inc';
+require_once DRUPAL_ROOT . '/includes/cache.inc';
+require_once DRUPAL_ROOT . '/includes/file.inc';
+require_once DRUPAL_ROOT . '/includes/module.inc';
 
+drupal_environment_initialize();
+drupal_settings_initialize();
+// Sadly, lots of legacy Drupal code does not use DRUPAL_ROOT for file
+// lookup, such as _registry_parse_files()
+chdir(DRUPAL_ROOT);
+
+// And we stop there with bootstrapping, no Drupal yet, only allow the
+// Symfony commands to work. Since we force the static Drupal::_getKernel()
+// call, everything will be bootstrapped OK for Symfony.
 $input = new ArgvInput();
 $kernel = \Drupal::_getKernel();
 $application = new Application($kernel);
