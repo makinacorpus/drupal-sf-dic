@@ -189,6 +189,13 @@ services:
   sf_dic.console.command.dropkernel:
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]
+  sf_dic.console.command.cacheclear:
+    class: MakinaCorpus\Drupal\Sf\Command\CacheClearCommand
+    tags: [{name: console.command}]
+  sf_dic.console.command.panic:
+    class: MakinaCorpus\Drupal\Sf\Command\PanicCommand
+    tags: [{name: console.command}]
+
 
   # Custom node access helper
   sf_dic.node_access.subscriber:
