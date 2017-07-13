@@ -36,13 +36,14 @@
     "require": {
         "psr/log": "1.*",
         "symfony/config": "~3.0 <3.3",
-        "symfony/dependency-injection": "~3.2 <3.3",
-        "symfony/event-dispatcher": "~3.0 <3.3",
-        "symfony/expression-language": "~3.0 <3.3",
-        "symfony/http-foundation": "~3.0 <3.3",
-        "symfony/http-kernel": "~3.0 <3.3",
-        "symfony/translation": "~3.0 <3.3",
-        "symfony/yaml": "~2.8|~3.0 <3.3"
+        "symfony/dependency-injection": "~3.2 <3.4",
+        "symfony/event-dispatcher": "~3.0 <3.4",
+        "symfony/expression-language": "~3.0 <3.4",
+        "symfony/http-foundation": "~3.0 <3.4",
+        "symfony/http-kernel": "~3.0 <3.4",
+        "symfony/templating": "~3.0 <3.4",
+        "symfony/translation": "~3.0 <3.4",
+        "symfony/yaml": "~2.8|~3.0 <3.4"
     },
     "suggests": {
         "jdorn/sql-formatter": "Prettifies SQL queries in the WebProfiler debug pane",
