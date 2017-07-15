@@ -2,9 +2,11 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use MakinaCorpus\Drupal\Sf\Routing\NullRouter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
 /**
  * Modifies a few definitions, before the optimizations passes goes.
@@ -25,6 +27,11 @@ class FrameworkBundleIntegrationEarlyPass implements CompilerPassInterface
             $kernelArguments = $kernelDefinition->getArguments();
             $kernelArguments[3] = new Reference('argument_resolver');
             $kernelDefinition->setArguments($kernelArguments);
+        }
+
+        // Add a foo router
+        if (!$container->has('router')) {
+            $container->addDefinitions(['router' => (new Definition())->setClass(NullRouter::class)]);
         }
     }
 }

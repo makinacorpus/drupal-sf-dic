@@ -38,17 +38,6 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
             ]);
         }
 
-        // By registering the framework bundle, we also inherit from Symfony
-        // default URL generator, which will cause us great pain because of
-        // Drupal routes will not be known by the framework and throw a few
-        // exceptions.
-        if ($container->has('router.default')) {
-            $container
-                ->getDefinition('router.default')
-                ->setClass('MakinaCorpus\Drupal\Sf\Routing\Router')
-            ;
-        }
-
         // Also replace the translator with our own
         if ($container->hasDefinition('translator.drupal')) {
             $container->setAlias('translator', 'translator.drupal');

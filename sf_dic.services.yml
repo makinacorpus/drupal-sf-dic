@@ -209,6 +209,13 @@ services:
     arguments: ["@event_dispatcher"]
     tags: [{name: event_subscriber}]
 
+  # Custom router
+  sf_dic.drupal_router:
+    public: true
+    class: MakinaCorpus\Drupal\Sf\Routing\DrupalRouter
+    decorates: router
+    arguments: ['@sf_dic.drupal_router.inner']
+
   # Symfony controller proxy: where Drupal router driven Symfony controllers
   # are executed, response are built and handled, and exceptions are handled
   # too

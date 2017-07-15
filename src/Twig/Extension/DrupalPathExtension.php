@@ -2,8 +2,6 @@
 
 namespace MakinaCorpus\Drupal\Sf\Twig\Extension;
 
-use MakinaCorpus\Drupal\Sf\Routing\Router;
-
 /**
  * Drupal path extension WITH Symfony router
  */
