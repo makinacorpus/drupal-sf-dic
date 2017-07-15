@@ -7,6 +7,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Bootstraps Drupal before execution
+ *
+ * @codeCoverageIgnore
  */
 abstract class DrupalCommand extends ContainerAwareCommand
 {

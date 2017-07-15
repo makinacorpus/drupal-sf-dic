@@ -8,6 +8,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Drupal flush all caches
+ *
+ * @codeCoverageIgnore
  */
 class CacheClearCommand extends DrupalCommand
 {

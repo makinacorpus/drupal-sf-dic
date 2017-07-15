@@ -7,6 +7,8 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 /**
  * Sample kernel file that should work out of the box if you added the whole
  * Symfony distribution and the monolog bundle as dependencies of this project.
+ *
+ * @codeCoverageIgnore
  */
 class AppKernel extends Kernel
 {

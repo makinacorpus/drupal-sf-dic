@@ -3,7 +3,7 @@
 /**
  * PSR-0/PEAR class naming, in order to ensure Simpletests sees it.
  */
-class MakinaCorpus_Drupal_Sf_Container_Tests_FormWebTestCase
+class MakinaCorpus_Drupal_Sf_Container_Tests_Web_FormWebTestCase
     extends DrupalWebTestCase
 {
     public static function getInfo()

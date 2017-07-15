@@ -1,8 +1,15 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Tests;
+namespace MakinaCorpus\Drupal\Sf\Tests\Functionnal;
 
-use Drupal\Core\Entity\EntityManager;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\Node;
+use Drupal\node\NodeStorage;
+use Drupal\user\User;
+use Drupal\user\UserInterface;
+use Drupal\user\UserStorage;
+use MakinaCorpus\Drupal\Sf\Tests\AbstractDrupalTest;
 
 class EntityStorageTest extends AbstractDrupalTest
 {
@@ -13,7 +20,7 @@ class EntityStorageTest extends AbstractDrupalTest
         $this->getDrupalContainer(); // Force full bootstrap
 
         if (!getenv('FORCE_TESTS') && module_exists('pathauto')) {
-            $this->markTestSkipped("Some modules are stupid, we cannot test under those conditions");
+            $this->markTestSkipped("pathauto module, due to strict \stdClass typing, will cause our code to crash");
         }
     }
 
@@ -23,34 +30,34 @@ class EntityStorageTest extends AbstractDrupalTest
 
         $this->assertTrue($container->has('entity.manager'));
 
-        /* @var $entityManager EntityManager */
+        /** @var \Drupal\Core\Entity\EntityManager $entityManager */
         $entityManager = $container->get('entity.manager');
 
         foreach (['node', 'user', 'taxonomy_term'] as $entityType) {
             $entityStorage = $entityManager->getStorage($entityType);
-            $this->assertInstanceOf('\Drupal\Core\Entity\EntityStorageInterface', $entityStorage);
+            $this->assertInstanceOf(EntityStorageInterface::class, $entityStorage);
         }
     }
 
     public function testNodeStorage()
     {
-        /* @var $entityManager EntityManager */
+        /** @var \Drupal\Core\Entity\EntityManager $entityManager */
         $entityManager = $this->getDrupalContainer()->get('entity.manager');
         $nodeStorage = $entityManager->getStorage('node');
-        $this->assertInstanceOf('\Drupal\node\NodeStorage', $nodeStorage);
+        $this->assertInstanceOf(NodeStorage::class, $nodeStorage);
 
         $node = $nodeStorage->create();
-        $this->assertInstanceOf('\Drupal\node\Node', $node);
+        $this->assertInstanceOf(Node::class, $node);
 
-        /* @var $node \Drupal\node\Node */
+        /** @var \Drupal\node\Node $node */
         $node->setOwnerId(12)->setSticky(true)->setTitle("bla bla");
         $node->type = 'test';
         $nodeStorage->save($node);
 
         $nodeStorage->resetCache();
-        /* @var $compare \Drupal\node\Node */
+        /** @var \Drupal\node\Node $compare */
         $compare = $nodeStorage->load($node->id());
-        $this->assertInstanceOf('\Drupal\node\Node', $compare);
+        $this->assertInstanceOf(Node::class, $compare);
 
         $this->assertEquals($node->id(), $compare->id());
         $this->assertSame($node->getTitle(), $compare->getTitle());
@@ -63,25 +70,25 @@ class EntityStorageTest extends AbstractDrupalTest
 
     public function testUserStorage()
     {
-        /* @var $entityManager EntityManager */
+        /** @var \Drupal\Core\Entity\EntityManager $entityManager */
         $entityManager = $this->getDrupalContainer()->get('entity.manager');
         $userStorage = $entityManager->getStorage('user');
-        $this->assertInstanceOf('\Drupal\user\UserStorage', $userStorage);
+        $this->assertInstanceOf(UserStorage::class, $userStorage);
 
+        /** @var \Drupal\user\User $user */
         $user = $userStorage->create();
-        $this->assertInstanceOf('\Drupal\user\User', $user);
-        $this->assertInstanceOf('\Drupal\user\UserInterface', $user);
-        $this->assertInstanceOf('\Drupal\Core\Session\AccountInterface', $user);
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertInstanceOf(UserInterface::class, $user);
+        $this->assertInstanceOf(AccountInterface::class, $user);
 
-        /* @var $user \Drupal\user\User */
         $prefix = uniqid('robert-');
         $user->setUsername($prefix)->setEmail($prefix . '@smith.com');
         $userStorage->save($user);
 
         $userStorage->resetCache();
-        /* @var $compare \Drupal\user\User */
+        /** @var \Drupal\user\User $compare */
         $compare = $userStorage->load($user->id());
-        $this->assertInstanceOf('\Drupal\user\User', $compare);
+        $this->assertInstanceOf(User::class, $compare);
 
         $this->assertSame('user', $user->getEntityTypeId());
         $this->assertEquals($user->id(), $compare->id());

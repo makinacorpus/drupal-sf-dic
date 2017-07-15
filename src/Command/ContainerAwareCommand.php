@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
  * Thank you once again Fabien.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @codeCoverageIgnore
  */
 abstract class ContainerAwareCommand extends Command implements ContainerAwareInterface
 {

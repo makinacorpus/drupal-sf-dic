@@ -1,19 +1,18 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Tests;
+namespace MakinaCorpus\Drupal\Sf\Tests\Functional;
 
 use Drupal\Core\Session\Account;
 use Drupal\node\Node;
 use Drupal\user\User;
-
-use MakinaCorpus\Drupal\Sf\Security\Authorization\TokenAwareAuthorizationChecker;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
+use MakinaCorpus\Drupal\Sf\Security\Authorization\TokenAwareAuthorizationChecker;
 use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
 use MakinaCorpus\Drupal\Sf\Security\Voter\DrupalNodeAccessVoter;
 use MakinaCorpus\Drupal\Sf\Security\Voter\DrupalPermissionVoter;
+use MakinaCorpus\Drupal\Sf\Tests\AbstractDrupalTest;
 use MakinaCorpus\Drupal\Sf\Tests\Mockup\SecurityNullAuthenticationManager;
 use MakinaCorpus\Drupal\Sf\Tests\Mockup\SecurityToken;
-
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;

@@ -3,7 +3,7 @@
 /**
  * PSR-0/PEAR class naming, in order to ensure Simpletests sees it
  */
-abstract class MakinaCorpus_Drupal_Sf_Container_Tests_AbstractUnitTestCase
+abstract class MakinaCorpus_Drupal_Sf_Container_Tests_Web_AbstractUnitTestCase
     extends DrupalUnitTestCase
 {
     public function setUp()

@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Fixes heavily broken Drupal sites
+ *
+ * @codeCoverageIgnore
  */
 class PanicCommand extends Command
 {

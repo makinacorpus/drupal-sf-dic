@@ -8,6 +8,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Drop the current kernel
+ *
+ * @codeCoverageIgnore
  */
 class DropKernelCacheCommand extends ContainerAwareCommand
 {

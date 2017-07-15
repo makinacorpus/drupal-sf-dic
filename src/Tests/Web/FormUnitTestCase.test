@@ -5,7 +5,7 @@ use Drupal\Core\Form\FormState;
 /**
  * PSR-0/PEAR class naming, in order to ensure Simpletests sees it.
  */
-class MakinaCorpus_Drupal_Sf_Container_Tests_FormUnitTestCase
+class MakinaCorpus_Drupal_Sf_Container_Tests_Web_FormUnitTestCase
     extends MakinaCorpus_Drupal_Sf_Container_Tests_AbstractUnitTestCase
 {
     public static function getInfo()
