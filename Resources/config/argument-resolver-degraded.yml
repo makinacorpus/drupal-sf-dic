@@ -1,0 +1,30 @@
+services:
+
+    argument_metadata_factory:
+        public: false
+        class: Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory
+
+    argument_resolver:
+        public: false
+        class: Symfony\Component\HttpKernel\Controller\ArgumentResolver
+        arguments: ['@argument_metadata_factory', []]
+
+    argument_resolver.request_attribute:
+        public: false
+        class: Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestAttributeValueResolver
+        tags: [{name: controller.argument_value_resolver, priority: 100}]
+
+    argument_resolver.request:
+        public: false
+        class: Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestValueResolver
+        tags: [{name: controller.argument_value_resolver, priority: 50}]
+
+    argument_resolver.default:
+        public: false
+        class: Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver
+        tags: [{name: controller.argument_value_resolver, priority: -100}]
+
+    argument_resolver.variadic:
+        public: false
+        class: Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver
+        tags: [{name: controller.argument_value_resolver, priority: -150}]

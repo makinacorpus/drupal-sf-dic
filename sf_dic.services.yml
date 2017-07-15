@@ -196,12 +196,26 @@ services:
     class: MakinaCorpus\Drupal\Sf\Command\PanicCommand
     tags: [{name: console.command}]
 
+  # Scalar from GET/POST argument resolver
+  sf_dic.argument_value_resolver.scalar_query:
+    class: MakinaCorpus\Drupal\Sf\Controller\ArgumentResolver\RequestQueryValueResolver
+    public: false
+    # Run before default value resolver
+    tags: [{name: controller.argument_value_resolver, priority: -80}]
 
   # Custom node access helper
   sf_dic.node_access.subscriber:
     class: MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessSubscriber
     arguments: ["@event_dispatcher"]
     tags: [{name: event_subscriber}]
+
+  # Symfony controller proxy: where Drupal router driven Symfony controllers
+  # are executed, response are built and handled, and exceptions are handled
+  # too
+  sf_dic.controller_handler:
+    public: true
+    class: MakinaCorpus\Drupal\Sf\Controller\ControllerHandler
+    arguments: ["@argument_resolver", "@service_container"]
 
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it

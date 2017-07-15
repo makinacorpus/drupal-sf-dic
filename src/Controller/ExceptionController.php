@@ -3,10 +3,9 @@
 namespace MakinaCorpus\Drupal\Sf\Controller;
 
 use Symfony\Bundle\TwigBundle\Controller\ExceptionController as BaseExceptionController;
-
 use Symfony\Component\Debug\Exception\FlattenException;
-use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 /**
  * Extended because in Drupal context, we need to restore the output buffering

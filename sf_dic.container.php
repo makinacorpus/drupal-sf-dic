@@ -6,14 +6,15 @@ use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\BreadcumbBuilderRegisterPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ControllerArgumentValueResolverPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\DoctrinePasstroughPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationEarlyPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\PropertyInfoPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
@@ -49,6 +50,10 @@ class ServiceProvider implements ServiceProviderInterface
                 if ($container->getParameter('kernel.debug')) {
                     $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
                 }
+
+                // Use our own implementation, we can use this without the framework bundle!
+                $container->addCompilerPass(new ControllerArgumentValueResolverPass());
+                $loader->load('argument-resolver-degraded.yml');
 
                 if (class_exists('Symfony\\Component\\PropertyAccess\\PropertyAccessor')) {
                     $loader->load('property_access.yml');

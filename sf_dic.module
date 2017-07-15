@@ -9,23 +9,18 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\user\User;
-use MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector;
 use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
-use MakinaCorpus\Drupal\Sf\DrupalResponse;
+use MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector;
 use MakinaCorpus\Drupal\Sf\EventDispatcher\FormEvent;
 use MakinaCorpus\Drupal\Sf\Security\DrupalUser;
 use MakinaCorpus\Drupal\Sf\Security\Token\UserToken;
 use Symfony\Component\Debug\Exception\FlattenException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Implements hook_boot().
@@ -237,7 +232,8 @@ function sf_dic_menu_node_access($op, $node) {
 /**
  * Ensure menu item type is understandable for Drupal.
  *
- * @param scalar[] $item
+ * @param array $item
+ *   Drupal menu item to fix
  */
 function _sf_dic_menu_type(&$item) {
   if (!isset($item['type']) || is_numeric($item['type'])) {
@@ -434,12 +430,10 @@ function sf_dic_controller_render($controller, array $path = [], array $query = 
  *   The fragment content
  */
 function sf_dic_http_render($uri, $options = [], $strategy = null) {
-
   if (null === $strategy) {
     $strategy = isset($options['strategy']) ? $options['strategy'] : 'inline';
     unset($options['strategy']);
   }
-
   return \Drupal::service('fragment.handler')->render($uri, $strategy, $options);
 }
 
@@ -486,64 +480,6 @@ function sf_dic_plugin_create($class, $configuration = []) {
 }
 
 /**
- * Deal with anything returned by a Symfony style controller.
- *
- * @param mixed $response
- */
-function _sf_dic_response($response) {
-  $container = \Drupal::getContainer();
-  $isFragmentRoute = false;
-
-  // Allow fragment renderers to work.
-  if ($container->hasParameter('fragment.path')) {
-    $fragmentPath = $container->getParameter('fragment.path');
-    $isFragmentRoute = current_path() === trim($fragmentPath, '/');
-  }
-
-  // @todo Partial support only of symfony http response, headers and others
-  //   are ignored, we should probably have a custom delivery callback in order
-  //   to fully support this.
-  if (/* \Drupal::request()->isXmlHttpRequest() || */
-      $response instanceof JsonResponse ||
-      $response instanceof BinaryFileResponse ||
-      $response instanceof StreamedResponse ||
-      ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/xml')) ||
-      ($response instanceof Response && 0 === strpos($response->headers->get('Content-Type'), 'application/json')) ||
-      $isFragmentRoute ||
-      // Ignoring the XmlHttpRequest should always be the right method, but
-      // sorry, I have to do otherwise as of now. As a side note, stripos()
-      // is very fast, and substr() is much much faster, so this should not
-      // be noticeable in any way in term of performances.
-      (($buffer = substr($response->getContent(), 0, 100)) && false !== stripos($buffer, 'Symfony Web Debug Toolbar'))
-  ){
-    $response->send();
-    drupal_exit();
-    return;
-  }
-
-  if ($response instanceof Response) {
-
-    // First attempt to get status code we may have missed
-    $status = $response->getStatusCode();
-    if ($response instanceof RedirectResponse || ($status >= 300 && $status < 400) ||
-        // Same note as above, substr() and stripos() are really fast.
-        (($buffer = substr($response->getContent(), -100)) && false !== stripos($response->getContent(), '</html>'))
-    ){
-      $response->send();
-      drupal_exit();
-      return;
-    }
-
-    // If nothing happend, this is probably a valid response just send
-    // it to the browser as normal, we just may need to convert it to
-    // string first so that Drupal delivery callbacks won't fail
-    $response = (string)$response->getContent();
-  }
-
-  return $response;
-}
-
-/**
  * Pass error pages handling to Symfony
  */
 function sf_dic_error_page($status = 404) {
@@ -568,8 +504,10 @@ function sf_dic_error_page($status = 404) {
   // Now that we got it, attempt to use Symfony to display the error page.
   /** @var \Symfony\Bundle\TwigBundle\Controller\ExceptionController $controller */
   $controller = $container->get('twig.controller.exception');
+  /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
+  $handler = \Drupal::service('sf_dic.controller_handler');
 
-  return _sf_dic_response($controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
+  return $handler->handleResponse($controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
 }
 
 /**
@@ -586,37 +524,6 @@ function _sf_dic_format_exception($e) {
   $e = $e->getPrevious();
  } while ($e);
  return $output;
-}
-
-/**
- * Handle router or kernel exception.
- *
- * @param \Throwable $exception
- */
-function _sf_dic_handle_exception($exception) {
-  /** @var \Throwable $e */
-  if ($exception instanceof \Symfony\Component\Security\Core\Exception\AccessDeniedException) {
-    sf_dic_exception($exception);
-    return MENU_ACCESS_DENIED;
-  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
-    sf_dic_exception($exception);
-    return MENU_ACCESS_DENIED;
-  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-    sf_dic_exception($exception);
-    return MENU_NOT_FOUND;
-  } else if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
-    sf_dic_exception($exception);
-    switch ($exception->getStatusCode()) {
-      case 403:
-        return MENU_ACCESS_DENIED;
-      case 404:
-        return MENU_NOT_FOUND;
-    }
-    throw $exception;
-  } else {
-    sf_dic_exception($exception);
-    throw $exception;
-  }
 }
 
 /**
@@ -637,12 +544,14 @@ function sf_dic_exception($exception = null) {
  * Menu callback for using Symfony real router.
  */
 function sf_dic_router() {
+  /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
+  $handler = \Drupal::service('sf_dic.controller_handler');
   try {
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    return _sf_dic_response($kernel->handle(\Drupal::request(), HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
+    return $handler->handleResponse($kernel->handle(\Drupal::request(), HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
   } catch (\Exception $e) {
-    return _sf_dic_handle_exception($e);
+    return $handler->handleException($e);
   }
 }
 
@@ -650,82 +559,13 @@ function sf_dic_router() {
  * Menu callback for using controllers via hook_menu().
  */
 function sf_dic_page($controller) {
-  $args = func_get_args();
-  array_shift($args);
-
-  $method = null;
-
-  // CLASS::STATIC_METHOD is not supported here.
-  if (false !== strpos($controller, '::')) {
-    list($controller, $method) = explode('::', $controller, 2);
-  }
-
-  if (class_exists($controller)) {
-    $controller = new $controller();
-  } else if (class_exists($controller . 'Controller')) {
-    $controller .= 'Controller';
-    $controller = new $controller();
-  } else if (\Drupal::hasService($controller)) {
-    $controller = \Drupal::service($controller);
-  } else {
-    throw new InvalidArgumentException(sprintf("%s: is not callable or class does not exist", $controller));
-  }
-
-  if (null === $method) {
-    $method = 'render';
-  }
-
-  if (!method_exists($controller, $method)) {
-    $method = $method . 'Action';
-    if (!method_exists($controller, $method)) {
-      throw new InvalidArgumentException(sprintf(
-          "%s::%s(), %s::%sAction(), %s::render(): method does not exists",
-          get_class($controller), $method, get_class($controller), $method, get_class($controller)
-      ));
-    }
-  }
-
-  try {
-    // Little bit of magic.
-    $r = new ReflectionClass(get_class($controller));
-    $rm = $r->getMethod($method);
-    $request = \Drupal::request();
-
-    foreach (array_values($rm->getParameters()) as $index => $rp) {
-      /* @var $rp \ReflectionParameter */
-      if ($rc = $rp->getClass()) {
-        if ('Symfony\Component\HttpFoundation\Request' === $rc->getName()) {
-          array_splice($args, $index, 0, [$request]);
-        }
-      } else if (count($args) <= $index) {
-        // Parameter is missing, attempt to fetch from GET
-        $name = $rp->getName();
-        if (isset($_GET[$name])) {
-          $args[$index] = $_GET[$name];
-        } else if (!$rp->isOptional()) {
-          // Missing parameter
-          throw new \InvalidArgumentException(sprintf("parameter '%s' is missing", $name));
-        }
-      }
-    }
-
-    // We cannot use the ContainerAwareInterface since in SF3 the recommended way
-    // is to use the ContainerAwareTrait which won't give any meta information on
-    // the object about weither or not we should inject the container.
-    if (method_exists($controller, 'setContainer')) {
-      $controller->setContainer(\Drupal::getContainer());
-    }
-
-    $response = call_user_func_array([$controller, $method], $args);
-    if (!$response instanceof Response) {
-      $response = new DrupalResponse($response);
-    }
-
-    return _sf_dic_response($response);
-
-  } catch (\Exception $e) {
-    return _sf_dic_handle_exception($e);
-  }
+  // Gather page arguments
+  $funcArguments = func_get_args();
+  array_shift($funcArguments);
+  // Execute and handle response
+  /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
+  $handler = \Drupal::service('sf_dic.controller_handler');
+  return $handler->handle($controller, \Drupal::request(), $funcArguments, 'render', 'Action');
 }
 
 /**
@@ -734,59 +574,13 @@ function sf_dic_page($controller) {
  * TODO: refactor to merge sf_dic_page()
  */
 function sf_dic_page_access($controller) {
-  $args = func_get_args();
-  array_shift($args);
-
-  $method = null;
-
-  // CLASS::STATIC_METHOD is not supported here.
-  if (false !== strpos($controller, '::')) {
-    list($controller, $method) = explode('::', $controller, 2);
-  }
-
-  if (class_exists($controller)) {
-    $controller = new $controller();
-  } else if (class_exists($controller . 'Controller')) {
-    $controller .= 'Controller';
-    $controller = new $controller();
-  } else if (\Drupal::hasService($controller)) {
-    $controller = \Drupal::service($controller);
-  } else {
-    throw new InvalidArgumentException(sprintf("%s: is not callable or class does not exist", $controller));
-  }
-
-  if (null === $method) {
-    throw new InvalidArgumentException(sprintf("%s: must specify a method", $controller));
-  }
-
-  if (!method_exists($controller, $method)) {
-    $method = $method . 'Access';
-    if (!method_exists($controller, $method)) {
-      throw new InvalidArgumentException(sprintf("%s::%s(), %s::%sAccess(): method does not exists", $controller, $method, $controller, $method, $controller));
-    }
-  }
-
-  // Little bit of magic.
-  $r = new ReflectionClass(get_class($controller));
-  $rm = $r->getMethod($method);
-  $request = \Drupal::request();
-  foreach (array_values($rm->getParameters()) as $index => $rp) {
-    /* @var $rp \ReflectionParameter */
-    if ($rc = $rp->getClass()) {
-      if ('Symfony\Component\HttpFoundation\Request' === $rc->getName()) {
-        array_splice($args, $index, 0, [$request]);
-      }
-    }
-  }
-
-  // We cannot use the ContainerAwareInterface since in SF3 the recommended way
-  // is to use the ContainerAwareTrait which won't give any meta information on
-  // the object about weither or not we should inject the container.
-  if (method_exists($controller, 'setContainer')) {
-    $controller->setContainer(\Drupal::getContainer());
-  }
-
-  return call_user_func_array([$controller, $method], $args);
+  // Gather page arguments
+  $funcArguments = func_get_args();
+  array_shift($funcArguments);
+  // Execute and return response
+  /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
+  $handler = \Drupal::service('sf_dic.controller_handler');
+  return $handler->execute($controller, \Drupal::request(), $funcArguments, 'access', 'Access');
 }
 
 /**
