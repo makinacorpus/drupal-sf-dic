@@ -3,13 +3,16 @@
 namespace MakinaCorpus\Drupal\Sf\Tests\Unit\Controller;
 
 use MakinaCorpus\Drupal\Sf\Controller\ControllerHandler;
+use MakinaCorpus\Drupal\Sf\Http\NullControllerResolver;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -22,12 +25,16 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param ContainerInterface $container
+     * @param bool $doHandleExceptions
      *
      * @return ControllerHandler
      */
-    private function createInstance(ContainerInterface $container)
+    private function createInstance(ContainerInterface $container, $doHandleExceptions = false)
     {
-        return new ControllerHandler(new ArgumentResolver(), $container, [$this, 'exitCallback']);
+        $dispatcher = new EventDispatcher();
+        $resolver = new NullControllerResolver();
+
+        return new ControllerHandler(new ArgumentResolver(), $container, $dispatcher, new HttpKernel($dispatcher, $resolver), [$this, 'exitCallback'], $doHandleExceptions);
     }
 
     /**

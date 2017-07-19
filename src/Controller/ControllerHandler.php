@@ -4,15 +4,20 @@ namespace MakinaCorpus\Drupal\Sf\Controller;
 
 use MakinaCorpus\Drupal\Sf\DrupalResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -24,20 +29,40 @@ class ControllerHandler
     private $argumentResolver;
     private $container;
     private $currentError;
+    private $dispatcher;
+    private $doHandleExceptions = false;
     private $exitCallback = 'drupal_exit';
+    private $httpKernel;
 
     /**
      * Default constructor
      *
-     * @param ArgumentResolver $argumentResolver
+     * @param ArgumentResolverInterface $argumentResolver
      * @param ContainerInterface $container
+     * @param EventDispatcherInterface $dispatcher
      * @param callable $exitCallback
      */
-    public function __construct(ArgumentResolver $argumentResolver, ContainerInterface $container, $exitCallback = 'drupal_exit')
-    {
+    public function __construct(
+        ArgumentResolverInterface $argumentResolver,
+        ContainerInterface $container,
+        EventDispatcherInterface $dispatcher,
+        HttpKernelInterface $httpKernel,
+        $exitCallback = 'drupal_exit',
+        $doHandleExceptions = false
+    ) {
+        // Allow this behavior to be set within settings.php if not set
+        // elsewhere, note that in unit tests, variable_get() will not
+        // exist
+        if (!$doHandleExceptions && function_exists('variable_get')) {
+            $doHandleExceptions = variable_get('kernel.handle_exceptions', false);
+        }
+
         $this->argumentResolver = $argumentResolver;
         $this->container = $container;
+        $this->dispatcher = $dispatcher;
+        $this->doHandleExceptions = $doHandleExceptions;
         $this->exitCallback = $exitCallback;
+        $this->httpKernel = $httpKernel;
     }
 
     /**
@@ -245,18 +270,62 @@ class ControllerHandler
             return $this->handleResponse($response);
 
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            return $this->handleException($request, $e);
         }
+    }
+
+    /**
+     * Handle non-catchable (ie. nor 403 nor 404) errors
+     *
+     * This stripped-down code from Symfony, all credits to its original author.
+     *
+     * @param Request $request
+     * @param \Throwable $exception
+     *
+     * @return Response
+     */
+    private function handleError(Request $request, $exception)
+    {
+        $event = new GetResponseForExceptionEvent($this->httpKernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
+        $this->dispatcher->dispatch(KernelEvents::EXCEPTION, $event);
+
+        // a listener might have replaced the exception
+        $exception = $event->getException();
+
+        if (!$event->hasResponse()) {
+            throw $exception;
+        }
+
+        $response = $event->getResponse();
+
+        // the developer asked for a specific status code
+        if ($response->headers->has('X-Status-Code')) {
+            $response->setStatusCode($response->headers->get('X-Status-Code'));
+
+            $response->headers->remove('X-Status-Code');
+        } elseif (!$response->isClientError() && !$response->isServerError() && !$response->isRedirect()) {
+            // ensure that we actually have an error response
+            if ($e instanceof HttpExceptionInterface) {
+                // keep the HTTP status code and headers
+                $response->setStatusCode($exception->getStatusCode());
+                $response->headers->add($exception->getHeaders());
+            } else {
+                $response->setStatusCode(500);
+            }
+        }
+
+        return $response;
     }
 
     /**
      * Handle response
      *
+     * @param Request $request
      * @param \Throwable $exception
      *
      * @return null|int|string|Response
      */
-    public function handleException($exception)
+    public function handleException(Request $request, $exception)
     {
         $this->currentError = $exception;
 
@@ -281,6 +350,11 @@ class ControllerHandler
                         return MENU_NOT_FOUND;
                 }
             }
+
+            if ($this->doHandleExceptions) {
+                return $this->handleError($request, $exception);
+            }
+
             throw $exception;
         }
     }

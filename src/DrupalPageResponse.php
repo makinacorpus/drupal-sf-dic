@@ -41,7 +41,7 @@ class DrupalPageResponse extends Response
         module_invoke_all('exit');
         drupal_session_commit();
         if (variable_get('cache', 0) && ($cache = drupal_page_set_cache())) {
-          drupal_serve_page_from_cache($cache);
+            drupal_serve_page_from_cache($cache);
         }
 
         // And here it is for the output buffer flush, this means that

@@ -222,7 +222,7 @@ services:
   sf_dic.controller_handler:
     public: true
     class: MakinaCorpus\Drupal\Sf\Controller\ControllerHandler
-    arguments: ["@argument_resolver", "@service_container"]
+    arguments: ["@argument_resolver", "@service_container", "@event_dispatcher", "@http_kernel"]
 
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it

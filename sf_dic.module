@@ -534,12 +534,13 @@ function sf_dic_exception($exception = null) {
 function sf_dic_router() {
   /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
   $handler = \Drupal::service('sf_dic.controller_handler');
+  $request = \Drupal::request();
   try {
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    return $handler->handleResponse($kernel->handle(\Drupal::request(), HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
-  } catch (\Exception $e) {
-    return $handler->handleException($e);
+    return $handler->handleResponse($kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
+  } catch (\Exception $exception) {
+    return $handler->handleException($request, $exception);
   }
 }
 
@@ -743,11 +744,15 @@ function sf_dic_page_delivery_html($page_callback_result) {
     return;
   }
 
-  $response = new DrupalPageResponse($page_callback_result);
+  if (!$page_callback_result instanceof Response) {
+      $response = new DrupalPageResponse($page_callback_result);
+  } else {
+      $response = $page_callback_result;
+  }
+
   $kernel   = \Drupal::_getKernel();
   $request  = \Drupal::request();
   $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
-
   \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
 
   $response->send();
