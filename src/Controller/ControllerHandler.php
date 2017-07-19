@@ -305,7 +305,7 @@ class ControllerHandler
             $response->headers->remove('X-Status-Code');
         } elseif (!$response->isClientError() && !$response->isServerError() && !$response->isRedirect()) {
             // ensure that we actually have an error response
-            if ($e instanceof HttpExceptionInterface) {
+            if ($exception instanceof HttpExceptionInterface) {
                 // keep the HTTP status code and headers
                 $response->setStatusCode($exception->getStatusCode());
                 $response->headers->add($exception->getHeaders());
