@@ -5,6 +5,7 @@ namespace MakinaCorpus\Drupal\Sf\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Generate an entity class using a table schema
@@ -23,6 +24,7 @@ class GenerateEntityCommand extends DrupalCommand
             ->addArgument('module', InputArgument::REQUIRED, "Module name (that provides the table)")
             ->addArgument('table', InputArgument::REQUIRED, "Table name")
             ->addArgument('class', InputArgument::REQUIRED, "Fully qualified class name")
+            ->addOption('processed', null, InputOption::VALUE_NONE, "Set this option if you wish to generate entity with Drupal schema processed (default is to generate it with unprocessed schema)")
             ->setDescription('Generate an entity using a Drupal table schema')
         ;
     }
@@ -46,7 +48,14 @@ class GenerateEntityCommand extends DrupalCommand
             return -1;
         }
 
-        $tableSchema = drupal_get_schema_unprocessed($module, $table);
+        if ($input->getOption('processed')) {
+            $tableSchema = drupal_get_schema($module, $table);
+            $command = sprintf("console drupal:generate-entity --processed %s %s %s", $module, $table, $escapedClass);
+        } else {
+            $tableSchema = drupal_get_schema_unprocessed($module, $table);
+            $command = sprintf("console drupal:generate-entity %s %s %s", $module, $table, $escapedClass);
+        }
+
         if (!$tableSchema || !isset($tableSchema['fields'])) {
             $output->writeln(sprintf("<error>table '%s' does not exists</error>", $table));
             return -1;
@@ -176,7 +185,7 @@ EOT;
 /**
  * Generated code, please do not modify.
  *
- * console drupal:generate-entity {$module} {$table} {$escapedClass}
+ * {$command}
  *
  * @generated
  */
