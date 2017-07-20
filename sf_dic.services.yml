@@ -195,6 +195,9 @@ services:
   sf_dic.console.command.panic:
     class: MakinaCorpus\Drupal\Sf\Command\PanicCommand
     tags: [{name: console.command}]
+  sf_dic.console.command.generate_entity:
+    class: MakinaCorpus\Drupal\Sf\Command\GenerateEntityCommand
+    tags: [{name: console.command}]
 
   # Scalar from GET/POST argument resolver
   sf_dic.argument_value_resolver.scalar_query:
