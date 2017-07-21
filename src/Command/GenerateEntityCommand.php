@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Generate an entity class using a table schema
@@ -23,7 +24,8 @@ class GenerateEntityCommand extends DrupalCommand
             ->setName('drupal:generate-entity')
             ->addArgument('module', InputArgument::REQUIRED, "Module name (that provides the table)")
             ->addArgument('table', InputArgument::REQUIRED, "Table name")
-            ->addArgument('class', InputArgument::REQUIRED, "Fully qualified class name")
+            ->addArgument('class', InputArgument::OPTIONAL, "Fully qualified class name")
+            ->addOption('source', null, InputOption::VALUE_REQUIRED, "If given, generate an entity using the given yaml file as table fields description")
             ->addOption('processed', null, InputOption::VALUE_NONE, "Set this option if you wish to generate entity with Drupal schema processed (default is to generate it with unprocessed schema)")
             ->addOption('map', null, InputOption::VALUE_OPTIONAL, "Value map, format is: NAME:ALIAS[,NAME:ALIAS]", ' ')
             ->addOption('type-map', null, InputOption::VALUE_OPTIONAL, "Type map, format is: NAME:TYPE[,NAME:TYPE]", ' ')
@@ -142,27 +144,76 @@ class GenerateEntityCommand extends DrupalCommand
         $typeMap = $this->parseMap($input->getOption('type-map'));
         $exclude = $this->parseList($input->getOption('exclude'));
 
+        $mutableProperties = [];
         $methods = [];
         $properties = [];
         $namespace = null;
 
-        if (!module_exists($module)) {
-            $output->writeln(sprintf("<error>module '%s' does not exist</error>", $module));
-            return -1;
-        }
+        /* ********************************************************************
+         *
+         * Parse input and find fields
+         *
+         **********************************************************************/
 
-        if ($input->getOption('processed')) {
-            $tableSchema = drupal_get_schema($module, $table);
-            $command = sprintf("console drupal:generate-entity --processed %s %s %s", $module, $table, $escapedClass);
+        $source = $input->getOption('source');
+        if ($source) {
+            if (!file_exists($source)) {
+                $output->writeln(sprintf('<error>file %s does not exist</error>', $source));
+                return -1;
+            }
+            if (!is_readable($source)) {
+                $output->writeln(sprintf('<error>file %s cannot be read</error>', $source));
+                return -1;
+            }
+
+            $sourceContent = Yaml::parse(file_get_contents($source));
+
+            if (!$class && isset($sourceContent['class'])) {
+                $class = $sourceContent['class'];
+            }
+
+            if (empty($sourceContent['properties'])) {
+                $output->writeln(sprintf('<error>file %s does not contain the "properties" array</error>', $source));
+                return -1;
+            }
+
+            $schemaFields = $sourceContent['properties'];
+
+            if (isset($sourceContent['mutable'])) {
+                if (!is_array($sourceContent['mutable'])) {
+                    $output->writeln(sprintf('<error>the "mutable" key must be an array</error>', $source));
+                    return -1;
+                }
+                $mutableProperties = $sourceContent['mutable'];
+            }
         } else {
-            $tableSchema = drupal_get_schema_unprocessed($module, $table);
-            $command = sprintf("console drupal:generate-entity %s %s %s", $module, $table, $escapedClass);
+
+            if (!module_exists($module)) {
+                $output->writeln(sprintf("<error>module '%s' does not exist</error>", $module));
+                return -1;
+            }
+
+            if ($input->getOption('processed')) {
+                $tableSchema = drupal_get_schema($module, $table);
+                $command = sprintf("console drupal:generate-entity --processed %s %s %s", $module, $table, $escapedClass);
+            } else {
+                $tableSchema = drupal_get_schema_unprocessed($module, $table);
+                $command = sprintf("console drupal:generate-entity %s %s %s", $module, $table, $escapedClass);
+            }
+
+            if (!$tableSchema || !isset($tableSchema['fields'])) {
+                $output->writeln(sprintf("<error>table '%s' does not exists</error>", $table));
+                return -1;
+            }
+
+            $schemaFields = $tableSchema['fields'];
         }
 
-        if (!$tableSchema || !isset($tableSchema['fields'])) {
-            $output->writeln(sprintf("<error>table '%s' does not exists</error>", $table));
-            return -1;
-        }
+        /* ********************************************************************
+         *
+         * Validate class name
+         *
+         **********************************************************************/
 
         if (!preg_match('/^[a-z]+[\w\d_\\\\]*$/i', $class) || false !== strpos('\\\\', $class) || '\\' === substr($class, -1)) {
             $output->writeln(sprintf("<error>class name '%s' is invalid</error>", $class));
@@ -174,29 +225,46 @@ class GenerateEntityCommand extends DrupalCommand
             $class = substr($class, $index + 1);
         }
 
+        /* ********************************************************************
+         *
+         * Validate exclusion, type map and alias map
+         *
+         **********************************************************************/
+
         // Validate and process exclusion
         if ($exclude) {
             foreach ($exclude as $name) {
-                if (!isset($tableSchema['fields'][$name])) {
+                if (!isset($schemaFields[$name])) {
                     throw new \InvalidArgumentException(sprintf("field '%s' in excluded fields does not exist in table definition", $name));
                 }
-                unset($tableSchema['fields'][$name]);
+                unset($schemaFields[$name]);
             }
         }
 
         // Validate field maps
         foreach (array_keys($aliasMap) as $name) {
-            if (!isset($tableSchema['fields'][$name])) {
+            if (!isset($schemaFields[$name])) {
                 throw new \InvalidArgumentException(sprintf("field '%s' in alias map does not exist in table definition after exclude/include filtering", $name));
             }
         }
         foreach (array_keys($typeMap) as $name) {
-            if (!isset($tableSchema['fields'][$name])) {
+            if (!isset($schemaFields[$name])) {
                 throw new \InvalidArgumentException(sprintf("field '%s' in type map does not exist in table definition after exclude/include filtering", $name));
             }
         }
+        foreach ($mutableProperties as $name) {
+            if (!isset($schemaFields[$name])) {
+                throw new \InvalidArgumentException(sprintf("field '%s' in mutable property list does not exist in table definition after exclude/include filtering", $name));
+            }
+        }
 
-        foreach ($tableSchema['fields'] as $name => $description) {
+        /* ********************************************************************
+         *
+         * Create method and properties
+         *
+         **********************************************************************/
+
+        foreach ($schemaFields as $name => $description) {
 
             // Populate the static map at the same time
             $originalName = $name;
@@ -207,13 +275,17 @@ class GenerateEntityCommand extends DrupalCommand
             }
 
             $typeIsForced = false;
-            $default = '';
+            $default = null;
             $getterReturnType = 'mixed';
             $getterCast = '';
             $getterBody = '';
             $nullable = !isset($description['not null']) || !$description['not null'];
             $escapedName = preg_replace('/[^\w]/i', '_', $name);
             $camelCasedName = str_replace('_', '', ucwords($escapedName, "_"));
+            $getterPrefix = 'get';
+            $setterPrefix = 'set';
+            $setterBody = '';
+            $setterTypeHint = '';
 
             if (isset($typeMap[$originalName])) {
                 $type = $typeMap[$originalName];
@@ -222,7 +294,23 @@ class GenerateEntityCommand extends DrupalCommand
                 $type = $description['type'];
             }
 
+            if (in_array($type, ['int', 'numeric', 'serial']) &&
+                !$typeIsForced &&
+                preg_match('/(_at|_on|ts_|_ts|date_|_date|created|updated|changed|modified)/', $name)
+            ) {
+                $type = 'timestamp';
+            }
+
             switch ($type) {
+
+                case 'bool':
+                    if (isset($description['default'])) {
+                        $default = $description['default'] ? 'true' : 'false';
+                    }
+                    $getterPrefix = 'is';
+                    $getterCast = '(bool)';
+                    $getterReturnType = 'bool';
+                    break;
 
                 case 'float':
                     if (isset($description['default'])) {
@@ -235,21 +323,25 @@ class GenerateEntityCommand extends DrupalCommand
                 case 'int':
                 case 'numeric':
                 case 'serial':
-                    if (!$typeIsForced && preg_match('/(_at|_on|ts_|_ts|date_|_date|created|updated|changed|modified)/', $name)) {
-                        // Ignore default for dates
-                        $getterBody = <<<EOT
+                    if (isset($description['default'])) {
+                        $default = (string)(int)$description['default'];
+                    }
+                    $getterCast = '(int)';
+                    $getterReturnType = 'int';
+                    break;
+
+                case 'timestamp':
+                    // Ignore default for dates
+                    $getterBody = <<<EOT
         if (\$this->{$escapedName}) {
             return new \\DateTimeImmutable('@'.\$this->{$escapedName});
         }
 EOT;
-                        $getterReturnType = $nullable ? '\\DateTimeInterface' : 'null|\\DateTimeInterface';
-                    } else {
-                        if (isset($description['default'])) {
-                            $default = (int)$description['default'];
-                        }
-                        $getterCast = '(int)';
-                        $getterReturnType = 'int';
-                    }
+                    $getterReturnType = $nullable ? '\\DateTimeInterface' : 'null|\\DateTimeInterface';
+                    $setterTypeHint = '\\DateTimeInterface';
+                    $setterBody = <<<EOT
+        \$this->{$escapedName} = \$value->getTimestamp();
+EOT;
                     break;
 
                 default:
@@ -263,6 +355,67 @@ EOT;
                     $getterReturnType = 'string';
                     break;
             }
+
+        /* ********************************************************************
+         *
+         * Generate setter
+         *
+         **********************************************************************/
+
+            if (in_array($name, $mutableProperties)) {
+
+                if ($setterTypeHint) {
+                    $setterTypeHint .= ' ';
+                }
+
+                if ($setterBody) {
+                    $methods[] = <<<EOT
+    /**
+     * Set {$name}
+     *
+     * @param {$getterReturnType}
+     */
+    public function {$setterPrefix}{$camelCasedName}({$setterTypeHint}\$value)
+    {
+{$setterBody}
+    }
+EOT;
+                } else if ($nullable) {
+                    $methods[] = <<<EOT
+    /**
+     * Set {$name}
+     *
+     * @param {$getterReturnType}
+     */
+    public function {$setterPrefix}{$camelCasedName}({$setterTypeHint}\$value)
+    {
+        if (null === \$value || '' === \$value) {
+            \$this->{$escapedName} = null;
+        } else {
+            \$this->{$escapedName} = {$getterCast}\$value;
+        }
+    }
+EOT;
+                } else {
+                    $methods[] = <<<EOT
+    /**
+     * Set {$name}
+     *
+     * @param {$getterReturnType}
+     */
+    public function {$setterPrefix}{$camelCasedName}({$setterTypeHint}\$value)
+    {
+        \$this->{$escapedName} = {$getterCast}\$value;
+    }
+EOT;
+                }
+            }
+
+        /* ********************************************************************
+         *
+         * Generate getter
+         *
+         **********************************************************************/
 
             if ('null' !== $getterReturnType && $nullable) {
                 $getterReturnType = 'null|' . $getterReturnType;
@@ -282,7 +435,7 @@ EOT;
      *
      * @return {$getterReturnType}
      */
-    public function get{$camelCasedName}()
+    public function {$getterPrefix}{$camelCasedName}()
     {
 {$getterBody}
     }
@@ -294,14 +447,14 @@ EOT;
      *
      * @return {$getterReturnType}
      */
-    public function get{$camelCasedName}()
+    public function {$getterPrefix}{$camelCasedName}()
     {
         return {$getterCast}\$this->{$escapedName};
     }
 EOT;
             }
 
-            if ($default) {
+            if (isset($default)) {
                 $properties[] = <<<EOT
     private \${$escapedName} = {$default};
 EOT;
@@ -311,6 +464,12 @@ EOT;
 EOT;
             }
         }
+
+        /* ********************************************************************
+         *
+         * Reconcile everything and dump PHP content
+         *
+         **********************************************************************/
 
         if ($namespace) {
             $header = <<<EOT
