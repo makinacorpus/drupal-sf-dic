@@ -383,8 +383,6 @@ EOT;
  * Generated code, please do not modify.
  *
  * {$command}
- *
- * @generated
  */
 class {$class}
 {
