@@ -3,15 +3,13 @@
 namespace MakinaCorpus\Drupal\Sf;
 
 use Drupal\Core\Session\AccountInterface;
-
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Controller is a simple implementation of a Controller.
@@ -19,6 +17,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * It provides methods to common features needed in controllers.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * This has been tweaked to work gracefully in a Drupal environment.
  */
 abstract class Controller implements ContainerAwareInterface
 {
@@ -37,19 +37,11 @@ abstract class Controller implements ContainerAwareInterface
      *
      * @return string The generated URL
      *
-     * @see UrlGeneratorInterface
+     * @see \Symfony\Component\Routing\RouterInterface
      */
     protected function generateUrl($route, $parameters = array(), $referenceType = 0)
     {
-        if ($parameters) {
-            $tokens = [];
-            foreach ($parameters as $key => $value) {
-                $tokens['%' . $key] = $value;
-            }
-            $route = strtr($route, $tokens);
-        }
-
-        return url($route);
+        return $this->get('router')->generate($route, $parameters, $referenceType);
     }
 
     /**
