@@ -31,6 +31,7 @@ class ServiceProvider implements ServiceProviderInterface
         $bundles = $container->getParameter('kernel.bundles');
 
         $container->addCompilerPass(new BreadcumbBuilderRegisterPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
+        // @todo depreciate tag names in flavor of "kernel." prefixed ones
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new FrameworkBundleIntegrationEarlyPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 100 /* run before calista */);
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
@@ -50,6 +51,11 @@ class ServiceProvider implements ServiceProviderInterface
                 if ($container->getParameter('kernel.debug')) {
                     $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
                 }
+
+                // We need to register event subscribers and event listeners
+                // using the Symfony tag instead of our own. This was an error
+                // to have different tag names in the first place.
+                $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'kernel.event_listener', 'kernel.event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
 
                 // Use our own implementation, we can use this without the framework bundle!
                 $container->addCompilerPass(new ControllerArgumentValueResolverPass());
