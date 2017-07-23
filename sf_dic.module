@@ -56,7 +56,9 @@ function sf_dic_boot() {
   }
 
   // Let Symfony code will run gracefully.
-  // @todo explode menu API parameters in _route_params.
+  // @todo explode menu API parameters in _route_params and populate
+  //   request attributes as well, for the argument resolver to work
+  //   gracefully.
   $request->attributes->set('_route', $_GET['q']);
   $request->attributes->set('_route_params', []);
 
