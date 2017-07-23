@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
@@ -145,6 +146,21 @@ function sf_dic_language_init() {
   $request = \Drupal::request();
   $request->query->set('q', $_GET['q']);
   $request->attributes->set('_route', $_GET['q']);
+}
+
+/**
+ * Implements hook_init().
+ */
+function sf_dic_init() {
+  if (!drupal_is_cli()) {
+    // Raise the KernelEvents::REQUEST for non-Symfony page execution. Please
+    // note that this will make it run twice in case we do use the real Symfony
+    // kernel to handle a real Symfony controller.
+    $httpKernel = \Drupal::service('http_kernel');
+    $request = \Drupal::request();
+    $event = new GetResponseEvent($httpKernel, $request, HttpKernelInterface::MASTER_REQUEST);
+    \Drupal::service('event_dispatcher')->dispatch(KernelEvents::REQUEST, $event);
+  }
 }
 
 /**
