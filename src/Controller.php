@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Controller is a simple implementation of a Controller.
@@ -71,7 +72,7 @@ abstract class Controller implements ContainerAwareInterface
      */
     protected function redirect($url, $status = 302)
     {
-        drupal_goto($url, [], $status);
+        return new RedirectResponse($url, $status);
     }
 
     /**
