@@ -643,11 +643,28 @@ function sf_dic_forms_proxy_unpack_callback(FormInterface $form_obj, FormStateIn
     // @todo Handle ['#ajax' => callback].
     if (isset($form[$name]) && is_array($form[$name])) {
       foreach ($form[$name] as $index => $callback) {
-        // Lookup for callbacks declared such as "::submitSomething()" and
-        // build a PHP valid callable with it instead, that should be enough
-        // to trick core From API into executing it.
-        if (!is_callable($callback) && is_string($callback) && '::' === substr($callback, 0, 2)) {
 
+        if ($callback instanceof \Closure) {
+          // Deal with closures manually
+          switch ($name) {
+
+            case '#element_validate':
+              $form[$name][$index] = function (&$element, &$form_state, &$complete_form) use ($callback, $form_state_obj) {
+                return call_user_func($callback, $element, $form_state_obj, $complete_form);
+              };
+              break;
+
+            default:
+              $form[$name][$index] = function (&$form) use ($callback, $form_state_obj) {
+                return call_user_func($callback, $form, $form_state_obj);
+              };
+              break;
+          }
+
+        } else if (!is_callable($callback) && is_string($callback) && '::' === substr($callback, 0, 2)) {
+          // Lookup for callbacks declared such as "::submitSomething()" and
+          // build a PHP valid callable with it instead, that should be enough
+          // to trick core From API into executing it.
           $method = substr($callback, 2);
 
           // Deal with '#element_validate' differently to mimic Drupal 8
