@@ -30,6 +30,15 @@ abstract class FormBase implements FormInterface
     /**
      * {@inheritdoc}
      */
+    public function submitForm(array &$form, FormStateInterface $formState)
+    {
+        // You probably should implement submit, but you also may set callables
+        // on specific buttons #submit property, so this is optional too.
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function validateForm(array &$form, FormStateInterface $form_state)
     {
         // Validation is optional.
