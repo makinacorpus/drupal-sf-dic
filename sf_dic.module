@@ -154,7 +154,10 @@ function sf_dic_language_init() {
  * Implements hook_init().
  */
 function sf_dic_init() {
-  if (!drupal_is_cli()) {
+  // @todo temporary disable this when fullstack is enabled, because a few
+  //   components will attempt to match the current route over the current URL
+  //   and throw exceptions if unfound
+  if (!drupal_is_cli() && !sf_dic_bundle_exists('FrameworkBundle')) {
     // Raise the KernelEvents::REQUEST for non-Symfony page execution. Please
     // note that this will make it run twice in case we do use the real Symfony
     // kernel to handle a real Symfony controller.
