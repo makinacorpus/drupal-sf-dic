@@ -20,10 +20,6 @@ class AddConsoleCommandPass implements CompilerPassInterface
         foreach ($commandServices as $id => $tags) {
             $definition = $container->getDefinition($id);
 
-            if (!$definition->isPublic()) {
-                throw new \InvalidArgumentException(sprintf('The service "%s" tagged "console.command" must be public.', $id));
-            }
-
             if ($definition->isAbstract()) {
                 throw new \InvalidArgumentException(sprintf('The service "%s" tagged "console.command" must not be abstract.', $id));
             }
