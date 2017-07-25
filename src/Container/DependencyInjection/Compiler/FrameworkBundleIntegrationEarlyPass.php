@@ -29,6 +29,13 @@ class FrameworkBundleIntegrationEarlyPass implements CompilerPassInterface
             $kernelDefinition->setArguments($kernelArguments);
         }
 
+        // This modules hacks a bit event dispatcher, and the event dispatcher
+        // debug implementation will raise some exceptions until we fixed the
+        // way we use the dispatcher, let's just disable it
+        if ($container->hasDefinition('debug.event_dispatcher')) {
+            $container->removeDefinition('debug.event_dispatcher');
+        }
+
         // Add a foo router
         if (!$container->has('router')) {
             $container->addDefinitions(['router' => (new Definition())->setClass(NullRouter::class)]);
