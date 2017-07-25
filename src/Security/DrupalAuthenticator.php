@@ -9,6 +9,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
+/**
+ * This is a passthrough that transparently gives the Drupal user to Symfony
+ * security bundle: it acts as an authenticator, the only one that should
+ * live anyway, and just spawns DrupalUser tokens.
+ */
 class DrupalAuthenticator extends AbstractGuardAuthenticator
 {
     /**

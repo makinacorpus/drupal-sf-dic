@@ -1,6 +1,24 @@
 # Registers some services to emulate the Symfony security component when it is
 # not enabled, in order to have functions such as Twig is_granted() function.
 services:
+
+  security.token_storage:
+    public: true
+    class: MakinaCorpus\Drupal\Sf\Security\DowngradeTokenStorage
+
+  security.access.decision_manager:
+    public: false
+    class: Symfony\Component\Security\Core\Authorization\AccessDecisionManager
+
+  security.authentication.manager:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Security\DowngradeAuthenticationManager
+
+  security.authorization_checker:
+    public: true
+    class: Symfony\Component\Security\Core\Authorization\AuthorizationChecker
+    arguments: ['@security.token_storage', '@security.authentication.manager', '@security.access.decision_manager']
+
   drupal.security_twig_extension:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\SecurityDowngradeExtension

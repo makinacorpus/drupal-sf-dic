@@ -4,6 +4,7 @@ namespace Drupal\Module\sf_dic;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddConsoleCommandPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\AddSecurityVotersPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\BreadcumbBuilderRegisterPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\ControllerArgumentValueResolverPass;
@@ -83,6 +84,7 @@ class ServiceProvider implements ServiceProviderInterface
             $loader->load('security.yml');
         } else{
             $loader->load('security-degraded.yml');
+            $container->addCompilerPass(new AddSecurityVotersPass());
         }
         if (in_array('Symfony\\Bundle\\MonologBundle\\MonologBundle', $bundles)) {
             $loader->load('logging.yml');
