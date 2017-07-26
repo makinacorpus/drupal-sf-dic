@@ -23,7 +23,7 @@ class AddConsoleCommandPass implements CompilerPassInterface
             $definition = $container->getDefinition($id);
             $class = $container->getParameterBag()->resolveValue($definition->getClass());
 
-            if (!$r = $container->getReflectionClass($class)) {
+            if (!$r = new \ReflectionClass($class)) {
                 throw new \InvalidArgumentException(sprintf('Class "%s" used for service "%s" cannot be found.', $class, $id));
             }
             if (!$r->isSubclassOf(Command::class)) {
