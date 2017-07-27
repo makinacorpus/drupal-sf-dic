@@ -36,12 +36,18 @@ require_once DRUPAL_ROOT . '/includes/database/database.inc';
 require_once DRUPAL_ROOT . '/includes/cache.inc';
 require_once DRUPAL_ROOT . '/includes/file.inc';
 require_once DRUPAL_ROOT . '/includes/module.inc';
-
 drupal_environment_initialize();
 drupal_settings_initialize();
+
 // Sadly, lots of legacy Drupal code does not use DRUPAL_ROOT for file
 // lookup, such as _registry_parse_files()
 chdir(DRUPAL_ROOT);
+
+// Cache system cannot be used during low level operations if those files
+// are not forcefully enabled before running anything
+foreach (variable_get('cache_backends', []) as $include) {
+  require_once DRUPAL_ROOT.'/'.$include;
+}
 
 // And we stop there with bootstrapping, no Drupal yet, only allow the
 // Symfony commands to work. Since we force the static Drupal::_getKernel()
