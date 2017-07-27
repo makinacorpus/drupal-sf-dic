@@ -110,10 +110,10 @@ class DrupalHandler extends AbstractProcessingHandler
             'link'        => '',
             'user'        => null,
             'uid'         => \Drupal::currentUser()->id(),
-            'request_uri' => $request->getRequestUri(),
-            'referer'     => $request->headers->get('referer'),
-            'ip'          => $request->getClientIp(),
-            'timestamp'   => $record['datetime']->getTimestamp(),
+            'request_uri' => $request ? $request->getRequestUri() : null,
+            'referer'     => $request ? $request->headers->get('referer') : null,
+            'ip'          => $request ? $request->getClientIp() : null,
+            'timestamp'   => $request ? $record['datetime']->getTimestamp() : null,
         ];
 
         foreach (module_implements('watchdog') as $module) {
