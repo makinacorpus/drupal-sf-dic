@@ -30,11 +30,6 @@ services:
     class: MakinaCorpus\Drupal\Sf\Templating\TemplateNameParser
     arguments: ['@kernel']
 
-  twig.extension.drupal_path:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPathExtension
-    tags: [{name: twig.extension}]
-
   twig.extension.drupal_date:
     public: false
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalDateExtension

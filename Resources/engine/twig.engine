@@ -15,8 +15,6 @@
  *   the guys who wrote it were really drunk.
  */
 
-require_once __DIR__ . '/twig_functions.php';
-
 /**
  * Implements ENGINE_extension().
  */
