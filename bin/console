@@ -8,6 +8,13 @@ use Symfony\Component\Console\Input\ArgvInput;
 // read http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
 //umask(0000);
 
+// This can only work when Symfony fullstack is enabled
+if (!class_exists('Symfony\\Bundle\\FrameworkBundle\\Console\\Application')) {
+  echo "You cannot run the console without Symfony fullstack installed.\n";
+  return -1;
+}
+
+// In most case, CLI will never be configured with a timeout, but you never now.
 set_time_limit(0);
 
 // Avoids lots of PHP warnings
