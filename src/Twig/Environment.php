@@ -1,6 +1,6 @@
 <?php
 
-namespace MakinaCorpus\Drupal\Sf\Twig\TFD;
+namespace MakinaCorpus\Drupal\Sf\Twig;
 
 class Environment extends \Twig_Environment
 {

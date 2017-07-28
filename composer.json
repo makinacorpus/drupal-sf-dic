@@ -50,6 +50,7 @@
         "jdorn/sql-formatter": "Prettifies SQL queries in the WebProfiler debug pane",
         "makinacorpus/php-acl": "Integrates with PHP ACL and send node access collect events, requires ^1.1.0",
         "monolog/monolog": "Integrates the Drupal 8 logger to monolog",
-        "symfony/symfony": "Replaces Symfony components with the full stack framework and brings everything into Drupal"
+        "symfony/symfony": "Replaces Symfony components with the full stack framework and brings everything into Drupal",
+        "symfony/twig-bundle": "Allow the twig engine to work seamlessly with Drupal themes"
     }
 }
