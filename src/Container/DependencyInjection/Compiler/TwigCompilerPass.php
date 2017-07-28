@@ -4,11 +4,12 @@ namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
 use MakinaCorpus\Drupal\Sf\CacheWarmer\TemplatePathsCacheWarmer;
 use MakinaCorpus\Drupal\Sf\Templating\Loader\TemplateLocator as FallbackTemplateLocator;
-use MakinaCorpus\Drupal\Sf\Twig\Extension\TranslationExtension;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use MakinaCorpus\Drupal\Sf\Twig\Environment;
+use MakinaCorpus\Drupal\Sf\Twig\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
 /**
  * Fixes Twig configuration to be more resilient and more friendly with the
@@ -22,17 +23,11 @@ class TwigCompilerPass implements CompilerPassInterface
             return;
         }
 
-        // We must proceed with a few overrides of the TFD_Environment class
-        // if present, since we are going to integrate it a bit deeper with
-        // both Drupal and Symfony.
-        if (class_exists('\TFD_Environment')) {
-            $twigEnvDefinition = $container->getDefinition('twig');
-            $twigEnvDefinition->setClass('MakinaCorpus\Drupal\Sf\Twig\TFD\Environment');
-
-            if (class_exists('\TFD_Extension')) {
-                $twigEnvDefinition->addMethodCall('addExtension', [new Definition('TFD_Extension')]);
-            }
-        }
+        // We must proceed with a few overrides of the Twig_Environment class
+        // since we are going to integrate it a bit deeper with both Drupal.
+        $twigEnvDefinition = $container->getDefinition('twig');
+        $twigEnvDefinition->setClass(Environment::class);
+        $twigEnvDefinition->addMethodCall('addExtension', [new Definition(Extension::class)]);
 
         // Very specific fix for TwigBundle ^3
         if (!$container->has('fragment.handler') && !$container->hasAlias('fragment.handler')) {
@@ -72,13 +67,13 @@ class TwigCompilerPass implements CompilerPassInterface
         // which aims to extend support to Twig 2.x, the translator extension
         // is not loaded by name anymore, but by class, which makes it not
         // possible to override, we need to use the same class name.
-        if (class_exists('\Symfony\Bridge\Twig\Extension\TranslationExtension') &&
+        if (class_exists('\\Symfony\\Bridge\\Twig\\Extension\\TranslationExtension') &&
             $container->hasDefinition('twig.extension.trans') &&
             $container->hasDefinition('translator')
         ) {
             $container
                 ->getDefinition('twig.extension.trans')
-                ->setClass('Symfony\Bridge\Twig\Extension\TranslationExtension')
+                ->setClass('Symfony\\Bridge\\Twig\\Extension\\TranslationExtension')
                 ->setArguments([new Reference('translator')])
             ;
         }

@@ -2,9 +2,7 @@
 
 ## Installation
 
-[TFD7](http://tfd7.rocks/) is pretty nice for theming, and sf_dic relies on it to provide its own Drupal engine.
-
-To the twig engine, first install the dependencies with `composer require tfd7/tfd7 "symfony/twig-bundle:3.1.*"`
+To the twig engine, first install the dependencies with `composer require "symfony/twig-bundle:3.1.*"`
 
 Please note that if you want to use Twig, all the dependencies written above
 are mandatory, and you must use them in the specified versions.
