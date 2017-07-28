@@ -80,7 +80,7 @@ class Extension extends \Twig_Extension
      */
     public function renderMachineName($string)
     {
-        return preg_replace('/[^a-z0-9]/', '/_+/', '_', strtolower($string));
+        return preg_replace(['/[^a-z0-9]/', '/_+/'], '_', strtolower($string));
     }
 
     /**
