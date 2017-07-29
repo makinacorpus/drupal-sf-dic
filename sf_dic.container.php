@@ -13,6 +13,7 @@ use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundl
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundleIntegrationPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\PropertyInfoPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigExtensionsCompilerPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -43,6 +44,7 @@ class ServiceProvider implements ServiceProviderInterface
 
         // TwigBundle will automatically be registered in the kernel.
         if (class_exists('Symfony\\Bundle\\TwigBundle\\TwigBundle')) {
+            $container->addCompilerPass(new TwigExtensionsCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1000 /* run before twig */);
             $container->addCompilerPass(new TwigCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
             $loader->load('templating.yml');
         }
