@@ -157,14 +157,19 @@ function sf_dic_init() {
   // @todo temporary disable this when fullstack is enabled, because a few
   //   components will attempt to match the current route over the current URL
   //   and throw exceptions if unfound
-  if (!drupal_is_cli() && !sf_dic_bundle_exists('FrameworkBundle')) {
+  if (!drupal_is_cli() && menu_get_item()) {
     // Raise the KernelEvents::REQUEST for non-Symfony page execution. Please
     // note that this will make it run twice in case we do use the real Symfony
     // kernel to handle a real Symfony controller.
     $httpKernel = \Drupal::service('http_kernel');
     $request = \Drupal::request();
     $event = new GetResponseEvent($httpKernel, $request, HttpKernelInterface::MASTER_REQUEST);
+    // Very specific and ugly way of solving the RouterListener throwing
+    // exceptions: if we have a Drupal route, do not let it attempt to
+    // match one from the framework.
+    $request->attributes->set('_controller', '_drupal_menu_router');
     \Drupal::service('event_dispatcher')->dispatch(KernelEvents::REQUEST, $event);
+    $request->attributes->remove('_controller');
   }
 }
 

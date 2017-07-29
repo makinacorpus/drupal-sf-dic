@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use MakinaCorpus\Drupal\Sf\Security\Http\Firewall\ContextListener;
 
 /**
  * Modifies a few definitions, before the optimizations passes goes.
@@ -39,6 +40,18 @@ class FrameworkBundleIntegrationEarlyPass implements CompilerPassInterface
         // Add a foo router
         if (!$container->has('router')) {
             $container->addDefinitions(['router' => (new Definition())->setClass(NullRouter::class)]);
+        }
+
+        // Drops the firewall context listener and replace using a foo
+        // implementation to avoid Symfony from managing the session
+        // by itself, Drupal does it very well
+        if ($container->hasDefinition('security.context_listener')) {
+            $container->setDefinition('security.context_listener', (new Definition())
+                ->setClass(ContextListener::class)
+                ->setPublic(false)
+                // Yup, security bundles does replace arguments there
+                ->setArguments([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            );
         }
     }
 }
