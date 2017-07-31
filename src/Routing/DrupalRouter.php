@@ -26,6 +26,22 @@ class DrupalRouter implements RouterInterface
     {
         $options = [];
 
+        // We are working with a Drupal query suitable for the url()
+        // function if we have the 'query' parameter which is an array
+        // or the 'attributes' parameter which is for the l() function
+        // case in which we need to normalize. This is a side effect
+        // of legacy outdated twig templates using the url() twig function
+        // with the Drupal's url() function signature instead of the
+        // Symfony's one.
+        if (
+            (isset($parameters['query']) && is_array($parameters['query'])) ||
+            (isset($parameters['attributes']) && is_array($parameters['attributes'])) ||
+            (isset($parameters['absolute']) && is_bool($parameters['absolute']))
+        ) {
+            $options = $parameters;
+            $parameters = [];
+        }
+
         if ($parameters) {
             $tokens = [];
 
