@@ -30,6 +30,13 @@ abstract class Kernel extends BaseKernel
      */
     public function __construct($environment = 'prod', $debug = false)
     {
+        // Disallow realpath() because if you are working in symlinks it might
+        // endup by resolving a path under of open_basedir restrictions, and
+        // that's very bad for us.
+        $rootDirFromConf  = false;
+        $cacheDirFromConf = false;
+        $logsDirFromConf  = false;
+
         // Compute the kernel root directory
         if (empty($GLOBALS['conf']['kernel.root_dir'])) {
             $rootDir = DRUPAL_ROOT . '/../app';
@@ -42,9 +49,10 @@ abstract class Kernel extends BaseKernel
             }
         } else {
             $this->rootDir = $GLOBALS['conf']['kernel.root_dir'];
+            $rootDirFromConf = true;
         }
 
-        if ($rootDir = realpath($this->rootDir)) {
+        if (!$rootDirFromConf && ($rootDir = realpath($this->rootDir))) {
             if (!$rootDir) {
                 // Attempt to automatically create the root directory
                 if (!mkdir($rootDir, 0750, true)) {
@@ -62,9 +70,10 @@ abstract class Kernel extends BaseKernel
             $this->cacheDir = $this->rootDir . '/cache/' . $environment;
         } else {
             $this->cacheDir = $GLOBALS['conf']['kernel.cache_dir'] . '/' . $environment;
+            $cacheDirFromConf = true;
         }
 
-        if ($cacheDir = realpath($this->cacheDir)) {
+        if (!$cacheDirFromConf && ($cacheDir = realpath($this->cacheDir))) {
             if (!$cacheDir) {
                 // Attempt to automatically create the root directory
                 if (!mkdir($cacheDir, 0750, true)) {
@@ -82,9 +91,10 @@ abstract class Kernel extends BaseKernel
             $this->logDir = $this->rootDir . '/logs';
         } else {
             $this->logDir = $GLOBALS['conf']['kernel.logs_dir'];
+            $logsDirFromConf = true;
         }
 
-        if ($logDir = realpath($this->logDir)) {
+        if (!$logsDirFromConf && ($logDir = realpath($this->logDir))) {
             if (!$logDir) {
                 // Attempt to automatically create the root directory
                 if (!mkdir($logDir, 0750, true)) {
@@ -158,10 +168,9 @@ abstract class Kernel extends BaseKernel
     {
         $ret = [];
 
-        $rootDir = realpath(DRUPAL_ROOT);
-        require_once $rootDir. '/includes/common.inc';
+        require_once DRUPAL_ROOT . '/includes/common.inc';
 
-        $ret['sf_dic'] = $rootDir . '/' . drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
+        $ret['sf_dic'] = DRUPAL_ROOT . '/' . drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
 
         // Find all module.services.yml files, this will do a file_exists() per
         // module, but this will skipped whenever the container file is cached
@@ -173,7 +182,7 @@ abstract class Kernel extends BaseKernel
                 continue;
             }
 
-            $filename = $rootDir . '/' . drupal_get_path('module', $module) . '/' . $module . '.services.yml';
+            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.services.yml';
 
             if (file_exists($filename)) {
                 $ret[$module] = $filename;
@@ -194,14 +203,13 @@ abstract class Kernel extends BaseKernel
     {
         $ret = [];
 
-        $rootDir = realpath(DRUPAL_ROOT);
-        require_once $rootDir. '/includes/common.inc';
+        require_once DRUPAL_ROOT . '/includes/common.inc';
 
         $this->serviceProviders = [];
 
         foreach (array_keys(system_list('module_enabled')) as $module) {
 
-            $filename = $rootDir . '/' . drupal_get_path('module', $module) . '/' . $module . '.container.php';
+            $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.container.php';
 
             if (file_exists($filename)) {
                 include_once $filename;
