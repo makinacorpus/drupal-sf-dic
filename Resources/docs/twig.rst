@@ -2,7 +2,11 @@ Using Twig For Drupal 7
 =======================
 Installation
 ------------
-To the twig engine, first install the dependencies with ``composer require "symfony/twig-bundle:3.1.*"``
+To the twig engine, first install the dependencies with :
+
+.. code-block:: sh
+
+   composer require "symfony/twig-bundle:3.1.*"
 
 .. note:: 
 
@@ -26,7 +30,7 @@ a more advanced twig usage, and benefit from all Twig advanced features, you
 need to know that all the Drupal provided Twig templates will have the following
 identifier :
 
-    `` [theme|module]:NAME:PATH/TO/FILE.html.twig``
+    ``[theme|module]:NAME:PATH/TO/FILE.html.twig``
 
 Other template usage within your twig templates
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

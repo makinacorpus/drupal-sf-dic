@@ -6,15 +6,12 @@ Installation
 
 Easy way : if your Drupal 7 project is composer based
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This module works with composer, and should be installed using it, add these 
-following lines to your project ``composer.json`` file or to your Drupal module 
-that should use it as a dependency.
+This module works with composer, and should be installed using it, go in your 
+project repository and just type the following line in your terminal :
 
-.. code-block:: json
+.. code-block:: sh
 
-    "require" : {
-        "makinacorpus/drupal-sf-dic" : "*"
-    }
+    composer require makinacorpus/drupal-sf-dic
 
 Please refer to this `Composer template for Drupal projects <https://github.com/drupal-composer/drupal-project/tree/7.x/>`_
 to have a nice exemple for doing this.
@@ -26,7 +23,7 @@ Once Composer is installed and autoload dumped, you may add these lines to your
 
    <? php
    
-   include_once DRUPAL_ROOT . '/../lib/vendor/autoload.php';
+   include_once DRUPAL_ROOT . '/../vendor/autoload.php';
    $conf['kernel.cache_dir'] = DRUPAL_ROOT . '/../cache/';
    $conf['kernel.logs_dir'] = DRUPAL_ROOT . '/../logs/';
    
