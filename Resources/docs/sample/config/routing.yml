@@ -1,4 +1,4 @@
-
+#routing.yml example file
 filechunk:
     resource: "@FilechunkBundle/Resources/config/routing.yml"
     prefix: /

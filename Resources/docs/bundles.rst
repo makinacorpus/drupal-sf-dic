@@ -28,7 +28,11 @@ you must ackowledge the fact that you cannot use the whole Symfony API :
 
 Installation
 ------------
+.. note::
 
+   Bringing Symfony 3 Fullstack into Drupal 7 can only work with the Drupal 
+   Clean URL function enabled.
+   
 Bringing in required dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 You must require a few packages for this to work, if you want twig you must :
@@ -134,6 +138,12 @@ file :
            ]
        }
    }
+
+And then :
+
+.. code-block:: sh
+
+   composer dump-autoload
 
 Other considerations
 --------------------

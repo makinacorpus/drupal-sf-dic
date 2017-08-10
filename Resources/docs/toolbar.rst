@@ -7,18 +7,6 @@ in Drupal.
 For this, start with :ref:`bundles` and set-up both Symfony full-stack framework 
 and the router.
 
-Allow this module to override Drupal delivery callback
-------------------------------------------------------
-This is necessary, because the web debug toolbar needs to work on full page
-responses, even without using it, this parameter is safe to use, set this into
-your ``settings.php`` file:
-
-.. code-block:: php
-
-   <? php
-   
-   $conf['kernel.symfony_reponse_conversion'] = true;
-
 Enable the debug and web profiler bundles
 -----------------------------------------
 You need to provide your own ``AppKernel`` implementation via the
