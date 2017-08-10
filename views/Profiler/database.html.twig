@@ -21,7 +21,7 @@
     {% set text %}
         {% for query in collector.findTenBiggest() %}
             <div class="sf-toolbar-info-piece">
-                <b>{{ query.query|truncate(40) }}</b>
+                <b>{{ query.query }}</b>
                 <span>{{ (query.time * 1000)|round }} ms</span>
             </div>
         {% endfor %}
