@@ -36,6 +36,7 @@ Then add to your ``AppKernel.php`` file, in the ``registerBundles`` method:
 .. code-block:: php
    
    <? php
+   
    new \Symfony\Bundle\MonologBundle\MonologBundle()
 
 Configuring Monolog
@@ -52,7 +53,7 @@ set it up, you only need to add to you ``config.yml`` file :
            drupal:
                type: service
                id: drupal.monolog_handler
-   level: warning
+               level: warning
 
 .. note ::
    Of course, you can still add as many handlers as you wish, but beware that
@@ -98,7 +99,7 @@ Here is a sample ``config.yml`` monolog section :
            main:
                type:   stream
                path:   "%kernel.logs_dir%/%kernel.environment%.log"
-   level:  debug
+               level:  debug
 
 For a more advanced configuration, please refer to Symfony's manual :
 `Logging with Monolog <https://symfony.com/doc/current/logging.html>`_.

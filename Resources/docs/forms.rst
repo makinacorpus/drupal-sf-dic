@@ -26,16 +26,16 @@ different methods. First you should define a form implementing
    
    class MyForm extends FormBase
    {
-       public function buildForm($form, FormStateInterface $form_state)
-       {
-           // build a form API array, classical then
-           return $form;
-       }
+     public function buildForm($form, FormStateInterface $form_state)
+     {
+       // build a form API array, classical then
+       return $form;
+     }
    
-       public function submitForm(&$form, FormStateInterface $form_state)
-       {
-           // do something...
-       }
+     public function submitForm(&$form, FormStateInterface $form_state)
+     {
+       // do something...
+     }
    }
 
 Using the form builder

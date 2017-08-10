@@ -132,15 +132,15 @@ the ``kitten_killer.container.php`` file containing the following code :
    // You MUST NOT change the class name.
    class ServiceProvider implements ServiceProviderInterface
    {
-      /**
-       * {@inheritdoc}
-       */
-      public function register(ContainerBuilder $container)
-      {
-          // From this point you can arbitrarily use the container the way you
-          // wish and register anything you need.
-          $container->addCompilerPass(new MyModule\DependencyInjection\SomeCompilerPass());
-      }
+     /**
+      * {@inheritdoc}
+      */
+     public function register(ContainerBuilder $container)
+     {
+       // From this point you can arbitrarily use the container the way you
+       // wish and register anything you need.
+       $container->addCompilerPass(new MyModule\DependencyInjection\SomeCompilerPass());
+     }
    }
 
 

@@ -7,10 +7,10 @@ Drupal 7 - Symfony - Dependency Injection
 
    getting-started
    services
-   forms
    bundles
-   toolbar
    twig
+   forms
+   toolbar
    monolog
    aliasmanager
 

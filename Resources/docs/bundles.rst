@@ -117,6 +117,7 @@ the following files into the previously mentionned ``config/`` directory :
 *   ``drupal-sf-dic/Resources/config/config.yml``;
 *   ``drupal-sf-dic/Resources/config/parameters.yml``.
 
+.. _bundles_kernel:
 
 Working with bundles
 --------------------
@@ -187,4 +188,4 @@ Then add a ``sites/default/routing.yml`` file, containing :
 
    my_bundle:
        resource: "@MyVendorMyBundle/Resources/config/routing.yml"
-   prefix: /
+       prefix: /
