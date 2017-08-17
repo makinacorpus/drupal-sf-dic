@@ -14,12 +14,12 @@ use MakinaCorpus\Drupal\Sf\Twig\Node\Render;
  * @author René Bakx
  * @see http://tfd7.rocks for more information
  */
-class NodeVisitor implements \Twig_NodeVisitorInterface
+class NodeVisitor extends \Twig_BaseNodeVisitor
 {
     /**
      * {@inheritdoc}
      */
-    public function enterNode(\Twig_Node $node, \Twig_Environment $env)
+    protected function doEnterNode(\Twig_Node $node, \Twig_Environment $env)
     {
         return $node;
     }
@@ -27,7 +27,7 @@ class NodeVisitor implements \Twig_NodeVisitorInterface
     /**
      * {@inheritdoc}
      */
-    public function leaveNode(\Twig_Node $node, \Twig_Environment $env)
+    protected function doLeaveNode(\Twig_Node $node, \Twig_Environment $env)
     {
         if (!$node instanceof \Twig_Node_Print) {
             return $node;
