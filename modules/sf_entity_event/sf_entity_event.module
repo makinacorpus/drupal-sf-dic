@@ -71,18 +71,6 @@ function sf_entity_event_node_view($node, $view_mode, $langcode) {
 }
 
 /**
- * Implements hook_node_prepare_view().
- */
-function sf_entity_event_node_prepare_view($entities, $langcode) {
-  $entity = reset($entities);
-  if ($entity instanceof NodeInterface) {
-    sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
-  } else {
-    trigger_error('\$node should be an instanceof NodeInterface', E_USER_DEPRECATED);
-  }
-}
-
-/**
  * Implements hook_node_presave().
  */
 function sf_entity_event_node_presave($node) {

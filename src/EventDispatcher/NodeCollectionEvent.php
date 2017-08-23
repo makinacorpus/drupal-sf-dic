@@ -7,7 +7,6 @@ use Drupal\node\NodeInterface;
 class NodeCollectionEvent extends EntityCollectionEvent
 {
     const EVENT_LOAD = 'node:load';
-    const EVENT_PREPAREVIEW = 'node:prepareview';
 
     /**
      * Constructor

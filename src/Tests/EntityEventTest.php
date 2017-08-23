@@ -76,8 +76,6 @@ class EntityEventTest extends AbstractDrupalTest
 
         $dispatcher->addListener(NodeCollectionEvent::EVENT_LOAD, [$listener, 'onNodeLoad']);
         $listener->expects($this->atLeast(1))->method('onNodeLoad');
-        $dispatcher->addListener(NodeCollectionEvent::EVENT_PREPAREVIEW, [$listener, 'onNodePrepareView']);
-        $listener->expects($this->atLeast(1))->method('onNodePrepareview');
 
         // New entity
         $entity = new Node();
@@ -103,7 +101,6 @@ class EntityEventTest extends AbstractDrupalTest
         // Update/insert careless hooks
         module_invoke_all('node_insert', $node);
         module_invoke_all('node_view', $node);
-        module_invoke_all('node_prepare_view', [$node]);
         module_invoke_all('node_presave', $node);
         // Hooks that need an identifier
         $node->nid = 12;
