@@ -13,6 +13,7 @@ Drupal 7 - Symfony - Dependency Injection
    toolbar
    monolog
    aliasmanager
+   sf_entity_event
 
 Introduction
 ------------
