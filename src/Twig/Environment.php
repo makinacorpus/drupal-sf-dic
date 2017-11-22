@@ -8,8 +8,6 @@ class Environment extends \Twig_Environment
 
     /**
      * Environment constructor.
-     * @param \Twig_LoaderInterface|null $loader
-     * @param array $options
      *
      * @see \MakinaCorpus\Drupal\Sf\Twig\SecureTwigRendererEngine
      */
