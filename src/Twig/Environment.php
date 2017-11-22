@@ -6,6 +6,11 @@ class Environment extends \Twig_Environment
 {
     protected $autoRender = false;
 
+    /**
+     * Environment constructor.
+     *
+     * @see \MakinaCorpus\Drupal\Sf\Twig\SecureTwigRendererEngine
+     */
     public function __construct(\Twig_LoaderInterface $loader = null, $options = [])
     {
         if (!array_key_exists('autorender', $options)) {

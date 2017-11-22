@@ -12,6 +12,7 @@ use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\FrameworkBundl
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\PropertyInfoPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigCompilerPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigExtensionsCompilerPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigFormRendererCompilerPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,6 +35,7 @@ class ServiceProvider implements ServiceProviderInterface
         $container->addCompilerPass(new RegisterListenersPass('event_dispatcher', 'event_listener', 'event_subscriber'), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new FrameworkBundleIntegrationEarlyPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
         $container->addCompilerPass(new FrameworkBundleIntegrationPass(), PassConfig::TYPE_BEFORE_REMOVING);
+        $container->addCompilerPass(new TwigFormRendererCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
 
         if (class_exists('Symfony\\Component\\Console\\Command\\Command')) {
             $container->addCompilerPass(new AddConsoleCommandPass());
