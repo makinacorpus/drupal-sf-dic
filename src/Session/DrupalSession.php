@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
  * Very basic session replacement that directly reads and write through the
  * $_SESSION superglobal instead of relying onto a SessionStorageInterface
  * backend.
+ *
+ * Beware that dues to Drupal lazy session handling, $_SESSION superglobal
+ * might not be intialized sometime.
  */
 class DrupalSession extends Session
 {
@@ -32,7 +35,7 @@ class DrupalSession extends Session
      */
     public function has($name)
     {
-        return array_key_exists($name, $_SESSION);
+        return isset($_SESSION) && array_key_exists($name, $_SESSION);
     }
 
     /**
@@ -43,7 +46,7 @@ class DrupalSession extends Session
         // It happens that, if called priori to session_start() call that this
         // variable is uninitialized, which causes notices to happen, let's
         // avoid that.
-        if (isset($_SESSION) && is_array($_SESSION) && array_key_exists($name, $_SESSION)) {
+        if (isset($_SESSION) && array_key_exists($name, $_SESSION)) {
             return $_SESSION[$name];
         }
         return $default;
@@ -62,7 +65,7 @@ class DrupalSession extends Session
      */
     public function all()
     {
-        return $_SESSION;
+        return isset($_SESSION) ? $_SESSION : [];
     }
 
     /**
@@ -88,8 +91,10 @@ class DrupalSession extends Session
      */
     public function clear()
     {
-        foreach (array_keys($_SESSION) as $key) {
-            unset($_SESSION[$key]);
+        if (isset($_SESSION)) {
+            foreach (array_keys($_SESSION) as $key) {
+                unset($_SESSION[$key]);
+            }
         }
     }
 
@@ -108,7 +113,10 @@ class DrupalSession extends Session
      */
     public function getIterator()
     {
-        return new \ArrayIterator($_SESSION);
+        if (isset($_SESSION)) {
+            return new \ArrayIterator($_SESSION);
+        }
+        return new \EmptyIterator();
     }
 
     /**
@@ -118,7 +126,7 @@ class DrupalSession extends Session
      */
     public function count()
     {
-        return count($_SESSION);
+        return isset($_SESSION) ? count($_SESSION) : 0;
     }
 
     /**
