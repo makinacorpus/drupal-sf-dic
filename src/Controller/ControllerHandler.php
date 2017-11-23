@@ -402,6 +402,12 @@ class ControllerHandler
             // be noticeable in any way in term of performances.
             (($buffer = substr($response->getContent(), 0, 100)) && false !== stripos($buffer, 'Symfony Web Debug Toolbar'))
         ){
+            // Very sad hack, but we do need this, in case the response in not
+            // handled by Drupal itself we must commit the session prior to
+            // sending the response, in order to ensure that session cookies
+            // are sent along with it.
+            drupal_session_commit();
+
             $response->send();
             if ($this->exitCallback) {
                 call_user_func($this->exitCallback);
