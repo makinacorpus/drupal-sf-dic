@@ -37,9 +37,11 @@ function sf_entity_event_node_access($node, $op, $account) {
  * Implements hook_node_access_records().
  */
 function sf_entity_event_node_access_records($node) {
-  $event = new NodeAccessRecordEvent($node);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
-  return $event->toDrupalGrantList();
+  if ($node instanceof NodeInterface) {
+    $event = new NodeAccessRecordEvent($node);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessRecordEvent::EVENT_NODE_ACCESS_RECORD, $event);
+    return $event->toDrupalGrantList();
+  }
 }
 
 /**
@@ -59,14 +61,18 @@ function sf_entity_event_node_grants($account, $op) {
  * Implements hook_node_view().
  */
 function sf_entity_event_node_view($node, $view_mode, $langcode) {
-  sf_entity_event_node_dispatch(NodeEvent::EVENT_VIEW, $node);
+  if ($node instanceof NodeInterface) {
+    sf_entity_event_node_dispatch(NodeEvent::EVENT_VIEW, $node);
+  }
 }
 
 /**
  * Implements hook_node_prepare_view().
  */
 function sf_entity_event_node_prepare_view($entities, $langcode) {
-  sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
+  if ($node instanceof NodeInterface) {
+    sf_entity_collection_event_node_dispatch(NodeCollectionEvent::EVENT_PREPAREVIEW, $entities);
+  }
 }
 
 /**
