@@ -26,10 +26,11 @@ function sf_entity_event_node_prepare($node) {
  * Implements hook_node_access().
  */
 function sf_entity_event_node_access($node, $op, $account) {
-  // Node can be a string
-  $event = new NodeAccessEvent($node, $account, $op);
-  \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
-  return $event->getResult();
+  if ($account instanceof AccountInterface) {
+    $event = new NodeAccessEvent($node, $account, $op);
+    \Drupal::service('event_dispatcher')->dispatch(NodeAccessEvent::EVENT_NODE_ACCESS, $event);
+    return $event->getResult();
+  }
 }
 
 /**
