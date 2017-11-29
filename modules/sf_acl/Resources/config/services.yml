@@ -3,7 +3,7 @@ services:
   acl.security.acl.voter:
     public: false
     class: MakinaCorpus\Drupal\Sf\Security\Voter\DrupalAclVoter
-    arguments: ['@acl.manager']
+    arguments: ['@php_acl.manager']
     tags: [{name: security.voter}]
 
   # This is a very specific implementation of the ACL voter that will run the

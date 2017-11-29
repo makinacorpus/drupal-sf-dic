@@ -173,12 +173,15 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
 
         $account = $storage->create();
         $this->accounts[] = $account;
-        $stupidHash = uniqid() . mt_rand();
+        // SHA1 reduces size and avoid data truncation in database - which leads
+        // to real errors with PosgreSQL - MySQL should be ashamed to let this
+        // happen
+        $stupidHash = sha1(uniqid() . mt_rand());
         $account->mail = $stupidHash . '@example.com';
         $account->roles = [];
 
         if ($name) {
-            $account->name = $name . ' (' . rand(0, 99999) . ')';
+            $account->name = substr($name . ' ' . rand(0, 99999), 0, 59);
         } else {
             $account->name = $stupidHash;
         }
@@ -366,7 +369,9 @@ abstract class AbstractDrupalTest extends \PHPUnit_Framework_TestCase
     {
         if ($this->accounts) {
             foreach ($this->accounts as $account) {
-                user_delete($account->uid);
+                if ($account->uid) {
+                    user_delete($account->uid);
+                }
             }
         }
 

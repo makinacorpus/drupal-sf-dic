@@ -3,13 +3,8 @@
 namespace Drupal\Module\sf_acl;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
-
-use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\AuthorizationAwareRegisterPass;
-use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerAwareRegisterPass;
-use MakinaCorpus\ACL\Impl\Symfony\DependencyInjection\ManagerRegisterPass;
-
+use MakinaCorpus\ACL\Bridge\Symfony\ACLBundle;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
@@ -20,22 +15,28 @@ class ServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerBuilder $container)
     {
-        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
-
-        // Do not register anything if the package does not exist
-        // @todo if symfony bundle is present, load a different configuration files with
-        //   only drupal integration components provided
-        if (class_exists('\MakinaCorpus\ACL\Resource')) {
-
-            $loader->load('acl.yml');
-            $container->addCompilerPass(new ManagerRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
-            $container->addCompilerPass(new ManagerAwareRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
-            $container->addCompilerPass(new AuthorizationAwareRegisterPass(), PassConfig::TYPE_BEFORE_REMOVING);
-
+        // Check dependency on the php_acl library.
+        if ($container->has('php_acl.manager') || $container->hasAlias('php_acl.manager')) {
             $bundles = $container->getParameter('kernel.bundles');
+
+            // Only load our services if necessary, we do need the security
+            // bundle to be loaded for this to work
             if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
-                $loader->load('acl-security.yml');
+                $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
+                $loader->load('services.yml');
             }
+        }
+    }
+
+    /**
+     * {@inhertidoc}
+     */
+    public function registerBundles()
+    {
+        if (class_exists('MakinaCorpus\\ACL\\Bridge\\Symfony\\ACLBundle')) {
+            return [
+                new ACLBundle(),
+            ];
         }
     }
 }

@@ -38,7 +38,7 @@ use MakinaCorpus\ACL\Manager;
  * @return Manager
  */
 function _sf_acl_manager() {
-  return \Drupal::service('acl.manager');
+  return \Drupal::service('php_acl.manager');
 }
 
 /**
@@ -52,7 +52,7 @@ function sf_acl_is_granted($permission, $resource = null, $profile = null) {
   if ($container->has('security.authorization_checker')) {
     return $container->get('security.authorization_checker')->isGranted($permission, $resource, $profile);
   } else {
-    return $container->get('acl.manager')->isGranted($permission, $resource, $profile);
+    return $container->get('php_acl.manager')->isGranted($permission, $resource, $profile);
   }
 }
 
@@ -76,8 +76,8 @@ function sf_acl_node_access($node, $op, $account) {
  * Basically converts ACL/ACE to node_access records.
  */
 function sf_acl_node_access_records($node) {
-  /** @var \MakinaCorpus\ACL\Impl\Drupal\EntryToNodeAccessConverter $converter */
-  $converter = \Drupal::service('drupal.acl.entry_to_node_access_converter');
+  /** @var \MakinaCorpus\ACL\Bridge\Drupal\EntryToNodeAccessConverter $converter */
+  $converter = \Drupal::service('php_acl.drupal.entry_to_node_access_converter');
   return $converter->convertEntryList(_sf_acl_manager()->collectEntryListAll($node));
 }
 
