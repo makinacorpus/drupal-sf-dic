@@ -30,7 +30,7 @@ services:
   # Current logged in user, not exactly the same signature than Drupal 8
   # but will be API compatible for most use cases
   current_user:
-    class: Drupal\Core\Session\AccountProxy
+    class: Drupal\Core\Session\UserSession
     arguments: ["@entity.manager"]
 
   # Pass-through to get the database connection via the service container,
@@ -202,6 +202,13 @@ services:
   # Scalar from GET/POST argument resolver
   sf_dic.argument_value_resolver.scalar_query:
     class: MakinaCorpus\Drupal\Sf\Controller\ArgumentResolver\RequestQueryValueResolver
+    public: false
+    # Run before default value resolver
+    tags: [{name: controller.argument_value_resolver, priority: -80}]
+
+  # UserSession argument resolver
+  sf_dic.argument_value_resolver.user_session:
+    class: MakinaCorpus\Drupal\Sf\Controller\ArgumentResolver\UserSessionValueResolver
     public: false
     # Run before default value resolver
     tags: [{name: controller.argument_value_resolver, priority: -80}]
