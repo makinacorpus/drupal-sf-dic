@@ -17,4 +17,14 @@ class ContextListener implements ListenerInterface
     public function handle(GetResponseEvent $event)
     {
     }
+
+    /**
+     * This method is not in the interface, but \Symfony\Component\Security\Http\Firewall\ContextListener
+     * implements it, and the kernel will attempt to run it anyway.
+     *
+     * @param bool $logoutOnUserChange
+     */
+    public function setLogoutOnUserChange($logoutOnUserChange)
+    {
+    }
 }
