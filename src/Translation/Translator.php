@@ -51,10 +51,10 @@ class Translator implements TranslatorInterface
         $forms = explode('|', $id);
         foreach ($forms as $form) {
             if (false !== strpos($form, '{1}')) {
-                $singular = str_replace('{1}', '@count', $form);
+                $singular = str_replace('{1}', '', $form);
             }
             if (false !== strpos($form, 'Inf[')) {
-                $plural = preg_replace('/\]\d+,Inf\[/', '@count', $form);
+                $plural = preg_replace('/\]\d+,Inf\[/', '', $form);
             }
         }
 
