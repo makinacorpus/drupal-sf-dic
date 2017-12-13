@@ -2,6 +2,7 @@
 
 namespace MakinaCorpus\Drupal\Sf\Controller;
 
+use MakinaCorpus\Drupal\Sf\DrupalPageResponse;
 use MakinaCorpus\Drupal\Sf\DrupalResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -435,7 +436,7 @@ class ControllerHandler
             // If nothing happend, this is probably a valid response just send
             // it to the browser as normal, we just may need to convert it to
             // string first so that Drupal delivery callbacks won't fail
-            $response = (string)$response->getContent();
+            $response = DrupalPageResponse::create($response->getContent(), $response->getStatusCode(), $response->headers->all());
         }
 
         return $response;
