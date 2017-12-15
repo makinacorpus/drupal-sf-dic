@@ -16,4 +16,5 @@ services:
         arguments: ['%kernel.cache_dir%/annotations']
 
     annotation_reader:
+        public: true
         alias: annotations.reader

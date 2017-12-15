@@ -2,4 +2,5 @@
 # so that Twig will see it and correctly load the translation extension
 services:
   translator:
+    public: true
     alias: translator.drupal

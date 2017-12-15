@@ -7,10 +7,12 @@ services:
   # need because it can't work nicely with Drupal at this point.
 
   templating:
+    public: true
     class: Symfony\Bundle\TwigBundle\TwigEngine
     arguments: ['@twig', '@templating.name_parser', '@templating.locator']
 
   templating.locator:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Templating\Loader\TemplateLocator
     arguments: ['@file_locator', '%kernel.cache_dir%']
 

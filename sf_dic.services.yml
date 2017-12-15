@@ -6,49 +6,59 @@ services:
   # Register the container itself as a synthetic service for the modules to be
   # able to use it as a dependency
   service_container:
+    public: true
     class: Symfony\Component\DependencyInjection\ContainerInterface
     synthetic: true
 
   kernel:
+    public: true
     class: Symfony\Component\HttpKernel\KernelInterface
     factory: [Drupal, _getKernel]
   # Null implementation of the controller resolver when not using fullstack is
   # spawned using the FrameworkBundleIntegrationPass compiler pass, get over it!
   # Following is the actual Symfony definition
   http_kernel:
+    public: true
     class: Symfony\Component\HttpKernel\HttpKernel
     arguments: ["@event_dispatcher", "@controller_resolver", "@request_stack"]
 
   # Request stack, because we can
   request_stack:
+    public: true
     class: Symfony\Component\HttpFoundation\RequestStack
 
   # Breadcrumb manager
   breadcrumb:
+    public: true
     class: Drupal\Core\Breadcrumb\BreadcrumbManager
 
   # Current logged in user, not exactly the same signature than Drupal 8
   # but will be API compatible for most use cases
   current_user:
+    public: true
     class: Drupal\Core\Session\UserSession
     arguments: ["@entity.manager"]
 
   # Pass-through to get the database connection via the service container,
   # available for being a dependency of other services
   database:
+    public: true
     class: DatabaseConnection
     factory: [Database, getConnection]
 
   drupal.database:
+    public: false
     alias: database
 
   # Form builder
   form_builder:
+    public: true
     class: Drupal\Core\Form\FormBuilder
     arguments: ["@service_container", "@logger.channel.form"]
 
   # Module handler, will only proxify what Drupal 7 can do
   module_handler:
+    public: true
     class: Drupal\Core\Extension\ModuleHandler
 
   # Cache factory
@@ -58,26 +68,32 @@ services:
 
   # Expose a few cache backends, core ones minus the very Drupal 8 specific ones
   cache.bootstrap:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache_bootstrap]
   cache.default:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache]
   cache.entity:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache_field]
   cache.menu:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache_menu]
   cache.render:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache]
   cache.data:
+    public: true
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: cache_factory:get
     arguments: [cache]
@@ -88,23 +104,28 @@ services:
   # @todo
   #   expose all controllers with their own service?
   entity.manager:
+    public: true
     class: Drupal\Core\Entity\EntityManager
 
   # Also register the bare minimum anyone would need to work with path
   # aliases the Drupal 8 way
   path.alias_manager:
+    public: true
     class: Drupal\Core\Path\AliasManager
     arguments: ['@path.alias_storage', '@cache.data']
   path.alias_storage:
+    public: true
     class: Drupal\Core\Path\DefaultAliasStorage
     arguments: ['@database', '@module_handler']
   path.current:
+    public: true
     class: Drupal\Core\Path\CurrentPathStack
     arguments: ['@request_stack']
 
   # We are not going to use Drupal 8 event dispatcher, but hopefully the
   # symfony vanilla one is API compatible
   event_dispatcher:
+    public: true
     class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
     arguments: ["@service_container"]
 
@@ -115,6 +136,7 @@ services:
 
   # Logger factory from Drupal 8
   logger.factory:
+    public: true
     class: Drupal\Core\Logger\LoggerChannelFactory
     calls:
       - [addLogger, ["@logger.watchdog"]]
@@ -125,6 +147,7 @@ services:
     class: Drupal\Core\Logger\LoggerChannel
     factory: ["@logger.factory", get]
   logger.channel.default:
+    public: true
     # Sorry this one is public, because we are going to use it in our unit
     # tests, it should be set privte ideally
     parent: logger.channel_base
@@ -151,6 +174,7 @@ services:
     arguments: ['form']
 
   session:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Session\DrupalSession
 
   # Register a few Drupal twig helpers, no matter we are using it or not they
@@ -187,15 +211,19 @@ services:
     tags: [{name: twig.extension}]
 
   sf_dic.console.command.dropkernel:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Command\DropKernelCacheCommand
     tags: [{name: console.command}]
   sf_dic.console.command.cacheclear:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Command\CacheClearCommand
     tags: [{name: console.command}]
   sf_dic.console.command.panic:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Command\PanicCommand
     tags: [{name: console.command}]
   sf_dic.console.command.generate_entity:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Command\GenerateEntityCommand
     tags: [{name: console.command}]
 
@@ -215,6 +243,7 @@ services:
 
   # Custom node access helper
   sf_dic.node_access.subscriber:
+    public: false
     class: MakinaCorpus\Drupal\Sf\EventDispatcher\NodeAccessSubscriber
     arguments: ["@event_dispatcher"]
     tags: [{name: event_subscriber}]
@@ -237,6 +266,7 @@ services:
   # Empty testing service, it will contain all services this module provides
   # in order to be able to unit test it
   test_empty_service:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Tests\Mockup\EmptyService
     arguments: ["%some_variable%"]
     calls:

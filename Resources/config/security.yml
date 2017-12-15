@@ -1,9 +1,11 @@
 services:
 
   drupal.token_authenticator:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Security\DrupalAuthenticator
 
   drupal.account_provider:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Security\DrupalUserProvider
     arguments: ['@entity.manager']
 

@@ -1,3 +1,4 @@
 services:
   translator.drupal:
+    public: false
     class: MakinaCorpus\Drupal\Sf\Translation\Translator
