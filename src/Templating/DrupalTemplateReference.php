@@ -13,6 +13,10 @@ namespace MakinaCorpus\Drupal\Sf\Templating;
 
 use Symfony\Component\Templating\TemplateReference as BaseTemplateReference;
 
+/**
+ * @deprecated
+ *   Will be removed next version.
+ */
 class DrupalTemplateReference extends BaseTemplateReference
 {
     public function __construct($origin, $type, $name, $path, $format, $engine)

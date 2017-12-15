@@ -23,6 +23,9 @@ use Symfony\Component\Templating\TemplateReferenceInterface;
  *     template is provided by;
  *   - REST_OF_NAME is what follows the extension name, if you have more
  *     following ':' they will be converted as '/' in path lookup.
+ *
+ * @deprecated
+ *   Will be removed next version.
  */
 class DrupalTemplateLocator implements FileLocatorInterface
 {
@@ -53,6 +56,8 @@ class DrupalTemplateLocator implements FileLocatorInterface
 
             throw new \InvalidArgumentException('The template must be an instance of TemplateReferenceInterface.');
         }
+
+        @trigger_error('You should not use path such as "[module|theme]:[NAME]:/[PATH].html.twig and use namespaces instead "@[NAME]/[PATH].html.twig where [PATH] is the module or theme name"', E_USER_DEPRECATED);
 
         $name = $template->getLogicalName();
 

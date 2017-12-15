@@ -43,7 +43,6 @@
         "symfony/http-kernel": "~3.0 <4",
         "symfony/routing": "~3.0 <4",
         "symfony/security": "~3.0 <4",
-        "symfony/templating": "~3.0 <4",
         "symfony/translation": "~3.0 <4",
         "symfony/yaml": "~2.8|~3.0 <4"
     },

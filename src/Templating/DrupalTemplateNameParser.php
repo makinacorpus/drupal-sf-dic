@@ -9,6 +9,9 @@ use Symfony\Component\Templating\TemplateReferenceInterface;
 
 /**
  * Catches anything that looks like drupal theme hook names
+ *
+ * @deprecated
+ *   Will be removed next version.
  */
 class DrupalTemplateNameParser extends BaseTemplateNameParser
 {
@@ -91,6 +94,8 @@ class DrupalTemplateNameParser extends BaseTemplateNameParser
             }
 
             $template = new DrupalTemplateReference($realname, $matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
+
+            @trigger_error('You should not use path such as "[module|theme]:[NAME]:/[PATH].html.twig and use namespaces instead "@[NAME]/[PATH].html.twig where [PATH] is the module or theme name"', E_USER_DEPRECATED);
 
             return $this->cache[$realname] = $template;
 

@@ -1,3 +1,4 @@
+# This file is deprecated and will be removed next version.
 services:
 
   # Please note these are only partial overrides, when using Symfony full

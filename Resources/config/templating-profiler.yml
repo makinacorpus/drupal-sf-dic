@@ -1,0 +1,6 @@
+services:
+
+  twig.extension.drupal_profiler:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\ProfilerExtension
+    tags: [{name: twig.extension}]

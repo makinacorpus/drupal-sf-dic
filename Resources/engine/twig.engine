@@ -41,7 +41,7 @@ function twig_init($theme) {
  *
  * Naming convention is:
  *
- *   "[theme|module]:MODULE_OR_THEME_NAME:/PATH/TO/FILE.html.twig"
+ *   "@MODULE_OR_THEME_NAME/PATH/TO/FILE.html.twig"
  *
  * For example, let's say you have "funtheme" theme in the following folder:
  *
@@ -53,7 +53,7 @@ function twig_init($theme) {
  *
  * Then its identifier will be:
  *
- *   "theme:funtheme:template/page.html.twig"
+ *   "@funtheme/template/page.html.twig"
  *
  * Which means that, for example, you want to extend it into this file:
  *
@@ -108,7 +108,7 @@ function _twig_map_names(&$templates) {
       }
     }
     if ($found) {
-      return $type . ':' . $found . ':' . substr($name, $foundLength + 1);
+      return '@' . $found . '/' . substr($name, $foundLength + 1);
     }
   };
 
@@ -239,6 +239,9 @@ function twig_render_template($template, $variables = []) {
   $twig = &drupal_static(__FUNCTION__);
   if (!$twig) {
     $twig = \Drupal::service('twig');
+  }
+  if (($pieces = explode('/@', $template, 2)) && isset($pieces[1])) {
+    $template = '@' . $pieces[1];
   }
   return $twig->render($template, $variables);
 }
