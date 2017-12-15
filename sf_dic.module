@@ -157,7 +157,9 @@ function sf_dic_init() {
   // @todo temporary disable this when fullstack is enabled, because a few
   //   components will attempt to match the current route over the current URL
   //   and throw exceptions if unfound
-  if (!drupal_is_cli() && menu_get_item()) {
+  // Do not run the event if current menu item is handled by Symfony itself,
+  // case in which the kernel will run it by itself, no need to run it twice.
+  if (!drupal_is_cli() && ($item = menu_get_item()) && 'sf_dic_router' !== $item['page_callback']) {
     // Raise the KernelEvents::REQUEST for non-Symfony page execution. Please
     // note that this will make it run twice in case we do use the real Symfony
     // kernel to handle a real Symfony controller.
@@ -561,6 +563,7 @@ function sf_dic_router() {
   /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
   $handler = \Drupal::service('sf_dic.controller_handler');
   $request = \Drupal::request();
+  $GLOBALS['sf_dic_router'] = true;
   try {
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
@@ -609,7 +612,8 @@ function sf_dic_page_form($formClass) {
  * Implements hook_exit().
  */
 function sf_dic_exit() {
-  if (\Drupal::hasRequest()) {
+  // Do not run the event twice.
+  if (empty($GLOBALS['sf_dic_router']) && \Drupal::hasRequest()) {
     $event = new PostResponseEvent(\Drupal::_getKernel(), \Drupal::request(), new Response());
     \Drupal::service('event_dispatcher')->dispatch(KernelEvents::TERMINATE, $event);
   }
@@ -793,6 +797,10 @@ function sf_dic_page_delivery_html($page_callback_result) {
       $response = $page_callback_result;
   }
 
+  // This event will be run twice if the current router is sf_dic_router (using
+  // Symfony kernel to handle the request) - but since we do override the
+  // request and embed it into a custom Drupal page one, this will run with a
+  // different response than Symfony's one - I guess that's OK.
   $kernel   = \Drupal::_getKernel();
   $request  = \Drupal::request();
   $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
