@@ -55,7 +55,7 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
 
         $this->exitCalled = false;
         $response = new Response("this is a normal response");
-        $this->assertSame("this is a normal response", $handler->handleResponse($response));
+        $this->assertSame("this is a normal response", $handler->handleResponse(new Request(), $response));
         $this->assertFalse($this->exitCalled);
     }
 
@@ -70,7 +70,7 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         ob_start();
         $this->exitCalled = false;
         $response = new Response("<html>this is a normal response</html>");
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         $this->assertSame("<html>this is a normal response</html>", ob_get_clean());
         $this->assertTrue($this->exitCalled);
     }
@@ -84,8 +84,8 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         $handler = $this->createInstance($container);
 
         $this->exitCalled = false;
-        $this->assertSame(1, $handler->handleResponse(1));
-        $this->assertSame(2, $handler->handleResponse(2));
+        $this->assertSame(1, $handler->handleResponse(new Request(), 1));
+        $this->assertSame(2, $handler->handleResponse(new Request(), 2));
         $this->assertFalse($this->exitCalled);
     }
 
@@ -98,7 +98,7 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         $handler = $this->createInstance($container);
 
         $this->exitCalled = false;
-        $this->assertSame(['#markup' => "foo"], $handler->handleResponse(['#markup' => "foo"]));
+        $this->assertSame(['#markup' => "foo"], $handler->handleResponse(new Request(), ['#markup' => "foo"]));
         $this->assertFalse($this->exitCalled);
     }
 
@@ -114,21 +114,21 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         ob_start();
         $this->exitCalled = false;
         $response = new JsonResponse(['foo' => 'bar']);
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         $this->assertSame('{"foo":"bar"}', ob_get_clean());
         $this->assertTrue($this->exitCalled);
 
         ob_start();
         $this->exitCalled = false;
         $response = new BinaryFileResponse(__FILE__);
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         ob_get_clean();
         $this->assertTrue($this->exitCalled);
 
         ob_start();
         $this->exitCalled = false;
         $response = new StreamedResponse('mt_rand');
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         ob_get_clean();
         $this->assertTrue($this->exitCalled);
 
@@ -136,7 +136,7 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         $this->exitCalled = false;
         $response = new Response('{"foo":"bar"}');
         $response->headers->set('Content-Type', 'application/json');
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         $this->assertSame('{"foo":"bar"}', ob_get_clean());
         $this->assertTrue($this->exitCalled);
 
@@ -144,7 +144,7 @@ class ControllerHandlerTest extends \PHPUnit_Framework_TestCase
         $this->exitCalled = false;
         $response = new Response('<pouet></pouet>');
         $response->headers->set('Content-Type', 'application/xml');
-        $this->assertNull($handler->handleResponse($response));
+        $this->assertNull($handler->handleResponse(new Request(), $response));
         $this->assertSame('<pouet></pouet>', ob_get_clean());
         $this->assertTrue($this->exitCalled);
     }

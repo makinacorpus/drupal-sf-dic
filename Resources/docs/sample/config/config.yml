@@ -34,9 +34,9 @@ twig:
         # Custom form types
         - "Form/fields.html.twig"
         # Bundle provided form themes and widgets
-        - "AutocompleteBundle:Form:fields.html.twig"
-        - "IbanBundle:Form:fields.html.twig"
-        - "FilechunkBundle:Form:fields.html.twig"
+        - "@Autocomplete/Form/fields.html.twig"
+        - "@Iban/Form/fields.html.twig"
+        - "@Filechunk/Form/fields.html.twig"
 
 #
 # Uncomment to use doctrine

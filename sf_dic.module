@@ -523,7 +523,7 @@ function sf_dic_error_page($status = 404) {
   /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
   $handler = \Drupal::service('sf_dic.controller_handler');
 
-  return $handler->handleResponse($controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
+  return $handler->handleResponse($request, $controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
 }
 
 /**
@@ -567,7 +567,7 @@ function sf_dic_router() {
   try {
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    return $handler->handleResponse($kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
+    return $handler->handleResponse($request, $kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
   } catch (\Exception $exception) {
     return $handler->handleException($request, $exception);
   }

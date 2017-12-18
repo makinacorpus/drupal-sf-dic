@@ -268,7 +268,7 @@ class ControllerHandler
                 $response = new DrupalResponse($response);
             }
 
-            return $this->handleResponse($response);
+            return $this->handleResponse($request, $response);
 
         } catch (\Exception $e) {
             return $this->handleException($request, $e);
@@ -363,11 +363,12 @@ class ControllerHandler
     /**
      * Handle response
      *
+     * @param Request $request
      * @param int|string|array|Response $response
      *
      * @return null|int|string|Response
      */
-    public function handleResponse($response)
+    public function handleResponse(Request $request, $response)
     {
         $isFragmentRoute = false;
 
@@ -435,8 +436,12 @@ class ControllerHandler
 
             // If nothing happend, this is probably a valid response just send
             // it to the browser as normal, we just may need to convert it to
-            // string first so that Drupal delivery callbacks won't fail
-            $response = DrupalPageResponse::create($response->getContent(), $response->getStatusCode(), $response->headers->all());
+            // string first so that Drupal delivery callbacks won't fail.
+            // Do not do it when the request is an AJAX request, nobody wants
+            // a full page during those.
+            if (!$request->isXmlHttpRequest()) {
+                $response = DrupalPageResponse::create($response->getContent(), $response->getStatusCode(), $response->headers->all());
+            }
         }
 
         return $response;
