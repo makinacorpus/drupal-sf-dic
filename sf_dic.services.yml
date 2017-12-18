@@ -126,8 +126,11 @@ services:
   # symfony vanilla one is API compatible
   event_dispatcher:
     public: true
-    class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
+    class: Symfony\Component\EventDispatcher\EventDispatcher
     arguments: ["@service_container"]
+    tags: [{name: container.hot_path}]
+  Symfony\Component\EventDispatcher\EventDispatcherInterface:
+    alias: event_dispatcher
 
   # Logger that sends everything into the watchdog
   logger.watchdog:
@@ -173,9 +176,12 @@ services:
     parent: logger.channel_base
     arguments: ['form']
 
-  session:
+  session.drupal:
     public: true
     class: MakinaCorpus\Drupal\Sf\Session\DrupalSession
+  session:
+    public: true
+    alias: session.drupal
 
   # Register a few Drupal twig helpers, no matter we are using it or not they
   # will be ignored if no twig is running, but aside of that, if Twig is there

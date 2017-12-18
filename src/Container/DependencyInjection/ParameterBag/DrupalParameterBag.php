@@ -21,10 +21,14 @@ class DrupalParameterBag extends ParameterBag
     }
 
     /**
-     * {@inheritDoc}
+     * Find Drupal variable override
      */
-    public function getDrupalOverride($name, $default)
+    private function getDrupalOverride($name, $default)
     {
+        // Hardcode 'kernel.secret' to use Drupal's own salt.
+        if ('kernel.secret' === $name) {
+            return drupal_get_private_key();
+        }
         if ('kernel.' === substr($name, 0, 7)) {
             // Kernel variables must be driven by the kernel only: here is the
             // explainaintion (not a simple one):

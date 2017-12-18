@@ -1,3 +1,4 @@
 services:
   drupal.monolog_handler:
+    public: true
     class: MakinaCorpus\Drupal\Sf\Monolog\DrupalHandler

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace MakinaCorpus\Drupal\Sf\Twig;
-
 
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Component\Form\FormView;

@@ -4,13 +4,13 @@ services:
         public: true
         class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalDatabaseDataCollector
         arguments: ["@database", '@?debug.stopwatch']
-        tags: [{ name: data_collector, template: "@sf_dic/Profiler/database.html.twig", id: drupal_database}]
+        tags: [{ name: data_collector, template: "@sf_dic/views/Profiler/database.html.twig", id: drupal_database}]
 
     makinacorpus.drupal_watchdog_collector:
-        public: true
+        public: false
         class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalWatchdogDataCollector
         arguments: ["@database", '@?debug.stopwatch']
-        tags: [{ name: data_collector, template: "@sf_dic/Profiler/watchdog.html.twig", id: drupal_watchdog}]
+        tags: [{ name: data_collector, template: "@sf_dic/views/Profiler/watchdog.html.twig", id: drupal_watchdog}]
 
     makinacorpus.entity.manager_proxy:
         public: false
@@ -19,7 +19,8 @@ services:
         arguments: ['@makinacorpus.entity.manager_proxy.inner']
 
     makinacorpus.drupal_node_collector:
-        public: true
+        public: false
         class: MakinaCorpus\Drupal\Sf\DataCollector\DrupalNodeDataCollector
         arguments: ["@makinacorpus.entity.manager_proxy", '@?debug.stopwatch']
-        tags: [{ name: data_collector, template: "@sf_dic/Profiler/node-load.html.twig", id: drupal_node}]
+        tags: [{ name: data_collector, template: "@sf_dic/views/Profiler/node-load.html.twig", id: drupal_node}]
+

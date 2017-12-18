@@ -1,0 +1,101 @@
+{
+    "name": "My site",
+    "description": "Drupal Site using Symfony 4",
+    "license": "proprietary",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/7"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:SebCorbin/composer-preserve-paths",
+            "no-api": true
+        }
+    ],
+    "prefer-stable": true,
+    "minimum-stability": "dev",
+    "require-dev": {
+        "derhasi/composer-preserve-paths": "*",
+        "drupal/drupal": "7.*",
+        "phpunit/phpunit": "^5",
+        "symfony/dotenv": "^4.0"
+    },
+    "require": {
+        "composer/installers": "*",
+        "doctrine/annotations": "^1.4",
+        "makinacorpus/drupal-sf-dic": "dev-sf4-test as 4.0",
+        "symfony/console": "^4.0",
+        "symfony/flex": "^1.0",
+        "symfony/framework-bundle": "^4.0",
+        "symfony/twig-bundle": "^4.0",
+        "symfony/lts": "^4@dev",
+        "symfony/yaml": "^4.0",
+        "twig/extensions": "~1.3",
+        "twig/twig": "^2"
+    },
+    "replace": {
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php56": "*"
+    },
+    "config": {
+        "bin-dir": "bin",
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "installer-paths": {
+            "public": [
+                "type:drupal-core"
+            ],
+            "public/sites/all/modules/composer/{$name}": [
+                "type:drupal-module"
+            ],
+            "public/sites/all/libraries/composer/{$name}": [
+                "type:drupal-library"
+            ],
+            "public/sites/all/themes/composer/{$name}": [
+                "type:drupal-theme"
+            ]
+        },
+        "preserve-paths": [
+            "www/sites/default/settings.php",
+            "www/sites/default/files",
+            "www/profiles/portvac"
+        ],
+        "patches": {
+            "drupal/core": {
+                "Fix theme system engine behaviour": "https://www.drupal.org/files/issues/1545964-144-theme_engine_inheritance.patch"
+            }
+        }
+    },
+    "scripts": {
+        "append_settings": "grep -Fq \"require_once DRUPAL_ROOT . '/../lib/vendor/autoload.php';\" www/sites/default/default.settings.php || echo \"\nrequire_once DRUPAL_ROOT . '/../lib/vendor/autoload.php';\n\n\\$GLOBALS['conf']['kernel.cache_dir'] = DRUPAL_ROOT . '/../cache/';\n\\$GLOBALS['conf']['kernel.logs_dir'] = DRUPAL_ROOT . '/../logs/';\n\" >> www/sites/default/default.settings.php",
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install --symlink --relative %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@append_settings",
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@append_settings",
+            "@auto-scripts"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    }
+}

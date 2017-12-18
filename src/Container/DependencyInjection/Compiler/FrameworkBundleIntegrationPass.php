@@ -40,7 +40,7 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
 
         // Also replace the translator with our own
         if ($container->hasDefinition('translator.drupal')) {
-            $container->setAlias('translator', 'translator.drupal');
+            $container->setAlias('translator', 'translator.drupal')->setPublic(true);
         }
 
         // When NOT in fullstack mode, we need to provide a null implementation

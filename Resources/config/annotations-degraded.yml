@@ -6,7 +6,6 @@ services:
 
     annotations.cached_reader:
         public: false
-        alias: annotations.reader
         class: Doctrine\Common\Annotations\CachedReader
         arguments: ['@annotations.reader', '@annotations.filesystem_cache']
 
@@ -17,4 +16,4 @@ services:
 
     annotation_reader:
         public: true
-        alias: annotations.reader
+        alias: annotations.cached_reader

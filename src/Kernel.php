@@ -5,13 +5,14 @@ namespace MakinaCorpus\Drupal\Sf;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\ParameterBag\DrupalParameterBag;
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
-use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
 
 /**
  * Derivation of Symfony's kernel allowing us to register Drupal services.
@@ -39,7 +40,7 @@ abstract class Kernel extends BaseKernel
 
         // Compute the kernel root directory
         if (empty($GLOBALS['conf']['kernel.root_dir'])) {
-            $rootDir = DRUPAL_ROOT . '/../app';
+            $rootDir = dirname(DRUPAL_ROOT) . '/app';
             if (is_dir($rootDir)) {
                 $this->rootDir = $rootDir;
             } else if (function_exists('conf_path')) {
@@ -130,6 +131,10 @@ abstract class Kernel extends BaseKernel
             unset($GLOBALS['conf']['kernel.logs_dir']);
         }
 
+        // This will be needed in order to use drupal_get_path() and
+        // drupal_get_private_key() utility functions
+        require_once DRUPAL_ROOT . '/includes/common.inc';
+
         parent::__construct($environment, $debug);
     }
 
@@ -139,6 +144,14 @@ abstract class Kernel extends BaseKernel
     public function getCacheDir()
     {
         return $this->cacheDir;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getProjectDir()
+    {
+        return dirname(DRUPAL_ROOT);
     }
 
     /**
@@ -168,22 +181,17 @@ abstract class Kernel extends BaseKernel
     {
         $ret = [];
 
-        require_once DRUPAL_ROOT . '/includes/common.inc';
-
         $ret['sf_dic'] = DRUPAL_ROOT . '/' . drupal_get_path('module', 'sf_dic') . '/sf_dic.services.yml';
 
         // Find all module.services.yml files, this will do a file_exists() per
         // module, but this will skipped whenever the container file is cached
         foreach (array_keys(system_list('module_enabled')) as $module) {
-
             // Skip current module and keep it first allowing other modules to
             // overrides our services
             if ('sf_dic' === $module) {
                 continue;
             }
-
             $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.services.yml';
-
             if (file_exists($filename)) {
                 $ret[$module] = $filename;
             }
@@ -203,20 +211,14 @@ abstract class Kernel extends BaseKernel
     {
         $ret = [];
 
-        require_once DRUPAL_ROOT . '/includes/common.inc';
-
         $this->serviceProviders = [];
 
         foreach (array_keys(system_list('module_enabled')) as $module) {
-
             $filename = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . '/' . $module . '.container.php';
-
             if (file_exists($filename)) {
                 include_once $filename;
             }
-
             $className = 'Drupal\\Module\\' . $module . '\\ServiceProvider';
-
             if (class_exists($className)) {
                 $provider = new $className();
                 if ($provider instanceof ServiceProviderInterface) {
@@ -229,64 +231,21 @@ abstract class Kernel extends BaseKernel
     }
 
     /**
-     * This exists in Symfony 3.3 and not in 3.2 and previous.
-     *
-     * The extension point similar to the Bundle::build() method.
-     *
-     * Use this method to register compiler passes and manipulate the
-     * container during the building process.
-     *
-     * @param ContainerBuilder $container
-     */
-    protected function build(ContainerBuilder $container)
-    {
-    }
-
-    /**
      * {@inheritdoc}
      */
     protected function getContainerBuilder()
     {
-        $container = new ContainerBuilder(new DrupalParameterBag($this->getKernelParameters()));
+        $container = new ContainerBuilder(new DrupalParameterBag(['kernel.secret' => drupal_get_private_key()] + $this->getKernelParameters()));
         $container->setParameter('kernel.drupal_site_path', DRUPAL_ROOT . '/' . conf_path());
 
+        if ($this instanceof CompilerPassInterface) {
+            $container->addCompilerPass($this, PassConfig::TYPE_BEFORE_OPTIMIZATION, -10000);
+        }
         if (class_exists('ProxyManager\Configuration') && class_exists('Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator')) {
             $container->setProxyInstantiator(new RuntimeInstantiator());
         }
 
         return $container;
-    }
-
-    /**
-     * I am so, so sorry I had to rewrite this, just because once the container
-     * has been require_once'ed, it cannot be a second time during the same PHP
-     * runtime, and container refresh does not work upon Drupal module enable.
-     *
-     * {@inheritdoc}
-     */
-    protected function initializeContainer()
-    {
-        $class = $this->getContainerClass();
-        $cache = new ConfigCache($this->getCacheDir().'/'.$class.'.php', $this->debug);
-        $fresh = true;
-        if (!$cache->isFresh()) {
-            $container = $this->buildContainer();
-            $container->compile();
-            $this->dumpContainer($cache, $container, $class, $this->getContainerBaseClass());
-
-            $fresh = false;
-
-            $this->container = $container;
-        } else {
-            require_once $cache->getPath();
-
-            $this->container = new $class();
-            $this->container->set('kernel', $this);
-        }
-
-        if (!$fresh && $this->container->has('cache_warmer')) {
-            $this->container->get('cache_warmer')->warmUp($this->container->getParameter('kernel.cache_dir'));
-        }
     }
 
     /**

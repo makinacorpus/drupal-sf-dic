@@ -1,0 +1,24 @@
+framework:
+
+    # Using Drupal, we have session for free
+    session:
+        handler_id: session.drupal
+
+    csrf_protection: true
+
+    # Enabled by default because some of our tools do use it
+    annotations:
+        enabled: true
+
+    fragments:
+        enabled: true
+
+    php_errors:
+        log: true
+
+    property_info:
+        enabled: true
+
+    validation:
+        enabled: true
+        enable_annotations: true
