@@ -59,6 +59,12 @@ foreach (variable_get('cache_backends', []) as $include) {
 // Symfony commands to work. Since we force the static Drupal::_getKernel()
 // call, everything will be bootstrapped OK for Symfony.
 $input = new ArgvInput();
+
+// Deal with environment switch
+if ($input->hasParameterOption('--env')) {
+  $GLOBALS['conf']['kernel.environment'] = $input->getParameterOption('--env');
+}
+
 $kernel = \Drupal::_getKernel();
 $application = new Application($kernel);
 $application->run($input);
