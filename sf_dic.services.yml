@@ -186,29 +186,9 @@ services:
   # Register a few Drupal twig helpers, no matter we are using it or not they
   # will be ignored if no twig is running, but aside of that, if Twig is there
   # but not the bundle, this'll work gracefully
-  twig.extension.drupal_file:
+  twig.extension.drupal_common:
     public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalFileExtension
-    tags: [{name: twig.extension}]
-  twig.extension.drupal_image:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalImageExtension
-    tags: [{name: twig.extension}]
-  twig.extension.drupal_node:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalNodeExtension
-    tags: [{name: twig.extension}]
-  twig.extension.drupal_pager:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalPagerExtension
-    tags: [{name: twig.extension}]
-  twig.extension.drupal_render:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalRenderExtension
-    tags: [{name: twig.extension}]
-  twig.extension.drupal_block:
-    public: false
-    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalBlockExtension
+    class: MakinaCorpus\Drupal\Sf\Twig\Extension\DrupalExtension
     tags: [{name: twig.extension}]
   twig.extension.drupal_http_render:
     public: true
