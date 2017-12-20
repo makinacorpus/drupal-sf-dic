@@ -17,8 +17,6 @@ framework:
     csrf_protection: ~
     session:         ~
     validation:      { enable_annotations: true }
-    # templating:
-    #     engines: ['twig']
     default_locale:  "%locale%"
     fragments:       ~
     http_method_override: true

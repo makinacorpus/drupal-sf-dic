@@ -2,7 +2,6 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
-use MakinaCorpus\Drupal\Sf\CacheWarmer\TemplatePathsCacheWarmer;
 use MakinaCorpus\Drupal\Sf\Twig\Environment;
 use MakinaCorpus\Drupal\Sf\Twig\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,14 +30,6 @@ class TwigCompilerPass implements CompilerPassInterface
         // Very specific fix for TwigBundle ^3
         if (!$container->has('fragment.handler') && !$container->hasAlias('fragment.handler')) {
             $container->removeDefinition('twig.runtime.httpkernel');
-        }
-
-        // And now, go for the template path cache warmer, we need to override
-        // its class because we are not using the Symfony original template
-        // locator but a decorating service instead. See the class documentation
-        // for more extensive explaination.
-        if ($container->hasDefinition('templating.cache_warmer.template_paths')) {
-            $container->getDefinition('templating.cache_warmer.template_paths')->setClass(TemplatePathsCacheWarmer::class);
         }
 
         // If the Twig bridge from Symfony is present and loaded, do not load

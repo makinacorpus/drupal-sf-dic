@@ -2,7 +2,6 @@
 
 namespace MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler;
 
-use MakinaCorpus\Drupal\Sf\Config\FileLocator as CustomFileLocator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -20,13 +19,7 @@ class FrameworkBundleIntegrationPass implements CompilerPassInterface
     {
         // When not working with symfony, we need to provide a file locator
         // service of our own instead of the symfony's one
-        if (!$container->hasDefinition('file_locator') && !$container->hasAlias('file_locator')) {
-            $container->addDefinitions([
-                'file_locator' => (new Definition())
-                    ->setClass(CustomFileLocator::class)
-                    ->addArgument(new Reference('kernel'))
-            ]);
-        } else {
+        if ($container->hasDefinition('file_locator') || $container->hasAlias('file_locator')) {
             // We are working with fullstack, and our users might have changed
             // the global resource directory to somewhere safer than Drupal's
             // sites/SITE folder, case in which we must honnor the user's
