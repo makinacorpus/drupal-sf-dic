@@ -1,7 +1,0 @@
-# Overrides a few Symfony error handling services
-services:
-  app.twig.controller.exception:
-    class:     MakinaCorpus\Drupal\Sf\Controller\ExceptionController
-    decorates: twig.controller.exception
-    arguments: ['@app.twig.controller.exception.inner']
-    public:    false

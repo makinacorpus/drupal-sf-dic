@@ -312,19 +312,6 @@ function sf_dic_menu() {
     }
   }
 
-  if (variable_get('kernel.symfony_all_the_way', false)) {
-    $items['symfony/access-denied'] = [
-      'page callback'   => 'sf_dic_error_page',
-      'page arguments'  => ['403'],
-      'access callback' => true,
-    ];
-    $items['symfony/not-found'] = [
-      'page callback'   => 'sf_dic_error_page',
-      'page arguments'  => ['404'],
-      'access callback' => true,
-    ];
-  }
-
   return $items;
 }
 
@@ -496,67 +483,6 @@ function sf_dic_plugin_create($class, $configuration = []) {
 }
 
 /**
- * Pass error pages handling to Symfony
- */
-function sf_dic_error_page($status = 404) {
-
-  $request = Drupal::request();
-  $container = Drupal::getContainer();
-  $exception = sf_dic_exception();
-
-  // This is an error page, and we need an exception.
-  if (!$exception) {
-    switch ((int)$status) {
-      case 403:
-        $exception = new \Symfony\Component\Security\Core\Exception\AccessDeniedException();
-        break;
-      case 404:
-      default:
-        $exception = new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
-        break;
-    }
-  }
-
-  // Now that we got it, attempt to use Symfony to display the error page.
-  /** @var \Symfony\Bundle\TwigBundle\Controller\ExceptionController $controller */
-  $controller = $container->get('twig.controller.exception');
-  /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
-  $handler = \Drupal::service('sf_dic.controller_handler');
-
-  return $handler->handleResponse($request, $controller->showAction($request, FlattenException::create($exception, $exception->getCode())));
-}
-
-/**
- * Format exception
- *
- * @param \Throwable $exception
- */
-function _sf_dic_format_exception($e) {
- /** @var \Throwable $e */
- $output = '';
- do {
-  $output .= $e->getMessage() . ' (' . $e->getCode() . ') in ' . $e->getFile() . ' (' . $e->getLine() . ')';
-  $output .= '<br/><pre>' . $e->getTraceAsString() . '</pre>';
-  $e = $e->getPrevious();
- } while ($e);
- return $output;
-}
-
-/**
- * Statically (dhu) get and set exceptions, since Drupal cannot handle them
- * proprely, we are going to need it.
- */
-function sf_dic_exception($exception = null) {
-  static $stored;
-  if (null !== $exception) {
-    $stored = $exception;
-    watchdog_exception(__FUNCTION__, $exception);
-    watchdog('http_exception', _sf_dic_format_exception($exception));
-  }
-  return $stored;
-}
-
-/**
  * Menu callback for using Symfony real router.
  */
 function sf_dic_router() {
@@ -567,7 +493,7 @@ function sf_dic_router() {
   try {
     /** @var \Symfony\Component\HttpKernel\Kernel $kernel */
     $kernel = \Drupal::service('kernel');
-    return $handler->handleResponse($request, $kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
+    return $handler->prepareResponseForDrupal($request, $kernel->handle($request, HttpKernelInterface::MASTER_REQUEST, variable_get('kernel.handle_exceptions', false)));
   } catch (\Exception $exception) {
     return $handler->handleException($request, $exception);
   }
@@ -786,9 +712,35 @@ function sf_dic_page_delivery_callback_alter(&$delivery_callback) {
  * as a Symfony Response instead.
  */
 function sf_dic_page_delivery_html($page_callback_result) {
+  $request  = \Drupal::request();
+
   if (!$page_callback_result || is_int($page_callback_result)) {
-    drupal_deliver_html_page($page_callback_result);
-    return;
+    // Drupal is terribly not funnny, and handles 403/404 pages by calling
+    // menu_execute_active_handler() while rendering the page, which will
+    // cause it to embed a Symfony response into a Drupal page, even if it
+    // has its own HTML embeded. We need to avoid that.
+    $exception = null;
+    if (variable_get('kernel.symfony_all_the_way', false)) {
+      // Let Symfony handle errors and trust it to it better than Drupal.
+      switch ($page_callback_result) {
+        case MENU_ACCESS_DENIED:
+          $exception = new \Symfony\Component\Security\Core\Exception\AccessDeniedException();
+          break;
+        case MENU_NOT_FOUND:
+          $exception = new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
+          break;
+      }
+    }
+    if ($exception) {
+      /** @var \MakinaCorpus\Drupal\Sf\Controller\ControllerHandler $handler */
+      $handler = \Drupal::service('sf_dic.controller_handler');
+      $page_callback_result = $handler->prepareResponseForDrupal($request, $handler->handleError($request, $exception));
+    } else {
+      // Always fallback on Drupal delivery mecanism when there's actually
+      // nothing that can be done by Symfony - but I doubt this'll happen
+      // very often except with 50X errors.
+      return drupal_deliver_html_page($page_callback_result);
+    }
   }
 
   if (!$page_callback_result instanceof Response) {
@@ -801,9 +753,8 @@ function sf_dic_page_delivery_html($page_callback_result) {
   // Symfony kernel to handle the request) - but since we do override the
   // request and embed it into a custom Drupal page one, this will run with a
   // different response than Symfony's one - I guess that's OK.
-  $kernel   = \Drupal::_getKernel();
-  $request  = \Drupal::request();
-  $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+  $kernel = \Drupal::_getKernel();
+  $event = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
   \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
 
   $response->send();
