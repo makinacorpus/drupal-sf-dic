@@ -268,7 +268,7 @@ class ControllerHandler
                 $response = new DrupalResponse($response);
             }
 
-            return $this->handleResponse($request, $response);
+            return $this->prepareResponseForDrupal($request, $response);
 
         } catch (\Exception $e) {
             return $this->handleException($request, $e);
@@ -285,7 +285,7 @@ class ControllerHandler
      *
      * @return Response
      */
-    private function handleError(Request $request, $exception)
+    public function handleError(Request $request, $exception)
     {
         $event = new GetResponseForExceptionEvent($this->httpKernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
         $this->dispatcher->dispatch(KernelEvents::EXCEPTION, $event);
@@ -368,7 +368,7 @@ class ControllerHandler
      *
      * @return null|int|string|Response
      */
-    public function handleResponse(Request $request, $response)
+    public function prepareResponseForDrupal(Request $request, $response)
     {
         $isFragmentRoute = false;
 
