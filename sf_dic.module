@@ -262,7 +262,19 @@ function sf_dic_node_add_page($type) {
  * Implements hook_flush_caches().
  */
 function sf_dic_flush_caches() {
-  \Drupal::unsetContainer();
+  // Clear container only if the whole Drupal cache is asked for wiping
+  // else this would be run on every system_cron() call and wipe out too
+  // aggressively the Symfony cache. In a perfect world, this would not
+  // have any side effect, but when using a NFS or anyother slow file
+  // system, this causes too much IO on the FS, and in certain cases it
+  // will make the FS freeze and the site being irresponsive until the OS
+  // regain control.
+  foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $caller) {
+    if (isset($caller['function']) && $caller['function'] === 'drupal_flush_all_caches') {
+      \Drupal::unsetContainer();
+      break;
+    }
+  }
   return [];
 }
 
