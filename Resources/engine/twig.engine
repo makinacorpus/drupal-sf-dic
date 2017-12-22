@@ -61,7 +61,7 @@ function twig_init($theme) {
  *
  * Then in your Twig file, you should use:
  *
- *   extends 'theme:funtheme:template/page.html.twig'
+ *   extends '@funtheme/template/page.html.twig'
  *
  * Et voilà !
  *
