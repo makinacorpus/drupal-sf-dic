@@ -23,6 +23,10 @@ class DrupalPageResponse extends Response
         $ret = [];
         $ret['Cache-Control'] = 'no-cache, must-revalidate';
 
+        if (variable_get('omit_vary_cookie') && variable_get('kernel.set_vary_cookie', true)) {
+            $ret['Vary'] = 'Cookie';
+        }
+
         if (!$isPageCacheable) {
             // If set for a cacheable response, it will be used as the expiry
             // timestamp for the cache entry and will cause the cache item to
@@ -118,11 +122,19 @@ class DrupalPageResponse extends Response
         // good, but we need to restore them if Symfony's own headers do not
         // override them.
         foreach (self::getDrupalDefaultHeaders($isPageCacheable) as $name => $value) {
-            // I am really, really sorry, but if the response does not carry the
-            // 'Cache-Control' header, it does set it onto itself in __construct
-            // which means that the has() function will always return true.
-            // Leave the Drupal default cache control no matter what.
-            if ('Cache-Control' === $name || !$this->headers->has($name)) {
+            if ('Vary' === $name) {
+                // Merge vary with existing one
+                if ($this->headers->has('Vary')) {
+                    $currentVaryValue = (array)$this->headers->get('Vary');
+                    $this->headers->set('Vary', implode(', ', array_merge([$value], $currentVaryValue)), true);
+                } else {
+                    $this->headers->set('Vary', $value);
+                }
+            } else if ('Cache-Control' === $name || !$this->headers->has($name)) {
+                // I am really, really sorry, but if the response does not carry the
+                // 'Cache-Control' header, it does set it onto itself in __construct
+                // which means that the has() function will always return true.
+                // Leave the Drupal default cache control no matter what.
                 $this->headers->set($name, $value);
             }
         }

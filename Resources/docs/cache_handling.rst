@@ -16,10 +16,17 @@ those lines into your ``settings.php`` file:
 
    <? php
 
-   // ...
-
-   // Force Drupal to *not* handle the Vary header by itself
    $conf['omit_vary_cookie'] = true;
 
 Please note that pages cached when using this module will not use the gzip
 feature.
+
+This module will automatically restore the ``Vary: Cookie`` header by merging
+it to Symfony responses, if you wish to completly disable it, set this variable:
+
+.. code-block:: php
+
+   <? php
+
+   $conf['kernel.set_vary_cookie'] = false;
+
