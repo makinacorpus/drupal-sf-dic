@@ -440,7 +440,7 @@ class ControllerHandler
             // Do not do it when the request is an AJAX request, nobody wants
             // a full page during those.
             if (!$request->isXmlHttpRequest()) {
-                $response = DrupalPageResponse::create($response->getContent(), $response->getStatusCode(), $response->headers->all());
+                $response = DrupalPageResponse::create($response->getContent(), $response->getStatusCode(), $response->headers->allPreserveCase());
             }
         }
 
