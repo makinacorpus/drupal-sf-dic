@@ -106,6 +106,11 @@ function sf_dic_boot() {
     $token->setUser(new DrupalUser($GLOBALS['user']));
     $container->get('security.token_storage')->setToken($token);
   }
+
+  // Prevent Drupal from sending headers at bootstrap - we will handle them
+  // manually during delivery callback instead.
+  $headerSent = &drupal_static('drupal_page_header');
+  $headerSent = true;
 }
 
 /**
@@ -720,6 +725,27 @@ function sf_dic_page_delivery_callback_alter(&$delivery_callback) {
 }
 
 /**
+ * Fix Drupal default headers.
+ *
+ * @see drupal_page_header()
+ * @see sf_dic_boot()
+ * @see sf_dic_page_delivery_html()
+ */
+function _sf_dic_page_delivery_fix_headers() {
+  // Always fallback on Drupal delivery mecanism when there's actually
+  // nothing that can be done by Symfony - but I doubt this'll happen
+  // very often except with 50X errors.
+  // Because we prenvented Drupal from sending its headers during bootstrap
+  // we need to set them back.
+  $headers = drupal_get_http_header();
+  foreach (DrupalPageResponse::getDrupalDefaultHeaders() as $name => $value) {
+    if (!isset($headers[$name])) {
+      drupal_add_http_header($name, $value, false);
+    }
+  }
+}
+
+/**
  * Specific page delivery callback that will allow our Drupal page to be seen
  * as a Symfony Response instead.
  */
@@ -748,9 +774,7 @@ function sf_dic_page_delivery_html($page_callback_result) {
       $handler = \Drupal::service('sf_dic.controller_handler');
       $page_callback_result = $handler->prepareResponseForDrupal($request, $handler->handleError($request, $exception));
     } else {
-      // Always fallback on Drupal delivery mecanism when there's actually
-      // nothing that can be done by Symfony - but I doubt this'll happen
-      // very often except with 50X errors.
+      _sf_dic_page_delivery_fix_headers();
       return drupal_deliver_html_page($page_callback_result);
     }
   }
