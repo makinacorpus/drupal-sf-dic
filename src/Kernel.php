@@ -22,6 +22,7 @@ abstract class Kernel extends BaseKernel
     protected $isFullStack = false;
     protected $cacheDir = null;
     protected $logDir = null;
+    protected $useRealPath = false;
 
     /**
      * Default constructor
@@ -38,6 +39,10 @@ abstract class Kernel extends BaseKernel
         $cacheDirFromConf = false;
         $logsDirFromConf  = false;
 
+        if (!empty($GLOBALS['conf']['kernel.realpath'])) {
+            $this->useRealPath = (bool)$GLOBALS['conf']['kernel.realpath'];
+        }
+
         // Compute the kernel root directory
         if (empty($GLOBALS['conf']['kernel.root_dir'])) {
             $rootDir = dirname(DRUPAL_ROOT) . '/app';
@@ -53,17 +58,8 @@ abstract class Kernel extends BaseKernel
             $rootDirFromConf = true;
         }
 
-        if (!$rootDirFromConf && ($rootDir = realpath($this->rootDir))) {
-            if (!$rootDir) {
-                // Attempt to automatically create the root directory
-                if (!mkdir($rootDir, 0750, true)) {
-                    throw new \LogicException(sprintf("%s: unable to create directory", $rootDir));
-                }
-                if (!$rootDir = realpath($rootDir)) {
-                    throw new \LogicException(sprintf("%s: unable to what ??", $rootDir));
-                }
-            }
-            $this->rootDir = $rootDir;
+        if (!$rootDirFromConf) {
+            $this->rootDir = $this->ensureDirectory($rootDir);
         }
 
         // And cache directory
@@ -74,17 +70,8 @@ abstract class Kernel extends BaseKernel
             $cacheDirFromConf = true;
         }
 
-        if (!$cacheDirFromConf && ($cacheDir = realpath($this->cacheDir))) {
-            if (!$cacheDir) {
-                // Attempt to automatically create the root directory
-                if (!mkdir($cacheDir, 0750, true)) {
-                    throw new \LogicException(sprintf("%s: unable to create directory", $cacheDir));
-                }
-                if (!$cacheDir = realpath($cacheDir)) {
-                    throw new \LogicException(sprintf("%s: unable to what ??", $cacheDir));
-                }
-            }
-            $this->cacheDir = $cacheDir;
+        if (!$cacheDirFromConf) {
+            $this->cacheDir = $this->ensureDirectory($this->cacheDir);
         }
 
         // And finally, the logs directory
@@ -96,16 +83,7 @@ abstract class Kernel extends BaseKernel
         }
 
         if (!$logsDirFromConf && ($logDir = realpath($this->logDir))) {
-            if (!$logDir) {
-                // Attempt to automatically create the root directory
-                if (!mkdir($logDir, 0750, true)) {
-                    throw new \LogicException(sprintf("%s: unable to create directory", $logDir));
-                }
-                if (!$logDir = realpath($logDir)) {
-                    throw new \LogicException(sprintf("%s: unable to what ??", $logDir));
-                }
-            }
-            $this->logDir = $logDir;
+            $this->logDir = $this->ensureDirectory($this->logDir);
         }
 
         if (!empty($GLOBALS['conf']['kernel.symfony_all_the_way'])) {
@@ -136,6 +114,24 @@ abstract class Kernel extends BaseKernel
         require_once DRUPAL_ROOT . '/includes/common.inc';
 
         parent::__construct($environment, $debug);
+    }
+
+    private function ensureDirectory($directory)
+    {
+        if (!$directory) {
+            throw new \LogicException('no directory provided');
+        }
+        if ($this->useRealPath) {
+            if (!$directory = realpath($directory)) {
+                throw new \LogicException(sprintf("%s: unable to what ??", $directory));
+            }
+        }
+        if (!is_dir($directory)) {
+            if (!mkdir($directory, 0750, true)) {
+                throw new \LogicException(sprintf("%s: unable to create directory", $directory));
+            }
+        }
+        return $directory;
     }
 
     /**
