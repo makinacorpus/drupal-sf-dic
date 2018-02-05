@@ -262,6 +262,12 @@ abstract class Kernel extends BaseKernel
      */
     protected function initializeContainer()
     {
+        // From Symfony 3.4 only a require and not require_once is being used,
+        // we can safely rely upon the parent implementation.
+        if (0 <= version_compare(BaseKernel::VERSION, '3.4.0')) {
+            return parent::initializeContainer();
+        }
+
         $class = $this->getContainerClass();
         $cache = new ConfigCache($this->getCacheDir().'/'.$class.'.php', $this->debug);
         $fresh = true;
