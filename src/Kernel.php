@@ -81,7 +81,7 @@ abstract class Kernel extends BaseKernel
             $logsDirFromConf = true;
         }
 
-        if (!$logsDirFromConf && ($logDir = realpath($this->logDir))) {
+        if (!$logsDirFromConf) {
             $this->logDir = $this->ensureDirectory($this->logDir);
         }
 
