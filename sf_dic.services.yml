@@ -207,7 +207,7 @@ services:
   twig.extension.drupal_http_render:
     public: true
     class: MakinaCorpus\Drupal\Sf\Twig\Extension\HttpRenderExtension
-    arguments: ['@kernel', '@request_stack']
+    arguments: ['@http_kernel', '@request_stack']
     tags: [{name: twig.extension}]
 
   sf_dic.console.command.dropkernel:
