@@ -39,6 +39,18 @@ abstract class Kernel extends BaseKernel
         $cacheDirFromConf = false;
         $logsDirFromConf  = false;
 
+        // Sad, but true story, we need Drupal to be bootstrapped if not
+        // especially for Symfony functionnal testing. THIS IS BLACK MAGIC.
+        if ('test' === $environment) {
+            if (!function_exists('drupal_bootstrap')) {
+                throw new \Exception("Drupal root was not found, kernel cannot boot.");
+            }
+            if (empty($_SERVER['REMOTE_ADDR'])) {
+                $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+            }
+            drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+        }
+
         if (!empty($GLOBALS['conf']['kernel.realpath'])) {
             $this->useRealPath = (bool)$GLOBALS['conf']['kernel.realpath'];
         }
