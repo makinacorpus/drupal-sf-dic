@@ -130,7 +130,7 @@ class DrupalPageResponse extends Response
                 } else {
                     $this->headers->set('Vary', $value);
                 }
-            } else if ('Cache-Control' === $name || !$this->headers->has($name)) {
+            } else if ('Cache-Control' === $name && !$this->headers->has($name)) {
                 // I am really, really sorry, but if the response does not carry the
                 // 'Cache-Control' header, it does set it onto itself in __construct
                 // which means that the has() function will always return true.
