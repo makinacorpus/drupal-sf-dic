@@ -750,6 +750,7 @@ function _sf_dic_page_delivery_fix_headers() {
  */
 function sf_dic_page_delivery_html($page_callback_result) {
   $request  = \Drupal::request();
+  $isDrupalResponse = false;
 
   if (!$page_callback_result || is_int($page_callback_result)) {
     // Drupal is terribly not funnny, and handles 403/404 pages by calling
@@ -779,6 +780,7 @@ function sf_dic_page_delivery_html($page_callback_result) {
   }
 
   if (!$page_callback_result instanceof Response) {
+      $isDrupalResponse = true;
       $response = new DrupalPageResponse($page_callback_result);
   } else {
       $response = $page_callback_result;
@@ -788,9 +790,11 @@ function sf_dic_page_delivery_html($page_callback_result) {
   // Symfony kernel to handle the request) - but since we do override the
   // request and embed it into a custom Drupal page one, this will run with a
   // different response than Symfony's one - I guess that's OK.
-  $kernel = \Drupal::_getKernel();
-  $event = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
-  \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
+  if ($isDrupalResponse) {
+      $kernel = \Drupal::_getKernel();
+      $event = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+      \Drupal::service('event_dispatcher')->dispatch(KernelEvents::RESPONSE, $event);
+  }
 
   $response->send();
 }
