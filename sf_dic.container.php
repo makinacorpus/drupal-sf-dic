@@ -86,6 +86,9 @@ class ServiceProvider implements ServiceProviderInterface
 
         if (in_array('Symfony\\Bundle\\SecurityBundle\\SecurityBundle', $bundles)) {
             $loader->load('security.yml');
+            if (!$container->hasParameter('drupal.custom_firewall') || !$container->getParameter('drupal.custom_firewall')) {
+                $loader->load('security.firewall.yml');
+            }
         } else{
             $loader->load('security-degraded.yml');
             $container->addCompilerPass(new AddSecurityVotersPass());
