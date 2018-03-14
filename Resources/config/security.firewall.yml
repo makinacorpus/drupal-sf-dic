@@ -1,0 +1,28 @@
+# you can read more about security in the related section of the documentation
+# http://symfony.com/doc/current/book/security.html
+security:
+
+  encoders:
+    MakinaCorpus\Drupal\Sf\Security\DrupalUser: bcrypt
+
+  # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+  providers:
+    drupal:
+      id: drupal.account_provider
+
+  # the main part of the security, where you can set up firewalls
+  # for specific sections of your app
+  firewalls:
+
+    # disables authentication for assets and the profiler,
+    # adapt it according to your needs
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+
+    drupal:
+      pattern: ^/
+      anonymous: ~
+      guard:
+        authenticators:
+          - drupal.token_authenticator
