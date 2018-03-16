@@ -212,6 +212,10 @@ services:
     public: false
     class: MakinaCorpus\Drupal\Sf\Command\GenerateEntityCommand
     tags: [{name: console.command}]
+  sf_dic.console.command.give_me_cats:
+    public: false
+    class: MakinaCorpus\Drupal\Sf\Command\GiveMeCatsCommand
+    tags: [{name: console.command}]
 
   # Scalar from GET/POST argument resolver
   sf_dic.argument_value_resolver.scalar_query:
