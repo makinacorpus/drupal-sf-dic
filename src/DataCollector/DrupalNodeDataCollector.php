@@ -119,4 +119,12 @@ class DrupalNodeDataCollector extends DataCollector
     {
         return 'drupal_node';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
+    {
+        $this->data = null;
+    }
 }

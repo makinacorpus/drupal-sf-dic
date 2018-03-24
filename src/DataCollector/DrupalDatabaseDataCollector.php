@@ -128,4 +128,12 @@ class DrupalDatabaseDataCollector extends DataCollector implements LateDataColle
     {
         return 'drupal_database';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
+    {
+        $this->data = null;
+    }
 }

@@ -69,4 +69,9 @@ class DrupalAuthenticator extends AbstractGuardAuthenticator
     {
         return false;
     }
+
+    public function supports(Request $request)
+    {
+        return true;
+    }
 }

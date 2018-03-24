@@ -67,4 +67,12 @@ class DrupalWatchdogDataCollector extends DataCollector implements LateDataColle
     {
         return 'drupal_watchdog';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
+    {
+        $this->data = null;
+    }
 }
