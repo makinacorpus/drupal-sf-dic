@@ -75,11 +75,13 @@ abstract class Kernel extends BaseKernel
         }
 
         // And cache directory
-        if (empty($GLOBALS['conf']['kernel.cache_dir'])) {
-            $this->cacheDir = $this->rootDir . '/cache/' . $environment;
-        } else {
-            $this->cacheDir = $GLOBALS['conf']['kernel.cache_dir'] . '/' . $environment;
-            $cacheDirFromConf = true;
+        if (!$this->cacheDir = $this->getCacheDir()) {
+            if (empty($GLOBALS['conf']['kernel.cache_dir'])) {
+                $this->cacheDir = $this->rootDir . '/cache/' . $environment;
+            } else {
+                $this->cacheDir = $GLOBALS['conf']['kernel.cache_dir'] . '/' . $environment;
+                $cacheDirFromConf = true;
+            }
         }
 
         if (!$cacheDirFromConf) {
@@ -87,11 +89,13 @@ abstract class Kernel extends BaseKernel
         }
 
         // And finally, the logs directory
-        if (empty($GLOBALS['conf']['kernel.logs_dir'])) {
-            $this->logDir = $this->rootDir . '/logs';
-        } else {
-            $this->logDir = $GLOBALS['conf']['kernel.logs_dir'];
-            $logsDirFromConf = true;
+        if (!$this->logDir = $this->getLogDir()) {
+            if (empty($GLOBALS['conf']['kernel.logs_dir'])) {
+                $this->logDir = $this->rootDir . '/logs';
+            } else {
+                $this->logDir = $GLOBALS['conf']['kernel.logs_dir'];
+                $logsDirFromConf = true;
+            }
         }
 
         if (!$logsDirFromConf) {
