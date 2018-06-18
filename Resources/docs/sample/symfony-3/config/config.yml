@@ -22,6 +22,7 @@ framework:
 
 twig:
     debug:            "%kernel.debug%"
+    path:             "%kernel.root_dir%/Resources/views"
     strict_variables: false
     form_themes:
         # Symfony's core form themes, last one if default one
