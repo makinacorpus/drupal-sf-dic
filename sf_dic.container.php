@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigBackwardCompatibleCompilerPass;
+use MakinaCorpus\Drupal\Sf\Container\DependencyInjection\Compiler\TwigLateCompilerPass;
 
 class ServiceProvider implements ServiceProviderInterface
 {
@@ -49,6 +50,7 @@ class ServiceProvider implements ServiceProviderInterface
         if (class_exists('Symfony\\Bundle\\TwigBundle\\TwigBundle')) {
             $container->addCompilerPass(new TwigExtensionsCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1000 /* run before twig */);
             $container->addCompilerPass(new TwigCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
+            $container->addCompilerPass(new TwigLateCompilerPass(), PassConfig::TYPE_BEFORE_REMOVING, -1000);
             if (variable_get('kernel.templating_backward_compatibility', true)) {
                 $container->addCompilerPass(new TwigBackwardCompatibleCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION);
                 $loader->load('templating.yml');
