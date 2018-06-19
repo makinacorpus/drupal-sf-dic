@@ -134,7 +134,7 @@ class DrupalSession extends Session
      */
     public function invalidate($lifetime = null)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -142,7 +142,7 @@ class DrupalSession extends Session
      */
     public function migrate($destroy = false, $lifetime = null)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -166,7 +166,7 @@ class DrupalSession extends Session
      */
     public function setId($id)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -182,7 +182,7 @@ class DrupalSession extends Session
      */
     public function setName($name)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -202,7 +202,7 @@ class DrupalSession extends Session
      */
     public function registerBag(SessionBagInterface $bag)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -210,7 +210,7 @@ class DrupalSession extends Session
      */
     public function getBag($name)
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
