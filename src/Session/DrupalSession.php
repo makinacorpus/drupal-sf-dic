@@ -27,7 +27,7 @@ class DrupalSession extends Session
      */
     public function start()
     {
-        throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
+        // throw new \LogicException("You should not call this method, this is a basic replacement for basic features.");
     }
 
     /**
@@ -134,7 +134,7 @@ class DrupalSession extends Session
      */
     public function invalidate($lifetime = null)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -142,7 +142,7 @@ class DrupalSession extends Session
      */
     public function migrate($destroy = false, $lifetime = null)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -166,7 +166,7 @@ class DrupalSession extends Session
      */
     public function setId($id)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -182,7 +182,7 @@ class DrupalSession extends Session
      */
     public function setName($name)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -202,7 +202,7 @@ class DrupalSession extends Session
      */
     public function registerBag(SessionBagInterface $bag)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
@@ -210,7 +210,7 @@ class DrupalSession extends Session
      */
     public function getBag($name)
     {
-        \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
+        // \trigger_error("You should not call this method, this is a basic replacement for basic features.", E_USER_DEPRECATED);
     }
 
     /**
