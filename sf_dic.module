@@ -758,7 +758,10 @@ function sf_dic_page_delivery_html($page_callback_result) {
     // cause it to embed a Symfony response into a Drupal page, even if it
     // has its own HTML embeded. We need to avoid that.
     $exception = null;
-    if (variable_get('kernel.symfony_all_the_way', false)) {
+    if (
+      variable_get('kernel.symfony_all_the_way', false) &&
+      variable_get('kernel.handle_exceptions', false)
+    ) {
       // Let Symfony handle errors and trust it to it better than Drupal.
       switch ($page_callback_result) {
         case MENU_ACCESS_DENIED:
