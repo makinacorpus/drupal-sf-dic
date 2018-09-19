@@ -23,7 +23,7 @@ class Language implements LanguageInterface
     public $prefix = '';
     public $weight = 0;
     public $javascript = '';
-    public $provider = LANGUAGE_NEGOTIATION_DEFAULT;
+    public $provider = 'language-default'; // LANGUAGE_NEGOTIATION_DEFAULT is sometime undefined.
 
     /**
      * {@inheritdoc}
