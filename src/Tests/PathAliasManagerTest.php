@@ -32,9 +32,6 @@ class PathAliasManagerTest extends AbstractDrupalTest
         if (!defined('LANGUAGE_NONE')) {
             define('LANGUAGE_NONE', 'und');
         }
-        if (!defined('LANGUAGE_NEGOTIATION_DEFAULT')) {
-            define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
-        }
 
         // Avoid variable_get() and variable_set() calls
         $GLOBALS['conf']['path_alias_whitelist'] = false;
