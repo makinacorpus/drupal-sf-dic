@@ -3,7 +3,7 @@
 	"type" : "drupal-module",
 	"description" : "Brings the vanilla Symfony 3 depency inject container component to Drupal 7 seamlessly along with a limited compatibility layer with Drupal 8 API",
 	"homepage" : "http://github.com/makinacorpus/drupal-sf-dic",
-	"license" : "GPL-2",
+	"license" : "GPL-2.0-or-later",
 	"authors" : [{
 			"name" : "Pierre Rineau",
 			"email" : "pierre.rineau@makina-corpus.com"
@@ -39,7 +39,7 @@
 		"symfony/translation" : "~3.0",
 		"symfony/yaml" : "~2.8|~3.0"
 	},
-	"suggests" : {
+	"suggest" : {
 		"monolog/monolog" : "Integrates the Drupal 8 logger to monolog",
 		"symfony/symfony" : "Replaces Symfony components with the full stack framework and brings everything into Drupal"
 	}
