@@ -5,11 +5,12 @@ namespace Drupal\node;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
 
 /**
  * API compatible yet incomplete implementation of the Drupal 8 equivalent.
  */
-interface NodeInterface extends EntityInterface, EntityChangedInterface, EntityOwnerInterface
+interface NodeInterface extends EntityInterface, EntityChangedInterface, EntityOwnerInterface, EntityPublishedInterface
 {
     /**
      * Gets the node type.
@@ -94,25 +95,4 @@ interface NodeInterface extends EntityInterface, EntityChangedInterface, EntityO
      *   The called node entity.
      */
     public function setSticky($sticky);
-
-    /**
-     * Returns the node published status indicator.
-     *
-     * Unpublished nodes are only visible to their authors and to administrators.
-     *
-     * @return bool
-     *   TRUE if the node is published.
-     */
-    public function isPublished();
-
-    /**
-     * Sets the published status of a node..
-     *
-     * @param bool $published
-     *   TRUE to set this node to published, FALSE to set it to unpublished.
-     *
-     * @return \Drupal\node\NodeInterface
-     *   The called node entity.
-     */
-    public function setPublished($published);
 }

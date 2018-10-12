@@ -8,7 +8,7 @@ use Drupal\user\UserStorage;
 /**
  * Factory to fetch Drupal 7 entity controllers.
  */
-class EntityManager
+class EntityManager implements EntityTypeManagerInterface
 {
     /**
      * Get entity controller
@@ -28,11 +28,33 @@ class EntityManager
                 return new UserStorage($entityType);
 
             default:
-                if (!entity_get_info($entityType)) {
+                if (!\entity_get_info($entityType)) {
                     throw new \InvalidArgumentException(sprintf('%s: entity type does not exist', $entityType));
                 }
 
                 return new DefaultEntityStorageProxy($entityType);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefinition($entity_type_id, $exception_on_invalid = true)
+    {
+        $type = \entity_get_info($entity_type_id);
+
+        if (!$type) {
+            throw new \InvalidArgumentException(sprintf('%s: entity type does not exist', $entity_type_id));
+        }
+
+        return new EntityType($entity_type_id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefinitions()
+    {
+        return \array_map(function ($entityTypeId) { return new EntityType($entityTypeId); }, \array_keys(\entity_get_info()));
     }
 }

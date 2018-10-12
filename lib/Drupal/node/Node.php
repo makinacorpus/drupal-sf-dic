@@ -197,11 +197,19 @@ class Node implements NodeInterface
     /**
      * {@inheritdoc}
      */
-    public function setPublished($published)
+    public function setPublished($published = null)
     {
         $this->status = (int)(bool)$published;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setUnpublished()
+    {
+        $this->status = 0;
     }
 
     /**
