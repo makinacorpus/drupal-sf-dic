@@ -27,11 +27,11 @@ class TwigLateCompilerPass implements CompilerPassInterface
                 $definition = $container->getDefinition('twig.loader.native_filesystem');
                 $definition->replaceArgument(1, __DIR__);
             }
-            if ($container->has('twig.loader.filesystem')) {
+            if ($container->hasDefinition('twig.loader.filesystem')) {
                 $definition = $container->getDefinition('twig.loader.filesystem');
                 $definition->replaceArgument(2, __DIR__);
             }
         }
-        // 
+        //
     }
 }

@@ -1,9 +1,8 @@
 <?php
 
-use Drupal\Core\Session\AccountInterface;
 use MakinaCorpus\Drupal\Sf\DefaultAppKernel;
+use MakinaCorpus\Drupal\Sf\DowngradeAppKernel;
 use MakinaCorpus\Drupal\Sf\Kernel;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -39,8 +38,10 @@ class Drupal
 
             if (class_exists('AppKernel')) {
                 self::$kernel = new AppKernel($env, $debug);
-            } else {
+            } else if (trait_exists('Symfony\\Bundle\\FrameworkBundle\\Kernel\\MicroKernelTrait')) {
                 self::$kernel = new DefaultAppKernel($env, $debug);
+            } else {
+                self::$kernel = new DowngradeAppKernel($env, $debug);
             }
         }
 
