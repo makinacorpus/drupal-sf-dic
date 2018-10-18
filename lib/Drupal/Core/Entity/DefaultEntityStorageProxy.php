@@ -125,8 +125,14 @@ class DefaultEntityStorageProxy implements EntityStorageInterface
             $function = $this->entityType . '_' . $op;
         }
 
+        // Native Drupal core module support, and some legacy modules along
         if (function_exists($function)) {
             return $function($input);
+        }
+
+        // Entity API and ECK support, should work for most operations
+        if (\method_exists($this->controller, $op)) {
+            return \call_user_func([$this->controller, $op], $input);
         }
 
         if (!$isMultiple) {
