@@ -118,6 +118,16 @@ function sf_dic_boot() {
 function sf_dic_module_implements_alter(&$implementations, $hook) {
   switch ($hook) {
 
+    case 'user_insert':
+    case 'user_update':
+    case 'user_delete':
+      // I am sorry, but pathauto type hint a few methods with \stdClass
+      // when working with users, and it will make any site to crash because
+      // of it. We don't plan to support pathauto, never, it's a stupid and
+      // slow module.
+      unset($implementations['pathauto']);
+      break;
+
     case 'menu_breadcrumb_alter':
       // We do need to be the first
       $group = $implementations['sf_dic'];
