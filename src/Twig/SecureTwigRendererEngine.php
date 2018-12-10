@@ -29,7 +29,7 @@ class SecureTwigRendererEngine extends TwigRendererEngine
      */
     private $secureEnvironment = null;
 
-    function setSecureEnvironment(Twig_Environment $environment)
+    function setSecureEnvironment(\Twig_Environment $environment)
     {
         $this->secureEnvironment = $environment;
         /** @var \Twig_Extension_Escaper $escaper */
