@@ -4,7 +4,6 @@ namespace MakinaCorpus\Drupal\Sf\Twig;
 
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Component\Form\FormView;
-use Twig\Environment;
 
 /**
  * Class SecureTwigRendererEngine
@@ -30,7 +29,7 @@ class SecureTwigRendererEngine extends TwigRendererEngine
      */
     private $secureEnvironment = null;
 
-    function setSecureEnvironment(Environment $environment)
+    function setSecureEnvironment(Twig_Environment $environment)
     {
         $this->secureEnvironment = $environment;
         /** @var \Twig_Extension_Escaper $escaper */
