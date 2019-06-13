@@ -58,7 +58,7 @@ class ConnectionFactory extends DoctrineConnectionFactory
                     'host' => 'host',
                 ];
 
-                $params = ['driver' => $driver];
+                $params['driver'] = $driver;
                 foreach ($map as $key => $target) {
                     if (!empty($drupalInfo[$key])) {
                         $params[$target] = $drupalInfo[$key];
