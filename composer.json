@@ -46,7 +46,7 @@
         "symfony/translation": "^3.4|~4.0",
         "symfony/yaml": "^3.4|~4.0"
     },
-    "suggests": {
+    "suggest": {
         "jdorn/sql-formatter": "Prettifies SQL queries in the WebProfiler debug pane",
         "makinacorpus/php-acl": "Integrates with PHP ACL and send node access collect events, requires ^1.1.0",
         "monolog/monolog": "Integrates the Drupal 8 logger to monolog",
